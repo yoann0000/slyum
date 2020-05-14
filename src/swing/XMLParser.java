@@ -122,7 +122,7 @@ public class XMLParser extends DefaultHandler {
   }
 
   public enum EntityType {
-    ASSOCIATION_CLASS, CLASS, INTERFACE, ENUM
+    ASSOCIATION_CLASS, CLASS, INTERFACE, ENUM, TABLE
   }
 
   private class Inheritance {

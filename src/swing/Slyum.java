@@ -29,11 +29,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
@@ -351,17 +347,16 @@ public class Slyum extends JFrame implements ActionListener {
   public static void enableFullScreenMode(Window window) {
     String className = "com.apple.eawt.FullScreenUtilities";
     String methodName = "setWindowCanFullScreen";
-    
+
     try {
       Class<?> clazz = Class.forName(className);
-      Method method = clazz.getMethod(methodName, new Class<?>[]{
-        Window.class, boolean.class});
+      Method method = clazz.getMethod(methodName, Window.class, boolean.class);
       method.invoke(null, window, true);
     } catch (Throwable t) {
       System.err.println("Full screen mode is not supported");
     }
   }
-  
+
   public static String getCurrentDirectoryFileChooser() {
     String defaultPath = null;
 
@@ -391,6 +386,10 @@ public class Slyum extends JFrame implements ActionListener {
   public static void setEnableUndoButtons(boolean enable) {
     PanelClassDiagram.getInstance().getUndoButton().setEnabled(enable);
     undo.setEnabled(enable);
+  }
+
+  public static void updateButtonsUMLREL() {
+    PanelClassDiagram.getInstance().getSPanelDiagramComponent().updateButtons();
   }
   
   public static Slyum getInstance() {
@@ -469,8 +468,8 @@ public class Slyum extends JFrame implements ActionListener {
     String prop = PropertyLoader.getInstance().getProperties()
         .getProperty(PropertyLoader.UPDATER_VERSION);
     int updaterVersion = 1;
-    
-    if (prop != null) updaterVersion = Integer.valueOf(prop);
+
+    if (prop != null) updaterVersion = Integer.parseInt(prop);
 
     return updaterVersion;
   }
@@ -485,38 +484,38 @@ public class Slyum extends JFrame implements ActionListener {
     String prop = PropertyLoader.getInstance().getProperties()
         .getProperty(PropertyLoader.RECENT_COLORS_SIZE);
     int size = 3;
-    
-    if (prop != null) size = Integer.valueOf(prop);
+
+    if (prop != null) size = Integer.parseInt(prop);
 
     return size;
   }
-  
+
   public static void initRecentColors() {
     String prop = PropertyLoader.getInstance().getProperties()
         .getProperty(PropertyLoader.RECENT_COLORS);
-    
+
     if (prop == null || prop.isEmpty())
       return;
-    
+
     String[] strRecentColors = prop.split(";");
-    
+
     for (String color : strRecentColors)
       try {
-        SColorAssigner.addRecentColor(new Color(Integer.valueOf(color)));
-      } catch (NumberFormatException e) {
-        
+        SColorAssigner.addRecentColor(new Color(Integer.parseInt(color)));
+      } catch (NumberFormatException ignored) {
+
       }
   }
-  
+
   public static void saveRecentColors() {
     if (SColorAssigner.getRecentColors().length == 0)
       return;
-    
+
     String strColors = String.join(
         ";", Arrays.stream(SColorAssigner.getRecentColors())
-                   .filter(c -> c != null)
-                   .map(c -> String.valueOf(c.getRGB())).toArray(size -> new String[size]));
-    
+                   .filter(Objects::nonNull)
+                   .map(c -> String.valueOf(c.getRGB())).toArray(String[]::new));
+
     PropertyLoader.getInstance().getProperties()
         .put(PropertyLoader.RECENT_COLORS, strColors);
     PropertyLoader.getInstance().push();
@@ -526,12 +525,12 @@ public class Slyum extends JFrame implements ActionListener {
     String prop = PropertyLoader.getInstance().getProperties()
         .getProperty(PropertyLoader.SHOW_INTERSECTION_LINE);
     boolean value = true;
-    
-    if (prop != null) value = Boolean.valueOf(prop);
+
+    if (prop != null) value = Boolean.parseBoolean(prop);
 
     return value;
   }
-  
+
   public static void setShowIntersectionLine(boolean show) {
     PropertyLoader.getInstance().getProperties().put(PropertyLoader.SHOW_INTERSECTION_LINE, show);
     PropertyLoader.getInstance().push();
@@ -843,13 +842,13 @@ public class Slyum extends JFrame implements ActionListener {
         }
         break;
       case ACTION_EXPORT_PDF:
-        PanelClassDiagram.getInstance().exportAsVectoriel("pdf", new String[] {"pdf", "svg", "eps"});
+        PanelClassDiagram.getInstance().exportAsVectoriel("pdf", "pdf", "svg", "eps");
         break;
       case ACTION_EXPORT_SVG:
-        PanelClassDiagram.getInstance().exportAsVectoriel("svg", new String[] {"pdf", "svg", "eps"});
+        PanelClassDiagram.getInstance().exportAsVectoriel("svg", "pdf", "svg", "eps");
         break;
       case ACTION_EXPORT_EPS:
-        PanelClassDiagram.getInstance().exportAsVectoriel("eps", new String[] {"pdf", "svg", "eps"});
+        PanelClassDiagram.getInstance().exportAsVectoriel("eps", "pdf", "svg", "eps");
         break;
       case ACTION_CLEAN_DIAGRAM:
         SMessageDialog.showInformationMessage("Cleaning complete!\n" + PanelClassDiagram.cleanComponents() + " component(s) removed.");
@@ -961,10 +960,10 @@ public class Slyum extends JFrame implements ActionListener {
                 .getProperty(PropertyLoader.DIVIDER_LEFT);
         
         if (dividerBottom != null)
-          panel.setDividerBottom(Float.valueOf(dividerBottom));
+          panel.setDividerBottom(Float.parseFloat(dividerBottom));
         
         if (dividerLeft != null)
-          panel.setDividerLeft(Float.valueOf(dividerLeft));
+          panel.setDividerLeft(Float.parseFloat(dividerLeft));
         
         if (isFullScreenMode())
           panel.setFullScreen(true);

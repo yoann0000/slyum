@@ -492,6 +492,8 @@ public class GraphicView extends GraphicComponent
   private Rectangle visibleRect = new Rectangle();
   private float zoom = 1.0f;
 
+  private boolean relational = false;
+
 
   /**
    * Create a new graphic view representing the class diagram given. The new
@@ -702,7 +704,15 @@ public class GraphicView extends GraphicComponent
 
     Slyum.getInstance().actionPerformed(e);
   }
-  
+
+  public boolean isRelational() {
+    return relational;
+  }
+
+  public void setRelational(boolean rel) {
+    this.relational = rel;
+  }
+
   public void adaptDiagramToWindow() {
     adaptListToWindow(getAllComponents());
   }

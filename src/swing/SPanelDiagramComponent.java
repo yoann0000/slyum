@@ -28,7 +28,7 @@ import swing.slyumCustomizedComponents.SToolBarButton;
 import utility.PersonalizedIcon;
 import utility.Utility;
 
-public class SPanelDiagramComponent extends SToolBar implements ActionListener {
+public class SPanelDiagramComponent extends SToolBar implements ActionListener{
 
   public enum Mode {
     CURSOR(getInstance().btnCursorMode), GRIP(getInstance().btnGripMode);
@@ -89,10 +89,17 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener {
   private static final String TT_LINK_NOTE = "Link note "
           + Utility.keystrokeToString(Slyum.KEY_LINK_NOTE);
 
+  private static final String TT_REL_TABLE = "Table "
+          + Utility.keystrokeToString(Slyum.KEY_CLASS);//TODO change to new key
+
+  private static final String TT_REL_ASSOCIATION = "Table "
+          + Utility.keystrokeToString(Slyum.KEY_ASSOCIATION);//TODO change to new key
+
+
   private SButton btnCursorMode, btnGripMode, btnClass, btnEnum, btnInterface,
           btnClassAssociation, btnGeneralize, btnDependeny, btnInnerClass,
           btnAssociation, btnAggregation, btnComposition, btnMulti, btnNote,
-          btnLinkNote;
+          btnLinkNote, btnTable, btnAssocRel;
 
   private Mode currentMode;
   private static SPanelDiagramComponent instance;
@@ -149,6 +156,20 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener {
             PersonalizedIcon
                     .createImageIcon(Slyum.ICON_PATH + "innerClass.png"),
             Slyum.ACTION_NEW_INNER_CLASS, Color.RED, TT_INNER_CLASS));
+
+    add(new SSeparator());
+    //TODO MORE BUTTONS!!!
+    add(btnTable = createSButton(
+            PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "tableRel.png"),
+            Slyum.ACTION_NEW_CLASS, Color.RED, TT_REL_TABLE));
+
+    add(btnAssocRel = createSButton(
+            PersonalizedIcon.createImageIcon(Slyum.ICON_PATH
+                    + "relAssociation.png"), Slyum.ACTION_NEW_ASSOCIATION,
+            Color.RED, TT_REL_ASSOCIATION));
+
+    btnTable.setEnabled(false);
+    btnAssocRel.setEnabled(false);
 
     add(new SSeparator());
 
@@ -213,6 +234,24 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener {
 
   public void applyMode() {
     setButtonModeStyle(currentMode.getBtnMode());
+  }
+
+  public void updateButtons(){
+    GraphicView gv = MultiViewManager.getSelectedGraphicView();
+    boolean isRel = gv.isRelational();
+    btnTable.setEnabled(isRel);
+    btnAssocRel.setEnabled(isRel);
+    btnClass.setEnabled(!isRel);
+    btnInterface.setEnabled(!isRel);
+    btnEnum.setEnabled(!isRel);
+    btnClassAssociation.setEnabled(!isRel);
+    btnGeneralize.setEnabled(!isRel);
+    btnDependeny.setEnabled(!isRel);
+    btnInnerClass.setEnabled(!isRel);
+    btnAssociation.setEnabled(!isRel);
+    btnAggregation.setEnabled(!isRel);
+    btnComposition.setEnabled(!isRel);
+    btnMulti.setEnabled(!isRel);
   }
 
   @Override

@@ -233,7 +233,7 @@ public class Change {
   public void _checkToolbarButtonState() {
     if (PanelClassDiagram.getInstance() == null)
       return;
-    
+    Slyum.updateButtonsUMLREL();
     Slyum.setEnableRedoButtons(pointer < stack.size() - 1);
     Slyum.setEnableUndoButtons(pointer > 0);
   }

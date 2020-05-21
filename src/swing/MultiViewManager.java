@@ -87,18 +87,15 @@ public class MultiViewManager {
     
     uip.setVisible(true);
 
-    if (uip.isAccepted()){
-      if (!uip.isRel())
-        return addNewView(uip.getText());
-      else
-        return null; //TODO
-    }
+    if (uip.isAccepted())
+      return addNewView(uip.getText(), uip.isRel());
 
     return null;
   }
   
-  public static GraphicView addNewView(String title) {
+  public static GraphicView addNewView(String title, boolean rel) {
     GraphicView newGraphicView = new GraphicView(instance.classDiagram, false);
+    newGraphicView.setRelational(rel);
     instance.graphicViews.add(newGraphicView);
     instance.hierarchicalView.addView(newGraphicView);
     newGraphicView.setName(title);
@@ -235,7 +232,7 @@ public class MultiViewManager {
   }
   
   public static GraphicView addAndOpenNewView(String title) {
-    return openView(addNewView(title));
+    return openView(addNewView(title, false));
   }
   
   public static void cleanGraphicViews() {

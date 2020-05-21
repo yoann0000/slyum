@@ -195,7 +195,7 @@ public class XMLParser extends DefaultHandler {
       if (open)
         graphicView = MultiViewManager.addAndOpenNewView(name);
       else
-        graphicView = MultiViewManager.addNewView(name);
+        graphicView = MultiViewManager.addNewView(name, false); //TODO change to diff uml and rel
     }
   }
   

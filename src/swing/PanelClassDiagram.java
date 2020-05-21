@@ -512,6 +512,10 @@ public class PanelClassDiagram extends JPanel {
     return SPanelElement.getInstance().getUndoButton();
   }
 
+  public SPanelDiagramComponent getSPanelDiagramComponent(){
+    return SPanelDiagramComponent.getInstance();
+  }
+
   public void setVisibleDiagramName(boolean visible) {
     hierarchicalView.setVisibleClassDiagramName(visible);
   }

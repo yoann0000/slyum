@@ -81,15 +81,19 @@ public class MultiViewManager {
   }
   
   public static GraphicView addNewView() {    
-    UserInputDialog uip = 
-        new UserInputDialog(
+    ViewCreationDialog uip =
+        new ViewCreationDialog(
             GraphicView.NO_NAMED_VIEW, "Slyum - New view", "Enter a name for the new view:");
     
     uip.setVisible(true);
-    
-    if (uip.isAccepted())
-      return addNewView(uip.getText());
-    
+
+    if (uip.isAccepted()){
+      if (!uip.isRel())
+        return addNewView(uip.getText());
+      else
+        return null; //TODO
+    }
+
     return null;
   }
   

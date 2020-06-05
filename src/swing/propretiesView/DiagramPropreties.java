@@ -159,11 +159,15 @@ public class DiagramPropreties
     
     pnlDiagramInformations.add(lblInformationsTitle);
     pnlDiagramInformations.add(panelInformations);
-    
+
+    //TODO create stored procedures and views here
+
     setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
     add(pnlDiagramProperties);
     add(Box.createHorizontalStrut(10));
     add(pnlDiagramInformations);
+    //add(Box.createHorizontalStrut(10));
+    //add(pnlRelInfo);
     add(Box.createHorizontalGlue());
     add(new JLabel("Select a component to see it's members"));
     add(Box.createHorizontalGlue());

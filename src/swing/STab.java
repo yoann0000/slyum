@@ -61,29 +61,23 @@ public class STab extends JTabbedPane {
     
     setTabLayoutPolicy(SCROLL_TAB_LAYOUT);
     
-    addChangeListener(new ChangeListener() {
+    addChangeListener(e -> SwingUtilities.invokeLater(() -> {
+      STab source = (STab)e.getSource();
 
-      @Override
-      public void stateChanged(final ChangeEvent e) {
-        SwingUtilities.invokeLater(() -> {
-          STab source = (STab)e.getSource();
+      if (source.getTabCount() <= saveCurrentSelectedIndex)
+        return;
 
-          if (source.getTabCount() <= saveCurrentSelectedIndex)
-            return;
+      GraphicViewTabComponent
+          gvtcPrevious = STab.this.getTabComponentAt(saveCurrentSelectedIndex),
+          gvtcCurrent = source.getTabComponentAt(source.getSelectedIndex());
 
-          GraphicViewTabComponent
-              gvtcPrevious = STab.this.getTabComponentAt(saveCurrentSelectedIndex),
-              gvtcCurrent = source.getTabComponentAt(source.getSelectedIndex());
-
-          if (gvtcPrevious != null && gvtcCurrent != null) {
-            tabChanged(gvtcCurrent.getGraphicView(), gvtcPrevious.getGraphicView());
-            saveCurrentSelectedIndex = ((STab)e.getSource()).getSelectedIndex();
-          } else if (gvtcPrevious != null) {
-            setSelectedIndex(saveCurrentSelectedIndex);
-          }
-        });
+      if (gvtcPrevious != null && gvtcCurrent != null) {
+        tabChanged(gvtcCurrent.getGraphicView(), gvtcPrevious.getGraphicView());
+        saveCurrentSelectedIndex = ((STab)e.getSource()).getSelectedIndex();
+      } else if (gvtcPrevious != null) {
+        setSelectedIndex(saveCurrentSelectedIndex);
       }
-    });
+    }));
     
     addMouseListener(new MouseAdapter() {
 

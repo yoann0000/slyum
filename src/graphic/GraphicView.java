@@ -141,7 +141,7 @@ public class GraphicView extends GraphicComponent
   public final static boolean IS_GRID_OPACITY_ENABLE = false;
   public final static boolean IS_PAINT_TITLE_BORDER = true;
   public final static String NO_NAMED_VIEW = "Unnamed view";
-  public final static String ROOT_VIEW_DEFAULT_NAME = "Main view";
+  public final static String ROOT_VIEW_DEFAULT_NAME = "Main view - UML";
   public final static double SCALE_STEP = 0.1;
 
   /**
@@ -174,7 +174,7 @@ public class GraphicView extends GraphicComponent
     boolean isRecord = Change.isRecord();
     Change.record();
     
-    components.stream().forEach((c) -> { c.userDelete();});
+    components.forEach(GraphicComponent::userDelete);
     
     if (!isRecord) Change.stopRecord();
   }
@@ -262,7 +262,7 @@ public class GraphicView extends GraphicComponent
     
     boolean visible = true;
     if (prop != null)
-      visible = Boolean.valueOf(prop);
+      visible = Boolean.parseBoolean(prop);
     
     return visible;
   }
@@ -1003,7 +1003,7 @@ public class GraphicView extends GraphicComponent
     boolean isRecord = Change.isRecord();
     Change.record();
 
-    list.stream().forEach(ev -> ev.adjustWidth());
+    list.stream().forEach(EntityView::adjustWidth);
 
     if (!isRecord) Change.stopRecord();
   }
@@ -1343,13 +1343,10 @@ public class GraphicView extends GraphicComponent
               .invoke(classDiagram, entity);
           newView.regenerateEntity();
           
-          SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-              entityView.setSelected(false);
-              newView.setSelected(true);
-              newView.repaint();
-            }
+          SwingUtilities.invokeLater(() -> {
+            entityView.setSelected(false);
+            newView.setSelected(true);
+            newView.repaint();
           });
         } catch (Exception e) {
           e.printStackTrace();
@@ -1534,14 +1531,12 @@ public class GraphicView extends GraphicComponent
       LinkedList<T> list, Point pos) {
     // last component first
     final Iterator<T> iter = list.descendingIterator();
-    final LinkedList<T> inversed = new LinkedList<T>();
+    final LinkedList<T> inversed = new LinkedList<>();
 
     while (iter.hasNext())
       inversed.add(iter.next());
 
-    final T component = searchComponentWithPosition(inversed, pos);
-
-    return component;
+    return searchComponentWithPosition(inversed, pos);
   }
 
   public GraphicComponent getComponentMouseHover(Point mouseLocation) {
@@ -1630,7 +1625,7 @@ public class GraphicView extends GraphicComponent
    */
   public LinkedList<GraphicComponent> getDiagramElements() {
     // Don't change order!!!!
-    final LinkedList<GraphicComponent> components = new LinkedList<GraphicComponent>();
+    final LinkedList<GraphicComponent> components = new LinkedList<>();
     components.addAll(linesView);
     components.addAll(entities);
     components.addAll(multiViews);
@@ -1878,7 +1873,7 @@ public class GraphicView extends GraphicComponent
   public ColoredComponent[] getSelectedColoredComponents() {
     List<GraphicComponent> gc = getSelectedComponents();
     List<ColoredComponent> colored = getColoredComponents(gc);
-    return (ColoredComponent[]) colored.toArray(new ColoredComponent[colored.size()]);
+    return colored.toArray(new ColoredComponent[colored.size()]);
   }
   
   /**
@@ -1907,7 +1902,7 @@ public class GraphicView extends GraphicComponent
    * @return all selected entities
    */
   public LinkedList<EntityView> getSelectedEntities() {
-    final LinkedList<EntityView> selectedEntities = new LinkedList<EntityView>();
+    final LinkedList<EntityView> selectedEntities = new LinkedList<>();
 
     for (final GraphicComponent c : entities)
       if (c.isSelected()) selectedEntities.add((EntityView) c);
@@ -2559,12 +2554,7 @@ public class GraphicView extends GraphicComponent
   }
   
   public void setColorForComponents(final Color color, ColoredComponent... components) {
-    changeComponentsColor(new ObtainColor() {
-      @Override
-      public Color getColor(ColoredComponent c) {
-        return color;
-      }
-    }, components);
+    changeComponentsColor(c -> color, components);
   }
   
   public void setDefaultColorForSelectedItems() {
@@ -2607,7 +2597,7 @@ public class GraphicView extends GraphicComponent
     @SuppressWarnings("unchecked")
     final LinkedList<EntityView> cpyList = (LinkedList<EntityView>) list
         .clone();
-    final LinkedList<EntityView> sorted = new LinkedList<EntityView>();
+    final LinkedList<EntityView> sorted = new LinkedList<>();
 
     // sort list from x location
     while (cpyList.size() > 0) {
@@ -2641,7 +2631,7 @@ public class GraphicView extends GraphicComponent
     @SuppressWarnings("unchecked")
     final LinkedList<EntityView> cpyList = (LinkedList<EntityView>) list
         .clone();
-    final LinkedList<EntityView> sorted = new LinkedList<EntityView>();
+    final LinkedList<EntityView> sorted = new LinkedList<>();
 
     // sort list from y location
     while (cpyList.size() > 0) {
@@ -2675,7 +2665,7 @@ public class GraphicView extends GraphicComponent
   @Override
   public void update(Observable o, Object arg) {
     if (o.getClass() == ClassDiagram.class) {
-      if (arg != null && arg instanceof Boolean && (Boolean)arg)
+      if (arg instanceof Boolean && (Boolean) arg)
         for (SimpleEntityView entity : SimpleEntityView.getAll())
           entity.initViewType();
       repaint();
@@ -2860,7 +2850,7 @@ public class GraphicView extends GraphicComponent
           
           for (Role role : multi.getRoles()) {
             GraphicComponent gc = searchAssociedComponent(role.getEntity());
-            if (gc == null || !(gc instanceof EntityView)) {
+            if (!(gc instanceof EntityView)) {
               needCreation = false;
               break;
             }
@@ -2876,41 +2866,36 @@ public class GraphicView extends GraphicComponent
           continue;
       
         Entity entity2 = linked.get(relation);
-        if (containsDiagramComponent(entity2) || relation instanceof Multi) {
+        if (containsDiagramComponent(entity2)) {
           EntityView source = null, target = null, entityView2 = (EntityView)searchAssociedComponent(entity2);
 
-          if (!(relation instanceof Multi))
-            if (relation.getSource() == entity1) {
-              source = entityView;
-              target = entityView2;
-            } else {
-              source = entityView2;
-              target = entityView;
-            }
+          if (relation.getSource() == entity1) {
+            source = entityView;
+            target = entityView2;
+          } else {
+            source = entityView2;
+            target = entityView;
+          }
 
           GraphicComponent gc = createAndAddRelation(relation, source, target);
 
-          if (gc!= null && gc instanceof RelationView)
+          if (gc instanceof RelationView)
             createdRelationViews.add((RelationView)gc);
         }
       }
     }
     
     // Place the component corresponding to the mouse location drop.
-    SwingUtilities.invokeLater(new Runnable() {
-      
-      @Override
-      public void run() {
-        boolean isBlocked = Change.isBlocked();
-        Change.setBlocked(true);
-        
-        entityView.setLocationRelativeTo(location);
-        entityView.regenerateEntity();
-        
-        createdRelationViews.stream().forEach(rv -> rv.center());
-        
-        Change.setBlocked(isBlocked);
-      }
+    SwingUtilities.invokeLater(() -> {
+      boolean isBlocked = Change.isBlocked();
+      Change.setBlocked(true);
+
+      entityView.setLocationRelativeTo(location);
+      entityView.regenerateEntity();
+
+      createdRelationViews.stream().forEach(LineView::center);
+
+      Change.setBlocked(isBlocked);
     });
     
     PanelClassDiagram.refreshHierarchicalView();

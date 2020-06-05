@@ -506,8 +506,7 @@ public abstract class EntityView extends MovableComponent implements Observer, C
     final Rectangle newBounds = new Rectangle(ajustOnGrid(bounds.x),
         ajustOnGrid(bounds.y), ajustOnGrid(bounds.width), bounds.height);
     
-    newBounds.width = newBounds.width < MINIMUM_SIZE.x ? MINIMUM_SIZE.x
-            : newBounds.width;
+    newBounds.width = Math.max(newBounds.width, MINIMUM_SIZE.x);
 
     this.bounds = newBounds;
 

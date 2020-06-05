@@ -60,7 +60,7 @@ public abstract class GlobalPropreties extends JPanel implements Observer {
     if (PanelClassDiagram.getInstance().isDisabledUpdate())
       return;
           
-    if (object != null && object instanceof UpdateMessage)
+    if (object instanceof UpdateMessage)
       switch ((UpdateMessage) object) {
         case SELECT:
           currentObject = observable;

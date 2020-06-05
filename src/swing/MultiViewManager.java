@@ -88,7 +88,8 @@ public class MultiViewManager {
     uip.setVisible(true);
 
     if (uip.isAccepted())
-      return addNewView(uip.getText(), uip.isRel());
+      return uip.isRel() ? addNewView(uip.getText() + " - REL", true)
+                         : addNewView(uip.getText() + " - UML", false);
 
     return null;
   }

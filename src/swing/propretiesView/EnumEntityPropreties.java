@@ -4,8 +4,6 @@ import classDiagram.IDiagramComponent.UpdateMessage;
 import classDiagram.components.EnumEntity;
 import classDiagram.components.EnumValue;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
@@ -200,77 +198,61 @@ public class EnumEntityPropreties extends GlobalPropreties {
 
     panelButtons.add(btnAdd = new SButton(PersonalizedIcon
             .createImageIcon(Slyum.ICON_PATH + "plus.png"), "Add"));
-    btnAdd.addActionListener(new ActionListener() {
+    btnAdd.addActionListener(evt -> {
+      if (currentObject == null) return;
 
-      @Override
-      public void actionPerformed(ActionEvent evt) {
-        if (currentObject == null) return;
-
-        ((EnumEntity) currentObject).createEnumValue();
-      }
+      ((EnumEntity) currentObject).createEnumValue();
     });
 
     panelButtons.add(btnUp = new SButton(PersonalizedIcon
             .createImageIcon(Slyum.ICON_PATH + "arrow-up-24.png"), "Up"));
-    btnUp.addActionListener(new ActionListener() {
+    btnUp.addActionListener(evt -> {
+      if (currentObject == null) return;
 
-      @Override
-      public void actionPerformed(ActionEvent evt) {
-        if (currentObject == null) return;
-
-        EnumEntity enumEntity = (EnumEntity) currentObject;
-        EnumValue enumValue = (EnumValue) tableEnumValues.getSelectedRowValue();
-        enumEntity.moveEnumPosition(enumValue, -1);
-        enumEntity.notifyObservers();
-        enumValue.select();
-        enumValue.notifyObservers(UpdateMessage.SELECT);
-      }
+      EnumEntity enumEntity = (EnumEntity) currentObject;
+      EnumValue enumValue = (EnumValue) tableEnumValues.getSelectedRowValue();
+      enumEntity.moveEnumPosition(enumValue, -1);
+      enumEntity.notifyObservers();
+      enumValue.select();
+      enumValue.notifyObservers(UpdateMessage.SELECT);
     });
 
     panelButtons.add(btnDown = new SButton(PersonalizedIcon
             .createImageIcon(Slyum.ICON_PATH + "arrow-down-24.png"), "Down"));
-    btnDown.addActionListener(new ActionListener() {
+    btnDown.addActionListener(evt -> {
+      if (currentObject == null) return;
 
-      @Override
-      public void actionPerformed(ActionEvent evt) {
-        if (currentObject == null) return;
-
-        EnumEntity enumEntity = (EnumEntity) currentObject;
-        EnumValue enumValue = (EnumValue) tableEnumValues.getSelectedRowValue();
-        enumEntity.moveEnumPosition(
-                (EnumValue) tableEnumValues.getSelectedRowValue(), 1);
-        enumEntity.notifyObservers();
-        enumValue.select();
-        enumValue.notifyObservers(UpdateMessage.SELECT);
-      }
+      EnumEntity enumEntity = (EnumEntity) currentObject;
+      EnumValue enumValue = (EnumValue) tableEnumValues.getSelectedRowValue();
+      enumEntity.moveEnumPosition(
+              (EnumValue) tableEnumValues.getSelectedRowValue(), 1);
+      enumEntity.notifyObservers();
+      enumValue.select();
+      enumValue.notifyObservers(UpdateMessage.SELECT);
     });
 
     panelButtons.add(btnDelete = new SButton(PersonalizedIcon
             .createImageIcon(Slyum.ICON_PATH + "minus.png"), "Delete"));
     btnDelete.setEnabled(false);
-    btnDelete.addActionListener(new ActionListener() {
+    btnDelete.addActionListener(evt -> {
+      if (currentObject == null) return;
 
-      @Override
-      public void actionPerformed(ActionEvent evt) {
-        if (currentObject == null) return;
+      EnumEntity enumEntity = (EnumEntity) currentObject;
+      int selectedRow = tableEnumValues.getSelectedRow(), rowCount, rowToSelect;
 
-        EnumEntity enumEntity = (EnumEntity) currentObject;
-        int selectedRow = tableEnumValues.getSelectedRow(), rowCount, rowToSelect;
+      enumEntity.removeEnumValue((EnumValue) tableEnumValues.getModel()
+              .getValueAt(selectedRow, 0));
+      enumEntity.notifyObservers();
 
-        enumEntity.removeEnumValue((EnumValue) tableEnumValues.getModel()
-                .getValueAt(selectedRow, 0));
-        enumEntity.notifyObservers();
+      // Recherche de l'enum devant être sélectionné après la suppression.
+      rowCount = tableEnumValues.getRowCount();
+      rowToSelect = selectedRow >= rowCount ? rowCount - 1 : selectedRow;
 
-        // Recherche de l'enum devant être sélectionné après la suppression.
-        rowCount = tableEnumValues.getRowCount();
-        rowToSelect = selectedRow >= rowCount ? rowCount - 1 : selectedRow;
-
-        if (rowCount > 0) {
-          EnumValue enumValueToSelect = (EnumValue) tableEnumValues.getModel()
-                  .getValueAt(rowToSelect, 0);
-          enumValueToSelect.select();
-          enumValueToSelect.notifyObservers(UpdateMessage.SELECT);
-        }
+      if (rowCount > 0) {
+        EnumValue enumValueToSelect = (EnumValue) tableEnumValues.getModel()
+                .getValueAt(rowToSelect, 0);
+        enumValueToSelect.select();
+        enumValueToSelect.notifyObservers(UpdateMessage.SELECT);
       }
     });
     // -----

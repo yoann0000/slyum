@@ -19,6 +19,13 @@ public class Trigger extends Type{
         procedure = "";
     }
 
+    public Trigger(String name, int id, TriggerType triggerType, ActivationTime activationTime, String procedure) {
+        super(name, id);
+        this.triggerType = triggerType;
+        this.activationTime = activationTime;
+        this.procedure = procedure;
+    }
+
     public TriggerType getTriggerType() {
         return triggerType;
     }

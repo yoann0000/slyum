@@ -12,7 +12,7 @@ import swing.XmlElement;
  */
 public interface IDiagramComponent extends XmlElement {
   public enum UpdateMessage {
-    ADD_ATTRIBUTE, ADD_METHOD, ADD_ATTRIBUTE_NO_EDIT, ADD_METHOD_NO_EDIT, ADD_ENUM, ADD_ENUM_NO_EDIT, MODIF, SELECT, UNSELECT
+    ADD_ATTRIBUTE, ADD_METHOD, ADD_ATTRIBUTE_NO_EDIT, ADD_METHOD_NO_EDIT, ADD_ENUM, ADD_ENUM_NO_EDIT, MODIF, SELECT, UNSELECT, ADD_VIEW
   };
 
   public void addObserver(Observer o);

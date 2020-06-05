@@ -157,12 +157,9 @@ public class EnumView extends EntityView {
   public void addEnumValue(EnumValue value, final boolean editing) {
     final TextBoxEnumValue newTextBox = new TextBoxEnumValue(parent, value);
     viewValues.add(newTextBox);
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        updateHeight();
-        if (editing) newTextBox.editing();
-      }
+    SwingUtilities.invokeLater(() -> {
+      updateHeight();
+      if (editing) newTextBox.editing();
     });
   }
 
@@ -181,7 +178,7 @@ public class EnumView extends EntityView {
       if (Slyum.ACTION_TEXTBOX_UP.equals(e.getActionCommand())) offset = -1;
 
       if (pressedTextBox.getClass() == TextBoxEnumValue.class) {
-        EnumValue value = (EnumValue) ((TextBoxEnumValue) pressedTextBox)
+        EnumValue value = (EnumValue) pressedTextBox
                 .getAssociedComponent();
         ((EnumEntity) component).moveEnumPosition(value, offset);
       }

@@ -95,7 +95,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     }
 
     @Override
-    public Class<? extends Object> getColumnClass(int c) {
+    public Class<?> getColumnClass(int c) {
       return getValueAt(0, c).getClass();
     }
 
@@ -179,7 +179,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
       try {
         data.get(row)[col] = value;
         fireTableCellUpdated(row, col);
-      } catch (Exception e) {
+      } catch (Exception ignored) {
 
       }
     }
@@ -242,7 +242,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
 
         if (index == -1) return;
 
-        if (o != null && o instanceof UpdateMessage)
+        if (o instanceof UpdateMessage)
           switch ((UpdateMessage) o) {
             case SELECT:
               btnRemoveAttribute.setEnabled(true);
@@ -262,7 +262,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
           }
 
         setAttribute(attribute, index);
-      } catch (final Exception e) {
+      } catch (final Exception ignored) {
 
       }
     }
@@ -299,7 +299,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     }
 
     @Override
-    public Class<? extends Object> getColumnClass(int c) {
+    public Class<?> getColumnClass(int c) {
       return getValueAt(0, c).getClass();
     }
 
@@ -335,11 +335,10 @@ public class SimpleEntityPropreties extends GlobalPropreties {
       Boolean isConstructorClass = Utility.getKeysByValue(mapIndex, row)
                                           .iterator().next().getClass()
                                           .equals(ConstructorMethod.class);
-      
-      Boolean retourn = !(((isInterfaceEntityClass || isConstructorClass) && col == 3) ||
-               isConstructorClass && col == 4 ||  
+
+      return !(((isInterfaceEntityClass || isConstructorClass) && col == 3) ||
+               isConstructorClass && col == 4 ||
                isConstructorClass && col == 1);
-      return retourn;
     }
 
     @Override
@@ -393,7 +392,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
       try {
         data.get(row)[col] = value;
         fireTableCellUpdated(row, col);
-      } catch (Exception e) {
+      } catch (Exception ignored) {
 
       }
     }
@@ -452,7 +451,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
 
         if (index == -1) return;
 
-        if (o != null && o instanceof UpdateMessage)
+        if (o instanceof UpdateMessage)
           switch ((UpdateMessage) o) {
             case SELECT:
               btnRemoveMethod.setEnabled(true);
@@ -472,7 +471,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
           }
 
         setMethod((Method) observable, index);
-      } catch (final Exception e) {
+      } catch (final Exception ignored) {
 
       }
     }
@@ -507,7 +506,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     }
 
     @Override
-    public Class<? extends Object> getColumnClass(int c) {
+    public Class<?> getColumnClass(int c) {
       return getValueAt(0, c).getClass();
     }
 
@@ -648,7 +647,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
           try {
             currentMethod.getParameters().get(row)
                     .setType(new Type((String) data));
-          } catch (Exception ex) {}
+          } catch (Exception ignored) {}
           break;
       }
 
@@ -667,7 +666,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
 
     @Override
     public void update(Observable observable, Object o) {
-      if (o != null && o instanceof UpdateMessage) {
+      if (o instanceof UpdateMessage) {
         switch ((UpdateMessage) o) {
           case SELECT:
             showInProperties();
@@ -847,7 +846,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
       gbc_btnNewButton.anchor = GridBagConstraints.NORTH;
       gbc_btnNewButton.gridx = 0;
       gbc_btnNewButton.gridy = 0;
-      p.add(createSimpleEntityPropreties(), gbc_btnNewButton);
+      p.add(createSimpleEntityProperties(), gbc_btnNewButton);
     }
 
     add(p);
@@ -882,23 +881,19 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     {
       btnUpAttribute.setAlignmentX(CENTER_ALIGNMENT);
       btnUpAttribute.setEnabled(false);
-      btnUpAttribute.addActionListener(new ActionListener() {
+      btnUpAttribute.addActionListener(arg0 -> {
+        // Get the selected attribute
+        final int index = attributesTable.getSelectionModel()
+                .getLeadSelectionIndex();
+        final Attribute attribute = Utility
+                .getKeysByValue(
+                        ((AttributeTableModel) attributesTable.getModel())
+                                .getMapIndex(), index).iterator().next();
 
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-          // Get the selected attribute
-          final int index = attributesTable.getSelectionModel()
-                  .getLeadSelectionIndex();
-          final Attribute attribute = Utility
-                  .getKeysByValue(
-                          ((AttributeTableModel) attributesTable.getModel())
-                                  .getMapIndex(), index).iterator().next();
-
-          ((SimpleEntity) currentObject).moveAttributePosition(attribute, -1);
-          ((SimpleEntity) currentObject).notifyObservers();
-          attribute.select();
-          attribute.notifyObservers(UpdateMessage.SELECT);
-        }
+        ((SimpleEntity) currentObject).moveAttributePosition(attribute, -1);
+        ((SimpleEntity) currentObject).notifyObservers();
+        attribute.select();
+        attribute.notifyObservers(UpdateMessage.SELECT);
       });
 
       panelButton.add(btnUpAttribute);
@@ -906,23 +901,19 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     {
       btnDownAttribute.setAlignmentX(CENTER_ALIGNMENT);
       btnDownAttribute.setEnabled(false);
-      btnDownAttribute.addActionListener(new ActionListener() {
+      btnDownAttribute.addActionListener(arg0 -> {
+        // Get the selected attribute
+        final int index = attributesTable.getSelectionModel()
+                .getLeadSelectionIndex();
+        final Attribute attribute = Utility
+                .getKeysByValue(
+                        ((AttributeTableModel) attributesTable.getModel())
+                                .getMapIndex(), index).iterator().next();
 
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-          // Get the selected attribute
-          final int index = attributesTable.getSelectionModel()
-                  .getLeadSelectionIndex();
-          final Attribute attribute = Utility
-                  .getKeysByValue(
-                          ((AttributeTableModel) attributesTable.getModel())
-                                  .getMapIndex(), index).iterator().next();
-
-          ((SimpleEntity) currentObject).moveAttributePosition(attribute, 1);
-          ((SimpleEntity) currentObject).notifyObservers();
-          attribute.select();
-          attribute.notifyObservers(UpdateMessage.SELECT);
-        }
+        ((SimpleEntity) currentObject).moveAttributePosition(attribute, 1);
+        ((SimpleEntity) currentObject).notifyObservers();
+        attribute.select();
+        attribute.notifyObservers(UpdateMessage.SELECT);
       });
 
       panelButton.add(btnDownAttribute);
@@ -931,36 +922,32 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     {
       btnRemoveAttribute.setAlignmentX(CENTER_ALIGNMENT);
       btnRemoveAttribute.setEnabled(false);
-      btnRemoveAttribute.addActionListener(new ActionListener() {
+      btnRemoveAttribute.addActionListener(arg0 -> {
+        // Get the selected attribute
+        final int index = attributesTable.getSelectionModel()
+                .getLeadSelectionIndex();
+        Attribute attribute = Utility
+                .getKeysByValue(
+                        ((AttributeTableModel) attributesTable.getModel())
+                                .getMapIndex(), index).iterator().next();
 
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-          // Get the selected attribute
-          final int index = attributesTable.getSelectionModel()
-                  .getLeadSelectionIndex();
-          Attribute attribute = Utility
-                  .getKeysByValue(
-                          ((AttributeTableModel) attributesTable.getModel())
-                                  .getMapIndex(), index).iterator().next();
+        ((SimpleEntity) currentObject).removeAttribute(attribute);
+        ((SimpleEntity) currentObject).notifyObservers();
 
-          ((SimpleEntity) currentObject).removeAttribute(attribute);
-          ((SimpleEntity) currentObject).notifyObservers();
-
-          for (int i = 0; i <= 1; i++) {
-            try {
-              attribute = Utility
-                      .getKeysByValue(
-                              ((AttributeTableModel) attributesTable.getModel())
-                                      .getMapIndex(), index - i).iterator()
-                      .next();
-            } catch (final NoSuchElementException e) {
-              continue;
-            }
-
-            attribute.select();
-            attribute.notifyObservers(UpdateMessage.SELECT);
-            break;
+        for (int i = 0; i <= 1; i++) {
+          try {
+            attribute = Utility
+                    .getKeysByValue(
+                            ((AttributeTableModel) attributesTable.getModel())
+                                    .getMapIndex(), index - i).iterator()
+                    .next();
+          } catch (final NoSuchElementException e) {
+            continue;
           }
+
+          attribute.select();
+          attribute.notifyObservers(UpdateMessage.SELECT);
+          break;
         }
       });
 
@@ -1002,13 +989,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
           PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "plus16.png"), 
           "Add method");
       button.setAlignmentX(CENTER_ALIGNMENT);
-      button.addActionListener(new ActionListener() {
-
-        @Override
-        public void actionPerformed(ActionEvent evt) {
-          addMethod(true);
-        }
-      });
+      button.addActionListener(evt -> addMethod(true));
       buttonWidth += button.getIcon().getIconWidth();
       panelAddMethodForClass.add(button);
       
@@ -1017,15 +998,11 @@ public class SimpleEntityPropreties extends GlobalPropreties {
           PersonalizedIcon.createImageIcon(
               Slyum.ICON_PATH + "add-constructor16.png"), 
           "Add constructor");
-      button.addActionListener(new ActionListener() {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-          ClassView classView = 
-              (ClassView)MultiViewManager.getSelectedGraphicView()
-                                         .searchAssociedComponent(currentObject);
-          classView.addConstructor();
-        }
+      button.addActionListener(e -> {
+        ClassView classView =
+            (ClassView)MultiViewManager.getSelectedGraphicView()
+                                       .searchAssociedComponent(currentObject);
+        classView.addConstructor();
       });
       buttonWidth += button.getIcon().getIconWidth();
       panelAddMethodForClass.add(button);
@@ -1039,37 +1016,27 @@ public class SimpleEntityPropreties extends GlobalPropreties {
           PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "plus.png"), 
           "Add method");
       btnAddMethodForInterface.setAlignmentX(CENTER_ALIGNMENT);
-      btnAddMethodForInterface.addActionListener(new ActionListener() {
-
-        @Override
-        public void actionPerformed(ActionEvent evt) {
-          addMethod(true);
-        }
-      });
+      btnAddMethodForInterface.addActionListener(evt -> addMethod(true));
       btnAddMethodForInterface.setVisible(false);
       panelButton.add(btnAddMethodForInterface);
     }
     {
       btnUpMethod.setAlignmentX(CENTER_ALIGNMENT);
       btnUpMethod.setEnabled(false);
-      btnUpMethod.addActionListener(new ActionListener() {
+      btnUpMethod.addActionListener(evt -> {
 
-        @Override
-        public void actionPerformed(ActionEvent evt) {
+        // Get the selected method
+        final int index = methodsTable.getSelectionModel()
+                .getLeadSelectionIndex();
+        final Method method = Utility
+                .getKeysByValue(
+                        ((MethodTableModel) methodsTable.getModel())
+                                .getMapIndex(), index).iterator().next();
 
-          // Get the selected method
-          final int index = methodsTable.getSelectionModel()
-                  .getLeadSelectionIndex();
-          final Method method = Utility
-                  .getKeysByValue(
-                          ((MethodTableModel) methodsTable.getModel())
-                                  .getMapIndex(), index).iterator().next();
-
-          ((SimpleEntity) currentObject).moveMethodPosition(method, -1);
-          ((SimpleEntity) currentObject).notifyObservers();
-          method.select();
-          method.notifyObservers(UpdateMessage.SELECT);
-        }
+        ((SimpleEntity) currentObject).moveMethodPosition(method, -1);
+        ((SimpleEntity) currentObject).notifyObservers();
+        method.select();
+        method.notifyObservers(UpdateMessage.SELECT);
       });
 
       panelButton.add(btnUpMethod);
@@ -1077,24 +1044,20 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     {
       btnDownMethod.setAlignmentX(CENTER_ALIGNMENT);
       btnDownMethod.setEnabled(false);
-      btnDownMethod.addActionListener(new ActionListener() {
+      btnDownMethod.addActionListener(evt -> {
 
-        @Override
-        public void actionPerformed(ActionEvent evt) {
+        // Get the selected method
+        final int index = methodsTable.getSelectionModel()
+                .getLeadSelectionIndex();
+        final Method method = Utility
+                .getKeysByValue(
+                        ((MethodTableModel) methodsTable.getModel())
+                                .getMapIndex(), index).iterator().next();
 
-          // Get the selected method
-          final int index = methodsTable.getSelectionModel()
-                  .getLeadSelectionIndex();
-          final Method method = Utility
-                  .getKeysByValue(
-                          ((MethodTableModel) methodsTable.getModel())
-                                  .getMapIndex(), index).iterator().next();
-
-          ((SimpleEntity) currentObject).moveMethodPosition(method, 1);
-          ((SimpleEntity) currentObject).notifyObservers();
-          method.select();
-          method.notifyObservers(UpdateMessage.SELECT);
-        }
+        ((SimpleEntity) currentObject).moveMethodPosition(method, 1);
+        ((SimpleEntity) currentObject).notifyObservers();
+        method.select();
+        method.notifyObservers(UpdateMessage.SELECT);
       });
 
       panelButton.add(btnDownMethod);
@@ -1103,36 +1066,32 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     {
       btnRemoveMethod.setAlignmentX(CENTER_ALIGNMENT);
       btnRemoveMethod.setEnabled(false);
-      btnRemoveMethod.addActionListener(new ActionListener() {
+      btnRemoveMethod.addActionListener(arg0 -> {
+        // Get the selected method
+        final int index = methodsTable.getSelectionModel()
+                .getLeadSelectionIndex();
+        Method method = Utility
+                .getKeysByValue(
+                        ((MethodTableModel) methodsTable.getModel())
+                                .getMapIndex(), index).iterator().next();
 
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-          // Get the selected method
-          final int index = methodsTable.getSelectionModel()
-                  .getLeadSelectionIndex();
-          Method method = Utility
-                  .getKeysByValue(
-                          ((MethodTableModel) methodsTable.getModel())
-                                  .getMapIndex(), index).iterator().next();
+        ((SimpleEntity) currentObject).removeMethod(method);
+        ((SimpleEntity) currentObject).notifyObservers();
 
-          ((SimpleEntity) currentObject).removeMethod(method);
-          ((SimpleEntity) currentObject).notifyObservers();
-
-          for (int i = 0; i <= 1; i++) {
-            try {
-              method = Utility
-                      .getKeysByValue(
-                              ((MethodTableModel) methodsTable.getModel())
-                                      .getMapIndex(), index - i).iterator()
-                      .next();
-            } catch (final NoSuchElementException e) {
-              continue;
-            }
-
-            method.select();
-            method.notifyObservers(UpdateMessage.SELECT);
-            break;
+        for (int i = 0; i <= 1; i++) {
+          try {
+            method = Utility
+                    .getKeysByValue(
+                            ((MethodTableModel) methodsTable.getModel())
+                                    .getMapIndex(), index - i).iterator()
+                    .next();
+          } catch (final NoSuchElementException e) {
+            continue;
           }
+
+          method.select();
+          method.notifyObservers(UpdateMessage.SELECT);
+          break;
         }
       });
 
@@ -1161,75 +1120,61 @@ public class SimpleEntityPropreties extends GlobalPropreties {
 
     btnLeftParameters.setAlignmentX(CENTER_ALIGNMENT);
     btnLeftParameters.setEnabled(false);
-    btnLeftParameters.addActionListener(new ActionListener() {
+    btnLeftParameters.addActionListener(e -> {
+      // Get the selected parameter
+      int index = methodsTable.getSelectionModel().getLeadSelectionIndex();
+      final Method method = Utility
+              .getKeysByValue(
+                      ((MethodTableModel) methodsTable.getModel())
+                              .getMapIndex(), index).iterator().next();
 
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        // Get the selected parameter
-        int index = methodsTable.getSelectionModel().getLeadSelectionIndex();
-        final Method method = Utility
-                .getKeysByValue(
-                        ((MethodTableModel) methodsTable.getModel())
-                                .getMapIndex(), index).iterator().next();
+      final Variable parameter = method.getParameters().get(
+              parametersTable.getSelectionModel().getLeadSelectionIndex());
 
-        final Variable parameter = method.getParameters().get(
-                parametersTable.getSelectionModel().getLeadSelectionIndex());
+      index = parametersTable.getSelectionModel().getLeadSelectionIndex();
+      method.moveParameterPosition(parameter, -1);
+      method.notifyObservers();
 
-        index = parametersTable.getSelectionModel().getLeadSelectionIndex();
-        method.moveParameterPosition(parameter, -1);
-        method.notifyObservers();
+      method.select();
+      method.notifyObservers(UpdateMessage.SELECT);
 
-        method.select();
-        method.notifyObservers(UpdateMessage.SELECT);
-
-        index--;
-        parametersTable.addRowSelectionInterval(index, index);
-        ((ParametersTableModel) parametersTable.getModel())
-                .setCurrentParameter(parameter);
-      }
+      index--;
+      parametersTable.addRowSelectionInterval(index, index);
+      ((ParametersTableModel) parametersTable.getModel())
+              .setCurrentParameter(parameter);
     });
     btnPanel.add(btnLeftParameters);
 
     btnRightParameters.setAlignmentX(CENTER_ALIGNMENT);
     btnRightParameters.setEnabled(false);
-    btnRightParameters.addActionListener(new ActionListener() {
+    btnRightParameters.addActionListener(e -> {
+      // Get the selected parameter
+      int index = methodsTable.getSelectionModel().getLeadSelectionIndex();
+      final Method method = Utility
+              .getKeysByValue(
+                      ((MethodTableModel) methodsTable.getModel())
+                              .getMapIndex(), index).iterator().next();
 
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        // Get the selected parameter
-        int index = methodsTable.getSelectionModel().getLeadSelectionIndex();
-        final Method method = Utility
-                .getKeysByValue(
-                        ((MethodTableModel) methodsTable.getModel())
-                                .getMapIndex(), index).iterator().next();
+      index = parametersTable.getSelectionModel().getLeadSelectionIndex();
+      final Variable parameter = method.getParameters().get(index);
 
-        index = parametersTable.getSelectionModel().getLeadSelectionIndex();
-        final Variable parameter = method.getParameters().get(index);
+      method.moveParameterPosition(parameter, 1);
+      method.notifyObservers();
 
-        method.moveParameterPosition(parameter, 1);
-        method.notifyObservers();
+      method.select();
+      method.notifyObservers(UpdateMessage.SELECT);
 
-        method.select();
-        method.notifyObservers(UpdateMessage.SELECT);
-
-        index++;
-        parametersTable.addRowSelectionInterval(index, index);
-        ((ParametersTableModel) parametersTable.getModel())
-                .setCurrentParameter(parameter);
-      }
+      index++;
+      parametersTable.addRowSelectionInterval(index, index);
+      ((ParametersTableModel) parametersTable.getModel())
+              .setCurrentParameter(parameter);
     });
     btnPanel.add(btnRightParameters);
 
     btnRemoveParameters.setAlignmentX(CENTER_ALIGNMENT);
     btnRemoveParameters.setEnabled(false);
-    btnRemoveParameters.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        ((ParametersTableModel) parametersTable.getModel())
-                .removeCurrentParameter();
-      }
-    });
+    btnRemoveParameters.addActionListener(e -> ((ParametersTableModel) parametersTable.getModel())
+            .removeCurrentParameter());
     btnPanel.add(btnRemoveParameters);
     btnPanel.setBackground(null);
     btnPanel.setPreferredSize(new Dimension(190, 30));
@@ -1239,7 +1184,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     add(panel);
   }
 
-  public JPanel createSimpleEntityPropreties() {
+  public JPanel createSimpleEntityProperties() {
     JPanel panel = new JPanel();
     panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
     panel.setOpaque(false);

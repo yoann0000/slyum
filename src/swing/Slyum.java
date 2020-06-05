@@ -1040,7 +1040,6 @@ public class Slyum extends JFrame implements ActionListener {
     final JMenuBar menuBar = new JMenuBar();
     menuBar.setBackground(DEFAULT_BACKGROUND);
     menuBar.setBorder(null);
-
     JMenuItem menuItem;
 
     // Menu file

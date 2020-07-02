@@ -92,14 +92,17 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
   private static final String TT_REL_TABLE = "Table "
           + Utility.keystrokeToString(Slyum.KEY_CLASS);//TODO change to new key
 
-  private static final String TT_REL_ASSOCIATION = "Table "
+  private static final String TT_REL_ASSOCIATION = "Relational association "
           + Utility.keystrokeToString(Slyum.KEY_ASSOCIATION);//TODO change to new key
+
+  private static final String TT_VIEW = "View "
+          + Utility.keystrokeToString(Slyum.KEY_ENUM);//TODO change to new key
 
 
   private SButton btnCursorMode, btnGripMode, btnClass, btnEnum, btnInterface,
           btnClassAssociation, btnGeneralize, btnDependeny, btnInnerClass,
           btnAssociation, btnAggregation, btnComposition, btnMulti, btnNote,
-          btnLinkNote, btnTable, btnAssocRel;
+          btnLinkNote, btnTable, btnAssocRel, btnView;
 
   private Mode currentMode;
   private static SPanelDiagramComponent instance;
@@ -158,10 +161,14 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
             Slyum.ACTION_NEW_INNER_CLASS, Color.RED, TT_INNER_CLASS));
 
     add(new SSeparator());
-    //TODO MORE BUTTONS!!!
+    //TODO MORE BUTTONS!!! & fix button actions
     add(btnTable = createSButton(
             PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "tableRel.png"),
             Slyum.ACTION_NEW_CLASS, Color.RED, TT_REL_TABLE));
+
+    add(btnView = createSButton(
+            PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "view.png"),
+            Slyum.ACTION_NEW_ENUM, Color.RED, TT_VIEW));
 
     add(btnAssocRel = createSButton(
             PersonalizedIcon.createImageIcon(Slyum.ICON_PATH
@@ -240,6 +247,7 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
     GraphicView gv = MultiViewManager.getSelectedGraphicView();
     boolean isRel = gv.isRelational();
     btnTable.setEnabled(isRel);
+    btnView.setEnabled(isRel);
     btnAssocRel.setEnabled(isRel);
     btnClass.setEnabled(!isRel);
     btnInterface.setEnabled(!isRel);

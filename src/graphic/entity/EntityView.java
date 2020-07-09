@@ -5,11 +5,7 @@ import change.BufferDeepCreation;
 import change.Change;
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
-import classDiagram.components.AssociationClass;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.Entity;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.InterfaceEntity;
+import classDiagram.components.*;
 import graphic.ColoredComponent;
 import graphic.GraphicComponent;
 import graphic.GraphicView;
@@ -61,16 +57,17 @@ public abstract class EntityView extends MovableComponent implements Observer, C
   private static Color basicColor = new Color(baseColor.getRGB());
 
   private static final Font stereotypeFontBasic = new Font(
-      Slyum.getInstance().defaultFont.getFamily(), 0, 11);
+      Slyum.getInstance().defaultFont.getFamily(), Font.PLAIN, 11);
   
-  public static EntityView createFromEntity(
-      GraphicView graphicView, Entity entity) {
+  public static EntityView createFromEntity(GraphicView graphicView, Entity entity) {
      if (entity.getClass() == ClassEntity.class)
-        return new ClassView(graphicView, (ClassEntity)entity);
+       return new ClassView(graphicView, (ClassEntity)entity);
      else if (entity.getClass() == InterfaceEntity.class)
-        return new InterfaceView(graphicView, (InterfaceEntity)entity);
+       return new InterfaceView(graphicView, (InterfaceEntity)entity);
      else if (entity.getClass() == EnumEntity.class)
-        return new EnumView(graphicView, (EnumEntity)entity);
+       return new EnumView(graphicView, (EnumEntity)entity);
+     else if (entity.getClass() == RelationalEntity.class)
+       return new RelationalEntityView(graphicView, (RelationalEntity)entity);
      //else if (entity.getClass() == AssociationClass.class)
        //return new AssociationClassView(graphicView, (AssociationClass)entity, (BinaryView)graphicView.searchAssociedComponent(((AssociationClass)entity).getAssociation()), new Rectangle());
     return null;
@@ -195,19 +192,19 @@ public abstract class EntityView extends MovableComponent implements Observer, C
     int distLeft = (int) lineLeft.ptSegDist(ptIntersectLeft)
                    + (int) relationLine.ptSegDist(ptIntersectLeft);
     
-    if (ptIntersectTop != null && distTop == 0) {
+    if (distTop == 0) {
       return new Point(RelationGrip.adjust((int) ptIntersectTop.getX()),
           (int) ptIntersectTop.getY());
       
-    } else if (ptIntersectRight != null && distRight == 0) {
+    } else if (distRight == 0) {
       return new Point((int) ptIntersectRight.getX(),
           RelationGrip.adjust((int) ptIntersectRight.getY()));
       
-    } else if (ptIntersectBottom != null && distBottom == 0) {
+    } else if (distBottom == 0) {
       return new Point(RelationGrip.adjust((int) ptIntersectBottom.getX()),
           (int) ptIntersectBottom.getY());
       
-    } else if (ptIntersectLeft != null && distLeft == 0) {
+    } else if (distLeft == 0) {
       return new Point((int) ptIntersectLeft.getX(),
               RelationGrip.adjust((int) ptIntersectLeft.getY()));
 

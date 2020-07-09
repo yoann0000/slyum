@@ -1,19 +1,8 @@
 package swing;
 
 import graphic.GraphicView;
-import graphic.factory.AggregationFactory;
-import graphic.factory.AssociationClassFactory;
-import graphic.factory.BinaryFactory;
-import graphic.factory.ClassFactory;
-import graphic.factory.CompositionFactory;
-import graphic.factory.DependencyFactory;
-import graphic.factory.EnumFactory;
-import graphic.factory.InheritanceFactory;
-import graphic.factory.InnerClassFactory;
-import graphic.factory.InterfaceFactory;
-import graphic.factory.LineCommentaryFactory;
-import graphic.factory.MultiFactory;
-import graphic.factory.NoteFactory;
+import graphic.factory.*;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -90,7 +79,7 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
           + Utility.keystrokeToString(Slyum.KEY_LINK_NOTE);
 
   private static final String TT_REL_TABLE = "Table "
-          + Utility.keystrokeToString(Slyum.KEY_CLASS);//TODO change to new key
+          + Utility.keystrokeToString(Slyum.KEY_TABLE);//TODO make sure key works
 
   private static final String TT_REL_ASSOCIATION = "Relational association "
           + Utility.keystrokeToString(Slyum.KEY_ASSOCIATION);//TODO change to new key
@@ -164,7 +153,7 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
     //TODO MORE BUTTONS!!! & fix button actions
     add(btnTable = createSButton(
             PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "tableRel.png"),
-            Slyum.ACTION_NEW_CLASS, Color.RED, TT_REL_TABLE));
+            Slyum.ACTION_NEW_TABLE, Color.RED, TT_REL_TABLE));
 
     add(btnView = createSButton(
             PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "view.png"),
@@ -272,6 +261,9 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
     
     GraphicView gv = MultiViewManager.getSelectedGraphicView();
     switch (e.getActionCommand()) {
+      case Slyum.ACTION_NEW_TABLE:
+        gv.initNewComponent(new TableFactory(gv));
+        break;
       case Slyum.ACTION_NEW_CLASS:
         gv.initNewComponent(new ClassFactory(gv));
         break;

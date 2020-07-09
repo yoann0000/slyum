@@ -332,7 +332,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     public boolean isCellEditable(int row, int col) {
       Boolean isInterfaceEntityClass = currentObject.getClass()
           .equals(InterfaceEntity.class);
-      Boolean isConstructorClass = Utility.getKeysByValue(mapIndex, row)
+      boolean isConstructorClass = Utility.getKeysByValue(mapIndex, row)
                                           .iterator().next().getClass()
                                           .equals(ConstructorMethod.class);
 
@@ -807,7 +807,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     visibilityColumn.setCellEditor(new DefaultCellEditor(Utility
             .getVisibilityComboBox()));
 
-    TableColumn column = null;
+    TableColumn column;
     for (int i = 0; i < attributesTable.getColumnCount(); i++) {
       column = attributesTable.getColumnModel().getColumn(i);
 
@@ -867,13 +867,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
               PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "plus.png"),
               "Add");
       button.setAlignmentX(CENTER_ALIGNMENT);
-      button.addActionListener(new ActionListener() {
-
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-          addAttribute(true);
-        }
-      });
+      button.addActionListener(arg0 -> addAttribute(true));
 
       panelButton.add(button);
     }
@@ -1213,18 +1207,14 @@ public class SimpleEntityPropreties extends GlobalPropreties {
     // Visibility combobox
     comboBox.setAlignmentX(LEFT_ALIGNMENT);
     comboBox.setPreferredSize(new Dimension(230, 25));
-    comboBox.addActionListener(new ActionListener() {
+    comboBox.addActionListener(e -> {
+      final Visibility newVisibility = Visibility.valueOf(comboBox
+              .getSelectedItem().toString().toUpperCase());
 
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        final Visibility newVisibility = Visibility.valueOf(comboBox
-                .getSelectedItem().toString().toUpperCase());
-
-        if (newVisibility != Visibility.valueOf(((SimpleEntity) currentObject)
-                .getVisibility().getName().toUpperCase())) {
-          ((SimpleEntity) currentObject).setVisibility(newVisibility);
-          ((SimpleEntity) currentObject).notifyObservers();
-        }
+      if (newVisibility != Visibility.valueOf(((SimpleEntity) currentObject)
+              .getVisibility().getName().toUpperCase())) {
+        ((SimpleEntity) currentObject).setVisibility(newVisibility);
+        ((SimpleEntity) currentObject).notifyObservers();
       }
     });
     panel.add(comboBox);

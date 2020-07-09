@@ -1,8 +1,15 @@
 package classDiagram.components;
 
-import java.util.LinkedList;
+import classDiagram.ClassDiagram;
+import classDiagram.IDiagramComponent;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-public class Key {
+import java.util.LinkedList;
+import java.util.Observable;
+
+public class Key extends Observable implements IDiagramComponent {
+    protected final int id = ClassDiagram.getNextId();
     private LinkedList<RelationalAttribute> keyComponents = new LinkedList<>();
     private String name;
 
@@ -34,5 +41,31 @@ public class Key {
 
     public void removeKeyComponent(RelationalAttribute attribute) {
         keyComponents.remove(attribute);
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void select() {
+        setChanged();
+    }
+
+    @Override
+    public Element getXmlElement(Document doc) {
+        Element key = doc.createElement(getXmlTagName());
+        key.setAttribute("name", name);
+
+        for (RelationalAttribute attribute : keyComponents)
+            key.appendChild(attribute.getXmlElement(doc));
+
+        return key;
+    }
+
+    @Override
+    public String getXmlTagName() {
+        return "key";
     }
 }

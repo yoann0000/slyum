@@ -2,12 +2,7 @@ package classDiagram;
 
 import change.BufferDiagramComponentCreation;
 import change.Change;
-import classDiagram.components.AssociationClass;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.Entity;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.InterfaceEntity;
-import classDiagram.components.Method;
+import classDiagram.components.*;
 import classDiagram.relationships.Aggregation;
 import classDiagram.relationships.Binary;
 import classDiagram.relationships.Composition;
@@ -109,6 +104,20 @@ public class ClassDiagram extends Observable
       for (final IComponentsObserver c : observers)
         if (notifyGraphicView || !(c instanceof GraphicView))
           c.notifyClassEntityCreation(component);
+      entities.addFirst(component);
+    }
+  }
+
+  public void addTableEntity(RelationalEntity component) {
+    addTableEntity(component, true);
+  }
+
+  public void addTableEntity(RelationalEntity component, boolean notifyGraphicView) {
+
+    if (addComponent(component)) {
+      for (final IComponentsObserver c : observers)
+        if (notifyGraphicView || !(c instanceof GraphicView))
+          c.notifyRelationalEntityCreation(component);
       entities.addFirst(component);
     }
   }

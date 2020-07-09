@@ -4,10 +4,7 @@ import classDiagram.ClassDiagram;
 import classDiagram.IComponentsObserver;
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
-import classDiagram.components.AssociationClass;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.InterfaceEntity;
+import classDiagram.components.*;
 import classDiagram.relationships.Aggregation;
 import classDiagram.relationships.Association;
 import classDiagram.relationships.Binary;
@@ -384,6 +381,12 @@ public class HierarchicalView
             entitiesNode);
   }
 
+  public void addRelationalEntity(RelationalEntity component) { //TODO change to new branch maybe?
+    addNode(new NodeRelationalEntity(component, treeModel, tree,
+                    PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "tableRel.png")),
+            entitiesNode);
+  }
+
   public void addComposition(Composition component) {
     addAssociation(component, "resources/icon/composition.png");
   }
@@ -553,6 +556,11 @@ public class HierarchicalView
   @Override
   public void notifyClassEntityCreation(ClassEntity component) {
     addClassEntity(component);
+  }
+
+  @Override
+  public void notifyRelationalEntityCreation(RelationalEntity component) {
+    addRelationalEntity(component);
   }
 
   @Override

@@ -8,11 +8,7 @@ import classDiagram.ClassDiagram.ViewEntity;
 import classDiagram.IComponentsObserver;
 import classDiagram.IDiagramComponent;
 import classDiagram.INameObserver;
-import classDiagram.components.AssociationClass;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.Entity;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.InterfaceEntity;
+import classDiagram.components.*;
 import classDiagram.components.Method.ParametersViewStyle;
 import classDiagram.relationships.Aggregation;
 import classDiagram.relationships.Binary;
@@ -23,12 +19,7 @@ import classDiagram.relationships.InnerClass;
 import classDiagram.relationships.Multi;
 import classDiagram.relationships.Relation;
 import classDiagram.relationships.Role;
-import graphic.entity.AssociationClassView;
-import graphic.entity.ClassView;
-import graphic.entity.EntityView;
-import graphic.entity.EnumView;
-import graphic.entity.InterfaceView;
-import graphic.entity.SimpleEntityView;
+import graphic.entity.*;
 import graphic.export.ExportViewImage;
 import graphic.factory.CreateComponent;
 import graphic.factory.MultiFactory;
@@ -805,6 +796,12 @@ public class GraphicView extends GraphicComponent
     GraphicComponent result = searchAssociedComponent(component);
     if (result == null)
       addEntity(new ClassView(this, component));
+  }
+
+  public void addTableEntity(RelationalEntity component) {
+    GraphicComponent result = searchAssociedComponent(component);
+    if (result == null)
+      addEntity(new RelationalEntityView(this, component));
   }
 
   public <T extends GraphicComponent> boolean addComponentIn(T component, LinkedList<T> list) {
@@ -1983,6 +1980,7 @@ public class GraphicView extends GraphicComponent
     Element graphicView = doc.createElement(getXmlTagName());
     graphicView.setAttribute("name", getName());
     graphicView.setAttribute("open", String.valueOf(isOpenInTab()));
+    graphicView.setAttribute("rel", String.valueOf(isRelational()));
     graphicView.setAttribute("grid", String.valueOf(getGridSize()));
 
     for (GraphicComponent c : getAllComponents()) {
@@ -2306,6 +2304,13 @@ public class GraphicView extends GraphicComponent
     if (MultiViewManager.getSelectedGraphicView() == this ||
         PanelClassDiagram.getInstance().isXmlImportation())
       addClassEntity(component);
+  }
+
+  @Override
+  public void notifyRelationalEntityCreation(RelationalEntity component) {
+    if (MultiViewManager.getSelectedGraphicView() == this ||
+            PanelClassDiagram.getInstance().isXmlImportation())
+      addTableEntity(component);
   }
 
   @Override

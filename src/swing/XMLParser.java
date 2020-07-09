@@ -189,13 +189,13 @@ public class XMLParser extends DefaultHandler {
       graphicView = MultiViewManager.getSelectedGraphicView();
     }
 
-    public UMLView(String name, boolean open) {
+    public UMLView(String name, boolean open, boolean rel) {
       this.name = name;
       
       if (open)
-        graphicView = MultiViewManager.addAndOpenNewView(name);
+        graphicView = MultiViewManager.addAndOpenNewView(name, rel);
       else
-        graphicView = MultiViewManager.addNewView(name, false); //TODO change to diff uml and rel
+        graphicView = MultiViewManager.addNewView(name, rel); //TODO change to diff uml and rel
     }
   }
   
@@ -417,8 +417,7 @@ public class XMLParser extends DefaultHandler {
   }
 
   @Override
-  public void endElement(String uri, String localName, String qName)
-          throws SAXException {
+  public void endElement(String uri, String localName, String qName) {
     switch (qName) {
       case "entity":
         currentEntity = null;
@@ -802,30 +801,27 @@ public class XMLParser extends DefaultHandler {
           l.setColor(rl.color);
           final LinkedList<TextBox> tb = l.getTextBoxRole();
 
-          SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-              if (tb.size() >= 1) {
-                ((TextBoxLabel) tb.getFirst()).computeDeplacement(new Point(
-                        rl.labelAssociation.x, rl.labelAssociation.y));
+          SwingUtilities.invokeLater(() -> {
+            if (tb.size() >= 1) {
+              ((TextBoxLabel) tb.getFirst()).computeDeplacement(new Point(
+                      rl.labelAssociation.x, rl.labelAssociation.y));
 
-                if (tb.size() >= 3) {
-                  ((TextBoxLabel) tb.get(1)).computeDeplacement(new Point(
-                          rl.roleAssociations.get(0).x, rl.roleAssociations
-                                  .get(0).y));
-                  ((TextBoxLabel) tb.get(2)).computeDeplacement(new Point(
-                          rl.roleAssociations.get(1).x, rl.roleAssociations
-                                  .get(1).y));
+              if (tb.size() >= 3) {
+                ((TextBoxLabel) tb.get(1)).computeDeplacement(new Point(
+                        rl.roleAssociations.get(0).x, rl.roleAssociations
+                                .get(0).y));
+                ((TextBoxLabel) tb.get(2)).computeDeplacement(new Point(
+                        rl.roleAssociations.get(1).x, rl.roleAssociations
+                                .get(1).y));
 
-                  ((TextBoxRole) tb.get(1)).getTextBoxMultiplicity()
-                          .computeDeplacement(
-                                  new Point(rl.multipliciteAssociations.get(0).x,
-                                          rl.multipliciteAssociations.get(0).y));
-                  ((TextBoxRole) tb.get(2)).getTextBoxMultiplicity()
-                          .computeDeplacement(
-                                  new Point(rl.multipliciteAssociations.get(1).x,
-                                          rl.multipliciteAssociations.get(1).y));
-                }
+                ((TextBoxRole) tb.get(1)).getTextBoxMultiplicity()
+                        .computeDeplacement(
+                                new Point(rl.multipliciteAssociations.get(0).x,
+                                        rl.multipliciteAssociations.get(0).y));
+                ((TextBoxRole) tb.get(2)).getTextBoxMultiplicity()
+                        .computeDeplacement(
+                                new Point(rl.multipliciteAssociations.get(1).x,
+                                        rl.multipliciteAssociations.get(1).y));
               }
             }
           });
@@ -867,20 +863,16 @@ public class XMLParser extends DefaultHandler {
             // Role
             final LinkedList<TextBox> tb = mlv.getTextBoxRole();
 
-            SwingUtilities.invokeLater(new Runnable() {
+            SwingUtilities.invokeLater(() -> {
+              if (tb.size() == 1) {
+                ((TextBoxLabel) tb.getFirst()).computeDeplacement(new Point(
+                        rl.roleAssociations.get(0).x, rl.roleAssociations
+                                .get(0).y));
 
-              @Override
-              public void run() {
-                if (tb.size() == 1) {
-                  ((TextBoxLabel) tb.getFirst()).computeDeplacement(new Point(
-                          rl.roleAssociations.get(0).x, rl.roleAssociations
-                                  .get(0).y));
-
-                  ((TextBoxRole) tb.getFirst()).getTextBoxMultiplicity()
-                          .computeDeplacement(
-                                  new Point(rl.multipliciteAssociations.get(0).x,
-                                          rl.multipliciteAssociations.get(0).y));
-                }
+                ((TextBoxRole) tb.getFirst()).getTextBoxMultiplicity()
+                        .computeDeplacement(
+                                new Point(rl.multipliciteAssociations.get(0).x,
+                                        rl.multipliciteAssociations.get(0).y));
               }
             });
           }
@@ -920,11 +912,11 @@ public class XMLParser extends DefaultHandler {
         
         if (attributes.getValue("defaultViewEnum") != null)
           umlClassDiagram.defaultViewEnum = 
-              Boolean.valueOf(attributes.getValue("defaultViewEnum"));
+              Boolean.parseBoolean(attributes.getValue("defaultViewEnum"));
         
         if (attributes.getValue("defaultVisibleTypes") != null)
           umlClassDiagram.defaultVisibleTypes = 
-              Boolean.valueOf(attributes.getValue("defaultVisibleTypes"));
+              Boolean.parseBoolean(attributes.getValue("defaultVisibleTypes"));
         
         break;
       case "entity":
@@ -969,7 +961,7 @@ public class XMLParser extends DefaultHandler {
                 .getValue("view"));
           
           if (attributes.getValue("is-constructor") != null)
-            currentMethod.isConstructor = Boolean.valueOf(attributes
+            currentMethod.isConstructor = Boolean.parseBoolean(attributes
                 .getValue("is-constructor"));
           
           currentEntity.method.add(currentMethod);
@@ -1075,14 +1067,18 @@ public class XMLParser extends DefaultHandler {
         try {
           UMLView newUMLView;
           boolean open = true;
+          boolean rel = false;
           
           if (attributes.getValue("open") != null)
-            open = Boolean.valueOf(attributes.getValue("open"));
+            open = Boolean.parseBoolean(attributes.getValue("open"));
+
+          if (attributes.getValue("rel") != null)
+            rel = Boolean.parseBoolean(attributes.getValue("rel"));
           
           if (umlClassDiagram.uMLView.size() == 0) // root graphic view
             newUMLView = new UMLView();
           else // new view
-            newUMLView = new UMLView(attributes.getValue("name"), open);
+            newUMLView = new UMLView(attributes.getValue("name"), open, rel);
           
           currentUMLView = newUMLView;
           umlClassDiagram.uMLView.add(newUMLView);

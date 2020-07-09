@@ -12,6 +12,8 @@ public class RelationalEntity extends Entity{
     public RelationalEntity(String name) {
         super(name);
         RelationalAttribute defaultAttribute = new RelationalAttribute("ID", PrimitiveType.INTEGER_TYPE);
+        defaultAttribute.setUnique(true);
+        defaultAttribute.setNotNull(true);
         attributes.add(defaultAttribute);
         primaryKey = new Key("ID", defaultAttribute);
     }
@@ -55,6 +57,30 @@ public class RelationalEntity extends Entity{
 
     public void removeAlternateKey(Key ak) {
         alternateKeys.remove(ak);
+    }
+
+    public LinkedList<RelationalAttribute> getAttributes() {
+        return attributes;
+    }
+
+    public void addAttribute(RelationalAttribute attribute) {
+        attributes.add(attribute);
+    }
+
+    public void removeAttribute(RelationalAttribute attribute) {
+        attributes.remove(attribute);
+    }
+
+    public LinkedList<Key> getAllKeys() {
+        LinkedList<Key> keyList = new LinkedList<>();
+        keyList.add(primaryKey);
+        keyList.addAll(alternateKeys);
+        keyList.addAll(foreignKeys);
+        return(keyList);
+    }
+
+    public void moveAttributePosition(RelationalAttribute attribute, int offset) {
+        moveComponentPosition(attributes, attribute, offset);
     }
 
     @Override

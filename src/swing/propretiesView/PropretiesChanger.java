@@ -2,10 +2,7 @@ package swing.propretiesView;
 
 import classDiagram.IComponentsObserver;
 import classDiagram.IDiagramComponent;
-import classDiagram.components.AssociationClass;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.InterfaceEntity;
+import classDiagram.components.*;
 import classDiagram.relationships.Aggregation;
 import classDiagram.relationships.Association;
 import classDiagram.relationships.Binary;
@@ -91,6 +88,10 @@ public class PropretiesChanger extends SScrollPane implements IComponentsObserve
     component.addObserver(SimpleEntityPropreties.getInstance());
   }
 
+  public void addRelationalEntity(RelationalEntity component) {
+    component.addObserver(RelationalEntityProperties.getInstance());
+  }
+
   public void addEnumEntity(EnumEntity component) {
     component.addObserver(EnumEntityPropreties.getInstance());
   }
@@ -141,6 +142,11 @@ public class PropretiesChanger extends SScrollPane implements IComponentsObserve
   @Override
   public void notifyClassEntityCreation(ClassEntity component) {
     addClassEntity(component);
+  }
+
+  @Override
+  public void notifyRelationalEntityCreation(RelationalEntity component) {
+    addRelationalEntity(component);
   }
 
   @Override

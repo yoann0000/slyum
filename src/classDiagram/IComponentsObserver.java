@@ -1,9 +1,6 @@
 package classDiagram;
 
-import classDiagram.components.AssociationClass;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.InterfaceEntity;
+import classDiagram.components.*;
 import classDiagram.relationships.Aggregation;
 import classDiagram.relationships.Binary;
 import classDiagram.relationships.Composition;
@@ -54,6 +51,14 @@ public interface IComponentsObserver {
    *          the component that was added.
    */
   public void notifyClassEntityCreation(ClassEntity component);
+
+  /**
+   * Adds a new table and notify that a new table has been added.
+   *
+   * @param component
+   *          the component that was added.
+   */
+  public void notifyRelationalEntityCreation(RelationalEntity component);
 
   /**
    * Adds a new composition and notify that a new composition has been added.

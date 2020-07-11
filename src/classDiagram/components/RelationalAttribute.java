@@ -151,8 +151,8 @@ public class RelationalAttribute extends Variable {
         Element attribute = super.getXmlElement(doc);
         if (defaultValue != null)
             attribute.setAttribute("defaultValue", defaultValue);
-        attribute.setAttribute("isUnique", String.valueOf(unique));
-        attribute.setAttribute("isNotNull", String.valueOf(notNull));
+        attribute.setAttribute("unique", String.valueOf(unique));
+        attribute.setAttribute("notNull", String.valueOf(notNull));
         return attribute;
     }
 }

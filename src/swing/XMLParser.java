@@ -3,18 +3,8 @@ package swing;
 import classDiagram.ClassDiagram.ViewEntity;
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
-import classDiagram.components.AssociationClass;
-import classDiagram.components.Attribute;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.ConstructorMethod;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.EnumValue;
-import classDiagram.components.InterfaceEntity;
-import classDiagram.components.Method;
+import classDiagram.components.*;
 import classDiagram.components.Method.ParametersViewStyle;
-import classDiagram.components.SimpleEntity;
-import classDiagram.components.Type;
-import classDiagram.components.Visibility;
 import classDiagram.relationships.Association.NavigateDirection;
 import classDiagram.relationships.Binary;
 import classDiagram.relationships.Composition;
@@ -177,7 +167,6 @@ public class XMLParser extends DefaultHandler {
 
     GraphicView graphicView;
     String name = null;
-    boolean open = true;
 
     LinkedList<Note> notes = new LinkedList<>();
 
@@ -210,6 +199,8 @@ public class XMLParser extends DefaultHandler {
     String name = null;
     Type type = null;
     Visibility visibility = null;
+    boolean unique = false;
+    boolean notNull = false;
   }
 
   LinkedList<AssociationClass> associationClassEntities = new LinkedList<>();
@@ -281,6 +272,7 @@ public class XMLParser extends DefaultHandler {
     classDiagram.components.Entity ce = null;
     e.name = TypeName.verifyAndAskNewName(e.name);
     boolean isSimpleEntity = true;
+    boolean isRelEntity = false;
 
     switch (e.entityType) {
       case CLASS:
@@ -323,7 +315,14 @@ public class XMLParser extends DefaultHandler {
         classDiagram.addAssociationClass((AssociationClass) ce);
 
         break;
-        
+
+      case TABLE:
+        isSimpleEntity = false;
+        isRelEntity = true;
+        ce = new RelationalEntity(e.name, e.id);
+        classDiagram.addTableEntity((RelationalEntity) ce);
+        break;
+
         default:
           throw new SAXNotRecognizedException(
               e.entityType + ": wrong entity type.");
@@ -369,6 +368,19 @@ public class XMLParser extends DefaultHandler {
         }
         m.notifyObservers();
       }
+    } else if(isRelEntity) {
+      RelationalEntity se = (RelationalEntity) ce;
+      for (Variable v : e.attribute) {
+        RelationalAttribute a = new RelationalAttribute(VariableName.verifyAndAskNewName(v.name),
+                v.type);
+
+        se.addAttribute(a);
+        se.notifyObservers(UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
+        a.setDefaultValue(v.defaultValue);
+        a.setUnique(v.unique);
+        a.setNotNull(v.notNull);
+        a.notifyObservers();
+      }
     } else {
       EnumEntity ee = (EnumEntity) ce;
       for (EnumValue v : e.enums) {
@@ -381,7 +393,7 @@ public class XMLParser extends DefaultHandler {
   }
 
   @Override
-  public void endDocument() throws SAXException {
+  public void endDocument() {
     
   }
 

@@ -63,15 +63,8 @@ public abstract class NodeEntity extends AbstractNode {
         "Add to current view", 
         PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "plus-16.png"));
     
-    item.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        
-        MultiViewManager.getSelectedGraphicView()
-                        .createEntityWithRelations(NodeEntity.this.entity);
-      }
-    });
+    item.addActionListener(e -> MultiViewManager.getSelectedGraphicView()
+                    .createEntityWithRelations(NodeEntity.this.entity));
     popupMenu.add(item, 0);
 
     reloadChildsNodes();
@@ -80,9 +73,7 @@ public abstract class NodeEntity extends AbstractNode {
   @Override
   protected ActionListener getMenuItemDeleteActionListener() {
     
-    return (ActionEvent e) -> {
-      change.Helper.deepDeleteEntity(entity);
-    };
+    return (ActionEvent e) -> change.Helper.deepDeleteEntity(entity);
   }
 
   @Override

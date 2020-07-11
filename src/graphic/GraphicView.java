@@ -2673,6 +2673,8 @@ public class GraphicView extends GraphicComponent
       if (arg instanceof Boolean && (Boolean) arg)
         for (SimpleEntityView entity : SimpleEntityView.getAll())
           entity.initViewType();
+        for (RelationalEntityView entity : RelationalEntityView.getAll())
+          entity.initViewType();
       repaint();
     }
   }

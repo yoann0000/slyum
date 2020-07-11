@@ -4,28 +4,18 @@ import classDiagram.IDiagramComponent.UpdateMessage;
 import graphic.GraphicComponent;
 import graphic.relations.LineCommentary;
 import graphic.relations.LineView;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.LinkedList;
-import java.util.List;
-import javax.swing.AbstractListModel;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import swing.Slyum;
 import swing.slyumCustomizedComponents.FlatPanel;
 import swing.slyumCustomizedComponents.SButton;
 import swing.slyumCustomizedComponents.SList;
 import utility.PersonalizedIcon;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.LinkedList;
+import java.util.List;
 
 public class NoteProperties extends GlobalPropreties {
   private static NoteProperties instance;
@@ -43,16 +33,16 @@ public class NoteProperties extends GlobalPropreties {
     JPanel panel = new FlatPanel();
     panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
-    list = new SList<LineCommentary>() {
+    list = new SList<>() {
 
       @Override
       protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (!isEnabled())
           utility.Utility.drawInfoRect(
-              "No link note", getBounds(), (Graphics2D)g, 30);
+                  "No link note", getBounds(), (Graphics2D) g, 30);
       }
-      
+
     };
     list.setEnabled(false);
     list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -67,39 +57,26 @@ public class NoteProperties extends GlobalPropreties {
       }
     });
 
-    list.addListSelectionListener(new ListSelectionListener() {
-      @Override
-      public void valueChanged(ListSelectionEvent e) {
-        btnDelete.setEnabled(list.getSelectedIndex() != -1);
-      }
-    });
+    list.addListSelectionListener(e -> btnDelete.setEnabled(list.getSelectedIndex() != -1));
     
     panel.add(list.getScrollPane());
     panel.add(Box.createHorizontalStrut(10));
 
     btnDelete = new SButton(PersonalizedIcon.createImageIcon(Slyum.ICON_PATH
             + "minus.png"), "Remove link");
-    btnDelete.addActionListener(new ActionListener() {
+    btnDelete.addActionListener(e -> {
+      final int i = list.getSelectedIndex();
 
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        final int i = list.getSelectedIndex();
+      for (LineCommentary lc : list.getSelectedValuesList())
+        lc.delete();
 
-        for (LineCommentary lc : list.getSelectedValuesList())
-          lc.delete();
+      updateComponentInformations(null);
 
-        updateComponentInformations(null);
-
-        SwingUtilities.invokeLater(new Runnable() {
-
-          @Override
-          public void run() {
-            int j = i;
-            if (i >= list.getModel().getSize()) j--;
-            list.setSelectedIndex(j);
-          }
-        });
-      }
+      SwingUtilities.invokeLater(() -> {
+        int j = i;
+        if (i >= list.getModel().getSize()) j--;
+        list.setSelectedIndex(j);
+      });
     });
     btnDelete.setEnabled(false);
     panel.add(btnDelete);
@@ -109,23 +86,11 @@ public class NoteProperties extends GlobalPropreties {
 
   @Override
   public void updateComponentInformations(UpdateMessage msg) {
-    SwingUtilities.invokeLater(new Runnable() {
-
-      @Override
-      public void run() {
-        list.setModel(new ListLineCommentaryModel());
-      }
-    });
+    SwingUtilities.invokeLater(() -> list.setModel(new ListLineCommentaryModel()));
   }
 
   public void setSelectedItem(final LineCommentary lc) {
-    SwingUtilities.invokeLater(new Runnable() {
-
-      @Override
-      public void run() {
-        list.setSelectedValue(lc, true);
-      }
-    });
+    SwingUtilities.invokeLater(() -> list.setSelectedValue(lc, true));
   }
 
   private class ListLineCommentaryModel extends
@@ -133,7 +98,7 @@ public class NoteProperties extends GlobalPropreties {
     @Override
     public LineCommentary getElementAt(int i) {
       if (currentObject == null) return null;
-      return (LineCommentary) getLineCommentary().get(i);
+      return getLineCommentary().get(i);
     }
 
     @Override

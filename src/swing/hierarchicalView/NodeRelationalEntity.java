@@ -19,13 +19,7 @@ public class NodeRelationalEntity extends NodeEntity {
         setUserObject(relationalEntity.getName());
         removeAllChildren();
 
-        relationalEntity.getAttributes().forEach((a) -> {
-            add(new NodeRelationalAttribute(a, treeModel, tree));
-        });
-
-        relationalEntity.getAllKeys().forEach((k) -> {
-            add(new NodeKey(k, treeModel, tree));
-        });
+        relationalEntity.getAttributes().forEach((a) -> add(new NodeRelationalAttribute(a, treeModel, tree)));
 
         HierarchicalView.sortAlphabetically(this, treeModel, tree);
         treeModel.reload(this);

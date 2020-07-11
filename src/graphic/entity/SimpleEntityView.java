@@ -129,11 +129,11 @@ public abstract class SimpleEntityView extends EntityView {
       int offset = 1;
       if (Slyum.ACTION_TEXTBOX_UP.equals(e.getActionCommand())) offset = -1;
       if (pressedTextBox.getClass() == TextBoxAttribute.class) {
-        final Attribute attribute = (Attribute) ((TextBoxAttribute) pressedTextBox)
+        final Attribute attribute = (Attribute) pressedTextBox
             .getAssociedComponent();
         ((SimpleEntity) component).moveAttributePosition(attribute, offset);
       } else if (pressedTextBox.getClass() == TextBoxMethod.class) {
-        final Method method = (Method) ((TextBoxMethod) pressedTextBox)
+        final Method method = (Method) pressedTextBox
             .getAssociedComponent();
         ((SimpleEntity) component).moveMethodPosition(method, offset);
       } else if (Slyum.ACTION_DUPLICATE.equals(e.getActionCommand())) {

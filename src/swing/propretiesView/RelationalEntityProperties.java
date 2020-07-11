@@ -222,9 +222,69 @@ public class RelationalEntityProperties extends GlobalPropreties{
         }
     }
 
+    //TODO
+    private class PKTableModel extends AbstractTableModel implements Observer, TableModelListener, MouseListener {
+        private final String[] columnNames = { "Attribute"};
+
+        private final LinkedList<Object[]> data = new LinkedList<>();
+
+        private final HashMap<RelationalAttribute, Integer> mapIndex = new HashMap<>();
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+        }
+
+        @Override
+        public void update(Observable o, Object arg) {
+
+        }
+
+        @Override
+        public void tableChanged(TableModelEvent e) {
+
+        }
+
+        @Override
+        public int getRowCount() {
+            return 0;
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 0;
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            return null;
+        }
+    }
+
     private final STable attributesTable;
     private final JButton btnRemoveAttribute, btnUpAttribute, btnDownAttribute;
-    private final JTextField textName = new TextFieldWithPrompt("", "Enter the entity's name");
+    private final JTextField textName = new TextFieldWithPrompt("", "Enter the entity's name"),
+                               pkName = new TextFieldWithPrompt("","Enter the Primary key's name");
+    private final JLabel pk = new JLabel();
 
     public RelationalEntityProperties() {
         // Buttons for attributes.
@@ -410,6 +470,26 @@ public class RelationalEntityProperties extends GlobalPropreties{
         });
         panel.add(textName);
         panel.add(Box.createVerticalStrut(5));
+        pk.setText("Primary Key Name");
+        panel.add(pk);
+
+        pkName.setAlignmentX(LEFT_ALIGNMENT);
+        pkName.setPreferredSize(new Dimension(230, 25));
+        pkName.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == '\n') {
+                    final RelationalEntity relationalEntity = (RelationalEntity) currentObject;
+
+                    if (!relationalEntity.getPrimaryKey().setName(pkName.getText()))
+                        pkName.setText(relationalEntity.getPrimaryKey().getName());
+                    else
+                        relationalEntity.notifyObservers();
+                }
+            }
+        });
+
+        panel.add(pkName);
         return panel;
     }
 

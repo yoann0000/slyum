@@ -6,29 +6,18 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.LinkedList;
-import java.util.Observable;
 
-public class Key extends Observable implements IDiagramComponent {
+public class Key extends Type implements IDiagramComponent {
     protected final int id = ClassDiagram.getNextId();
-    private LinkedList<RelationalAttribute> keyComponents = new LinkedList<>();
-    private String name;
+    private final LinkedList<RelationalAttribute> keyComponents = new LinkedList<>();
 
-    public Key(String name, RelationalAttribute attribute) {
-        this.name = name;
+    public Key(String name) {
+        super(name);
+    }
+
+    public Key(String name, RelationalAttribute attribute){
+        super(name);
         keyComponents.add(attribute);
-    }
-
-    public Key(LinkedList<RelationalAttribute> keyComponents, String name) {
-        this.keyComponents = keyComponents;
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public LinkedList<RelationalAttribute> getKeyComponents() {

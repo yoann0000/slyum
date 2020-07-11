@@ -1,21 +1,20 @@
 package classDiagram.components;
 
+import change.BufferCreationAttribute;
+import change.BufferCreationRelAttribute;
+import change.Change;
 import swing.XMLParser;
 import java.util.LinkedList;
 
 public class RelationalEntity extends Entity{
     private Key primaryKey;
-    private LinkedList<Key> foreignKeys = new LinkedList<>();
-    private LinkedList<Key> alternateKeys = new LinkedList<>();
+    private final LinkedList<Key> foreignKeys = new LinkedList<>();
+    private final LinkedList<Key> alternateKeys = new LinkedList<>();
     private LinkedList<RelationalAttribute> attributes = new LinkedList<>();
+    private RelationalAttribute lastAddedAttribute;
 
     public RelationalEntity(String name) {
         super(name);
-        RelationalAttribute defaultAttribute = new RelationalAttribute("ID", PrimitiveType.INTEGER_TYPE);
-        defaultAttribute.setUnique(true);
-        defaultAttribute.setNotNull(true);
-        attributes.add(defaultAttribute);
-        primaryKey = new Key("ID", defaultAttribute);
     }
 
     public RelationalEntity(String name, int id) {
@@ -63,12 +62,50 @@ public class RelationalEntity extends Entity{
         return attributes;
     }
 
+    /**
+     * Add a new attribute.
+     *
+     * @param attribute
+     *          the new attribute.
+     */
     public void addAttribute(RelationalAttribute attribute) {
-        attributes.add(attribute);
+        addAttribute(attribute, attributes.size());
     }
 
-    public void removeAttribute(RelationalAttribute attribute) {
-        attributes.remove(attribute);
+    /**
+     * Add a new attribute.
+     *
+     * @param attribute
+     *          the new attribute.
+     * @param index the position of the new attribute in the list.
+     */
+    public void addAttribute(RelationalAttribute attribute, int index) {
+        if (attribute == null)
+            throw new IllegalArgumentException("attribute is null");
+
+        attributes.add(index, attribute);
+        lastAddedAttribute = attribute;
+        int i = attributes.indexOf(attribute);
+        Change.push(new BufferCreationRelAttribute(this, attribute, true, i));
+        Change.push(new BufferCreationRelAttribute(this, attribute, false, i));
+
+        setChanged();
+    }
+
+    public boolean removeAttribute(RelationalAttribute attribute) {
+        if (attribute == null)
+            throw new IllegalArgumentException("attribute is null");
+
+        int i = attributes.indexOf(attribute);
+
+        if (attributes.remove(attribute)) {
+            Change.push(new BufferCreationRelAttribute(this, attribute, false, i));
+            Change.push(new BufferCreationRelAttribute(this, attribute, true, i));
+
+            setChanged();
+            return true;
+        } else
+            return false;
     }
 
     public LinkedList<Key> getAllKeys() {
@@ -86,5 +123,9 @@ public class RelationalEntity extends Entity{
     @Override
     protected String getEntityType() {
         return XMLParser.EntityType.TABLE.toString();
+    }
+
+    public RelationalAttribute getLastAddedAttribute() {
+        return lastAddedAttribute;
     }
 }

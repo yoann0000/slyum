@@ -622,8 +622,8 @@ public abstract class EntityView extends MovableComponent implements Observer, C
 
     Paint background;
     if (GraphicView.isEntityGradient())
-      background = new GradientPaint(bounds.x, bounds.y, getColor(), bounds.x
-                                                                     + bounds.width, bounds.y + bounds.height, getColor().darker());
+      background = new GradientPaint(bounds.x, bounds.y, getColor(), bounds.x + bounds.width,
+              bounds.y + bounds.height, getColor().darker());
     else
       background = getColor();
 
@@ -636,8 +636,7 @@ public abstract class EntityView extends MovableComponent implements Observer, C
 
     Dimension classNameSize = new Dimension(classNameWidth, classNameHeight);
 
-    stereotypeFont = stereotypeFont.deriveFont(stereotypeFontBasic.getSize()
-                                               * parent.getZoom());
+    stereotypeFont = stereotypeFont.deriveFont(stereotypeFontBasic.getSize() * parent.getZoom());
     
     g2.setFont(stereotypeFont);
     final String fullStereotype = "<< " + component.getStereotype() + " >>";

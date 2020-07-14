@@ -6,10 +6,7 @@ import classDiagram.IDiagramComponent.UpdateMessage;
 import classDiagram.components.*;
 import classDiagram.components.Method.ParametersViewStyle;
 import graphic.GraphicView;
-import graphic.textbox.TextBox;
-import graphic.textbox.TextBoxAttribute;
-import graphic.textbox.TextBoxMethod;
-import graphic.textbox.TextBoxRelAttribute;
+import graphic.textbox.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import swing.MultiViewManager;
@@ -47,33 +44,33 @@ public class RelationalEntityView extends EntityView {
 
     // Attributs et méthodes
     protected LinkedList<TextBoxRelAttribute> attributesView = new LinkedList<>();
-    protected boolean displayMethods = true;
+    protected boolean displayTriggers = true;
 
-
-    protected LinkedList<TextBoxMethod> methodsView = new LinkedList<>();
+    protected LinkedList<TextBoxTrigger> triggersView = new LinkedList<>();
 
     private boolean displayAttributes = true;
     // Style de vue
     private boolean displayDefault = true;
 
-    private ButtonGroup groupView, groupViewMethods;
+    private ButtonGroup groupView, groupViewTriggers;
     private JMenuItem menuItemAbstract;
-    private JMenuItem menuItemMethodsAll;
-    private JMenuItem menuItemMethodsDefault;
-    private JMenuItem menuItemMethodsName;
-    private JMenuItem menuItemMethodsNothing;
-    private JMenuItem menuItemMethodsType;
+    private JMenuItem menuItemTriggersAll;
+    private JMenuItem menuItemTriggersDefault;
+    private JMenuItem menuItemTriggersName;
+    private JMenuItem menuItemTriggersNothing;
+    private JMenuItem menuItemTriggersType;
     private JMenuItem menuItemStatic;
     private JMenuItem menuItemViewAll;
     private JMenuItem menuItemViewAttributes;
     private JMenuItem menuItemViewDefault;
-    private JMenuItem menuItemViewMethods;
+    private JMenuItem menuItemViewTriggers;
     private JMenuItem menuItemViewNothing;
 
     public RelationalEntityView(GraphicView parent, RelationalEntity component) {
-        super(parent, component);
+       super(parent, component);
         initViewType();
         addDefaultAttribute();
+        addDefaultKey();
     }
 
     @Override
@@ -96,16 +93,7 @@ public class RelationalEntityView extends EntityView {
         } else if ("ViewNothing".equals(e.getActionCommand())) {
             parent.showAttributsForSelectedEntity(false);
             parent.showMethodsForSelectedEntity(false);
-        } else if ("ViewMethodsDefault".equals(e.getActionCommand()))
-            methodViewChangeClicked(ParametersViewStyle.DEFAULT);
-        else if ("ViewTypeAndName".equals(e.getActionCommand()))
-            methodViewChangeClicked(ParametersViewStyle.TYPE_AND_NAME);
-        else if ("ViewType".equals(e.getActionCommand()))
-            methodViewChangeClicked(ParametersViewStyle.TYPE);
-        else if ("ViewName".equals(e.getActionCommand()))
-            methodViewChangeClicked(ParametersViewStyle.NAME);
-        else if ("ViewMethodNothing".equals(e.getActionCommand()))
-            methodViewChangeClicked(ParametersViewStyle.NOTHING);
+        }
         else if (Slyum.ACTION_TEXTBOX_UP.equals(e.getActionCommand())
                 || Slyum.ACTION_TEXTBOX_DOWN.equals(e.getActionCommand())) {
             int offset = 1;
@@ -127,13 +115,12 @@ public class RelationalEntityView extends EntityView {
                                 attributes.indexOf(component) - attributes.size() + 1);
                         entity.notifyObservers();
                     } else {
-//                        Method method = new Method((Method) component);
-//                        LinkedList<Method> methods = entity.getMethods();
-//                        entity.addMethod(method);
-//                        entity.notifyObservers(UpdateMessage.ADD_METHOD_NO_EDIT);
-//                        entity.moveMethodPosition(method, methods.indexOf(component)
-//                                - methods.size() + 1);
-//                        entity.notifyObservers();
+                        Trigger trigger = new Trigger((Trigger) component);
+                        LinkedList<Trigger> triggers = entity.getTriggers();
+                        entity.addTrigger(trigger);
+                        entity.notifyObservers(UpdateMessage.ADD_TRIGGER_NO_EDIT);
+                        entity.moveTriggerPosition(trigger, triggers.indexOf(component) - triggers.size() + 1);
+                        entity.notifyObservers();
                     }
                 }
             }
@@ -161,6 +148,14 @@ public class RelationalEntityView extends EntityView {
         component.notifyObservers(UpdateMessage.ADD_ATTRIBUTE);
     }
 
+    private void addDefaultKey(){
+        RelationalAttribute re = ((RelationalEntity) component).getAttributeByName("id");
+        if(re == null)
+            throw new IllegalArgumentException("default id was not created");
+        final Key pk = new Key("ID", re);
+        ((RelationalEntity) component).setPrimaryKey(pk);
+    }
+
     /**
      * Create a new attribute view with the given attribute. If editing is a true,
      * the new attribute view will be in editing mode while it created.
@@ -180,13 +175,34 @@ public class RelationalEntityView extends EntityView {
         if (editing) newTextBox.editing();
     }
 
+    /**
+     * Create a new trigger view with the given trigger. If editing is a true,
+     * the new attribute view will be in editing mode while it created.
+     *
+     * @param trigger
+     *          the trigger
+     * @param editing
+     *          true if creating a new attribute view in editing mode; false
+     *          otherwise
+     */
+    public void addTrigger(Trigger trigger, boolean editing) {
+        final TextBoxTrigger newTextBox = new TextBoxTrigger(parent, trigger);
+        triggersView.add(newTextBox);
+
+        updateHeight();
+
+        if (editing) newTextBox.editing();
+    }
+
+
+
     @Override
     public RelationalEntityView clone() throws CloneNotSupportedException {
 
         RelationalEntityView view = (RelationalEntityView) super.clone();
         view.displayDefault = displayDefault;
         view.displayAttributes = displayAttributes;
-        view.displayMethods = displayMethods;
+        view.displayTriggers = displayTriggers;
         return view;
     }
 
@@ -195,7 +211,7 @@ public class RelationalEntityView extends EntityView {
         int height = super.computeHeight(classNameHeight, stereotypeHeight,
                 elementsHeight);
 
-        if (displayMethods) height += 10 + elementsHeight * methodsView.size();
+        if (displayTriggers) height += 10 + elementsHeight * triggersView.size();
         if (displayAttributes)
             height += 10 + elementsHeight * attributesView.size();
         return height;
@@ -204,7 +220,7 @@ public class RelationalEntityView extends EntityView {
     @Override
     public List<TextBox> getAllTextBox() {
         List<TextBox> tb = super.getAllTextBox();
-        tb.addAll(methodsView);
+        tb.addAll(triggersView);
         tb.addAll(attributesView);
         return tb;
     }
@@ -237,8 +253,8 @@ public class RelationalEntityView extends EntityView {
      * @param display
      *          the new display state for methods.
      */
-    public void setDisplayMethods(boolean display) {
-        displayMethods = display;
+    public void setDisplayTriggers(boolean display) {
+        displayTriggers = display;
         displayDefault = false;
         updateHeight();
     }
@@ -246,7 +262,7 @@ public class RelationalEntityView extends EntityView {
     @Override
     public void setPictureMode(boolean enable) {
         super.setPictureMode(enable);
-        for (TextBox t : methodsView)
+        for (TextBox t : triggersView)
             t.setPictureMode(enable);
         for (TextBox t : attributesView)
             t.setPictureMode(enable);
@@ -258,7 +274,7 @@ public class RelationalEntityView extends EntityView {
         entityView.setAttribute("displayDefault", String.valueOf(displayDefault));
         entityView.setAttribute("displayAttributes",
                 String.valueOf(displayAttributes));
-        entityView.setAttribute("displayMethods", String.valueOf(displayMethods));
+        entityView.setAttribute("displayMethods", String.valueOf(displayTriggers));
         return entityView;
     }
 
@@ -268,19 +284,19 @@ public class RelationalEntityView extends EntityView {
             switch (view) {
                 case NOTHING:
                     displayAttributes = false;
-                    displayMethods = false;
+                    displayTriggers = false;
                     break;
                 case ONLY_ATTRIBUTES:
                     displayAttributes = true;
-                    displayMethods = false;
+                    displayTriggers = false;
                     break;
                 case ONLY_METHODS:
                     displayAttributes = false;
-                    displayMethods = true;
+                    displayTriggers = true;
                     break;
                 default:
                     displayAttributes = true;
-                    displayMethods = true;
+                    displayTriggers = true;
                     break;
             }
             updateHeight();
@@ -302,12 +318,12 @@ public class RelationalEntityView extends EntityView {
                 menuItemStatic.setEnabled(!isConstructor);
 
                 menuItemMoveUp.setEnabled(attributesView.indexOf(pressedTextBox) != 0
-                        && methodsView.indexOf(pressedTextBox) != 0);
+                        && triggersView.indexOf(pressedTextBox) != 0);
                 menuItemMoveDown
                         .setEnabled((attributesView.size() == 0 || attributesView
                                 .indexOf(pressedTextBox) != attributesView.size() - 1)
-                                && (methodsView.size() == 0 || methodsView
-                                .indexOf(pressedTextBox) != methodsView.size() - 1));
+                                && (triggersView.size() == 0 || triggersView
+                                .indexOf(pressedTextBox) != triggersView.size() - 1));
                 if (pressedTextBox instanceof TextBoxMethod)
                     menuItemAbstract.setEnabled(!isConstructor);
 
@@ -320,17 +336,17 @@ public class RelationalEntityView extends EntityView {
         }
         super.maybeShowPopup(e, popupMenu);
     }
-
-    /**
-     * Change the display style of parameters for all methods.
-     *
-     * @param newStyle
-     *          the new display style
-     */
-    public void methodViewChange(ParametersViewStyle newStyle) {
-        for (TextBoxMethod tbm : methodsView)
-            ((Method) tbm.getAssociedComponent()).setParametersViewStyle(newStyle);
-    }
+//
+//    /**
+//     * Change the display style of parameters for all methods.
+//     *
+//     * @param newStyle
+//     *          the new display style
+//     */
+//    public void triggerViewChange(ParametersViewStyle newStyle) {
+//        for (TextBoxTrigger tbm : triggersView)
+//            ((Trigger) tbm.getAssociedComponent()).setParametersViewStyle(newStyle);
+//    }
 
     /**
      * Remove the attribute associated with TextBoxAttribute from model (UML).
@@ -351,22 +367,31 @@ public class RelationalEntityView extends EntityView {
     }
 
     /**
-     * Remove the method associated with TextBoxMethod from model (UML)
+     * Remove the trigger associated with TextBoxTrigger from model (UML)
      *
-     * @param tbMethod
-     *          the method to remove.
+     * @param tbTrigger
+     *          the trigger to remove.
      * @return true if component has been removed; false otherwise.
      */
-    public boolean removeMethod(TextBoxMethod tbMethod) {
-        return true;
+    public boolean removeTrigger(TextBoxTrigger tbTrigger) {
+        if (((RelationalEntity) component).removeTrigger((Trigger) tbTrigger
+                .getAssociedComponent())) {
+            component.notifyObservers();
+
+            updateHeight();
+
+            return true;
+        }
+
+        return false;
     }
 
     @Override
     public boolean removeTextBox(TextBox tb) {
         if (tb instanceof TextBoxAttribute)
             return removeAttribute((TextBoxAttribute) tb);
-        else if (tb instanceof TextBoxMethod)
-            return removeMethod((TextBoxMethod) tb);
+        else if (tb instanceof TextBoxTrigger)
+            return removeTrigger((TextBoxTrigger) tb);
         return false;
     }
 
@@ -380,6 +405,10 @@ public class RelationalEntityView extends EntityView {
                 case ADD_ATTRIBUTE_NO_EDIT:
                     addAttribute(((RelationalEntity) component).getLastAddedAttribute(), enable);
                     break;
+                case ADD_TRIGGER:
+                    enable = true;
+                case ADD_TRIGGER_NO_EDIT:
+                    addTrigger(((RelationalEntity) component).getLastAddedTrigger(), enable);
                 default:
                     super.update(observable, object);
                     break;
@@ -429,7 +458,7 @@ public class RelationalEntityView extends EntityView {
 
         // Item Only methods
         subMenu.add(
-                menuItemViewMethods = makeRadioButtonMenuItem("Only Methods",
+                menuItemViewTriggers = makeRadioButtonMenuItem("Only Methods",
                         "ViewMethods", groupView), 3);
 
         // Item Nothing
@@ -442,27 +471,27 @@ public class RelationalEntityView extends EntityView {
         subMenu = new JMenu("Methods View");
         subMenu.setIcon(PersonalizedIcon.createImageIcon(Slyum.ICON_PATH
                 + "eye.png"));
-        groupViewMethods = new ButtonGroup();
+        groupViewTriggers = new ButtonGroup();
 
-        menuItemMethodsDefault = makeRadioButtonMenuItem("Default",
-                "ViewMethodsDefault", groupViewMethods);
-        menuItemMethodsDefault.setSelected(true);
-        subMenu.add(menuItemMethodsDefault);
-
-        subMenu.add(
-                menuItemMethodsAll = makeRadioButtonMenuItem("Type and Name",
-                        "ViewTypeAndName", groupViewMethods), 1);
+        menuItemTriggersDefault = makeRadioButtonMenuItem("Default",
+                "ViewMethodsDefault", groupViewTriggers);
+        menuItemTriggersDefault.setSelected(true);
+        subMenu.add(menuItemTriggersDefault);
 
         subMenu.add(
-                menuItemMethodsType = makeRadioButtonMenuItem("Type", "ViewType",
-                        groupViewMethods), 2);
+                menuItemTriggersAll = makeRadioButtonMenuItem("Type and Name",
+                        "ViewTypeAndName", groupViewTriggers), 1);
 
         subMenu.add(
-                menuItemMethodsName = makeRadioButtonMenuItem("Name", "ViewName",
-                        groupViewMethods), 3);
+                menuItemTriggersType = makeRadioButtonMenuItem("Type", "ViewType",
+                        groupViewTriggers), 2);
 
-        subMenu.add(menuItemMethodsNothing = makeRadioButtonMenuItem("Nothing",
-                "ViewMethodNothing", groupViewMethods));
+        subMenu.add(
+                menuItemTriggersName = makeRadioButtonMenuItem("Name", "ViewName",
+                        groupViewTriggers), 3);
+
+        subMenu.add(menuItemTriggersNothing = makeRadioButtonMenuItem("Nothing",
+                "ViewMethodNothing", groupViewTriggers));
 
         popupMenu.add(subMenu);
         popupMenu.addSeparator();
@@ -470,15 +499,14 @@ public class RelationalEntityView extends EntityView {
 
     @Override
     protected void innerRegenerate() {
-        methodsView.clear();
+        triggersView.clear();
         attributesView.clear();
         for (RelationalAttribute a : ((RelationalEntity) component).getAttributes())
             addAttribute(a, false);
     }
 
     @Override
-    protected int paintTextBoxes(Graphics2D g2, Rectangle bounds,
-                                 int textboxHeight, int offset) {
+    protected int paintTextBoxes(Graphics2D g2, Rectangle bounds, int textboxHeight, int offset) { //TODO add keys here I think
 
         if (displayAttributes) {
             // draw attributs separator
@@ -497,7 +525,7 @@ public class RelationalEntityView extends EntityView {
             }
         }
 
-        if (displayMethods) {
+        if (displayTriggers) {
             // draw methods separator
             offset += 10;
             g2.setStroke(new BasicStroke(BORDER_WIDTH));
@@ -505,7 +533,7 @@ public class RelationalEntityView extends EntityView {
             g2.drawLine(bounds.x, offset, bounds.x + bounds.width, offset);
 
             // draw methods
-            for (final TextBoxMethod tb : methodsView) {
+            for (final TextBoxTrigger tb : triggersView) {
                 tb.setBounds(new Rectangle(bounds.x + 8, offset + 2, bounds.width - 15,
                         textboxHeight + 2));
                 tb.paintComponent(g2);
@@ -532,12 +560,12 @@ public class RelationalEntityView extends EntityView {
      *          the new display style
      */
     private void methodViewChangeClicked(ParametersViewStyle newStyle) {
-        if (pressedTextBox instanceof TextBoxMethod)
-            ((Method) pressedTextBox.getAssociedComponent())
-                    .setParametersViewStyle(newStyle);
-        else
-            for (RelationalEntityView ev : getSelectedRelationalEntityView(parent))
-                ev.methodViewChange(newStyle);
+//        if (pressedTextBox instanceof TextBoxMethod)
+//            ((Method) pressedTextBox.getAssociedComponent())
+//                    .setParametersViewStyle(newStyle);
+//        else
+//            for (RelationalEntityView ev : getSelectedRelationalEntityView(parent))
+//                ev.triggerViewChange(newStyle);
     }
 
     private void updateMenuItemMethodsView() {
@@ -547,19 +575,19 @@ public class RelationalEntityView extends EntityView {
         if (pressedTextBox == null) {
             // Check si toutes les méthodes des entités sélectionnées ont la même vue.
             List<RelationalEntityView> selected = getSelectedRelationalEntityView(parent);
-            List<TextBoxMethod> textbox = new LinkedList<>();
+            List<TextBoxTrigger> textbox = new LinkedList<>();
             for (RelationalEntityView view : selected)
-                textbox.addAll(view.methodsView);
+                textbox.addAll(view.triggersView);
 
             for (int i = 0; i < textbox.size() - 1; i++) {
-                Method current = (Method) textbox.get(i).getAssociedComponent();
-                Method next = (Method) textbox
+                Trigger current = (Trigger) textbox.get(i).getAssociedComponent();
+                Trigger next = (Trigger) textbox
                         .get(i + 1).getAssociedComponent();
-                if (!current.getConcretParametersViewStyle().equals(
+                /*if (!current.getConcretParametersViewStyle().equals(
                         next.getConcretParametersViewStyle())) {
-                    groupViewMethods.clearSelection();
+                    groupViewTriggers.clearSelection();
                     return;
-                }
+                }*/
             }
 
             if (textbox.size() > 0)
@@ -573,30 +601,30 @@ public class RelationalEntityView extends EntityView {
         if (newView != null) {
             switch (newView) {
                 case DEFAULT:
-                    itemToSelect = menuItemMethodsDefault;
+                    itemToSelect = menuItemTriggersDefault;
                     break;
                 case NAME:
-                    itemToSelect = menuItemMethodsName;
+                    itemToSelect = menuItemTriggersName;
                     break;
 
                 case NOTHING:
-                    itemToSelect = menuItemMethodsNothing;
+                    itemToSelect = menuItemTriggersNothing;
                     break;
 
                 case TYPE:
-                    itemToSelect = menuItemMethodsType;
+                    itemToSelect = menuItemTriggersType;
                     break;
 
                 case TYPE_AND_NAME:
-                    itemToSelect = menuItemMethodsAll;
+                    itemToSelect = menuItemTriggersAll;
                     break;
 
                 default:
-                    itemToSelect = menuItemMethodsAll;
+                    itemToSelect = menuItemTriggersAll;
                     break;
             }
 
-            groupViewMethods.setSelected(itemToSelect.getModel(), true);
+            groupViewTriggers.setSelected(itemToSelect.getModel(), true);
         }
     }
 
@@ -609,7 +637,7 @@ public class RelationalEntityView extends EntityView {
             RelationalEntityView view = selected.get(i), next = selected.get(i + 1);
             if (view.displayDefault != next.displayDefault
                     || view.displayAttributes != next.displayAttributes
-                    || view.displayMethods != next.displayMethods) {
+                    || view.displayTriggers != next.displayTriggers) {
                 groupView.clearSelection();
                 return;
             }
@@ -617,12 +645,12 @@ public class RelationalEntityView extends EntityView {
 
         if (displayDefault)
             menuItemToSelect = menuItemViewDefault;
-        else if (displayAttributes && displayMethods)
+        else if (displayAttributes && displayTriggers)
             menuItemToSelect = menuItemViewAll;
         else if (displayAttributes)
             menuItemToSelect = menuItemViewAttributes;
-        else if (displayMethods)
-            menuItemToSelect = menuItemViewMethods;
+        else if (displayTriggers)
+            menuItemToSelect = menuItemViewTriggers;
         else
             menuItemToSelect = menuItemViewNothing;
 

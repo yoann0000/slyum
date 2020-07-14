@@ -1,6 +1,6 @@
 package classDiagram.components;
 
-public class Trigger extends Type{
+public class Trigger extends Type {
     private TriggerType triggerType;
     private ActivationTime activationTime;
     private String procedure;
@@ -24,6 +24,13 @@ public class Trigger extends Type{
         this.triggerType = triggerType;
         this.activationTime = activationTime;
         this.procedure = procedure;
+    }
+
+    public Trigger(Trigger component) {
+        super(component.name);
+        this.triggerType = component.triggerType;
+        this.activationTime = component.activationTime;
+        this.procedure = component.procedure;
     }
 
     public TriggerType getTriggerType() {
@@ -51,16 +58,3 @@ public class Trigger extends Type{
     }
 }
 
-enum TriggerType {
-    FOR_EACH_ROW,
-    FOR_EACH_STATEMENT
-}
-
-enum ActivationTime {
-    AFTER_CREATION,
-    BEFORE_ALTER,
-    AFTER_ALTER,
-    BEFORE_DROP,
-    AFTER_DROP,
-    BEFORE_INSERT
-}

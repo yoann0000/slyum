@@ -1,6 +1,6 @@
 package utility;
 
-import classDiagram.components.Visibility;
+import classDiagram.components.*;
 import classDiagram.relationships.Multiplicity;
 import graphic.GraphicComponent;
 import java.awt.Color;
@@ -154,13 +154,10 @@ public class Utility {
 
   /**
    * Get a string representing the tag geometry in the XML structure.
-   * 
-   * @param depth
-   *          the number of tabs before each tags
+   *
    * @param bounds
    *          the bounds to put into XML tags
-   * @param baliseName
-   *          the name of the balise
+   *
    * @return the string representing a geometry tags with the bounds given.
    */
   public static Element boundsToXmlElement(Document doc, Rectangle bounds,
@@ -483,6 +480,16 @@ public class Utility {
     return cmb;
   }
 
+  public static JComboBox<String> getPkAttributeComboBox(RelationalEntity re, Key pk){
+    final JComboBox<String> cmb = new SComboBox<>();
+    for (RelationalAttribute ra : re.getAttributes()){
+      if(!pk.getKeyComponents().contains(ra)){
+        cmb.addItem(ra.getName());
+      }
+    }
+    return cmb;
+  }
+
   /**
    * Return a JComboBox containing all default visibilities.
    * 
@@ -494,8 +501,38 @@ public class Utility {
     for (int i = 0; i < list.length; i++)
       list[i] = Visibility.values()[i].getName();
 
-    return new SComboBox<String>(list);
+    return new SComboBox<>(list);
   }
+
+  /**
+   * Return a JComboBox containing all default trigger types.
+   *
+   * @return a JComboBox containing all default trigger types
+   */
+  public static JComboBox<String> getTriggerTypeComboBox() {
+    final String[] list = new String[TriggerType.values().length];
+
+    for (int i = 0; i < list.length; i++)
+      list[i] = TriggerType.values()[i].getName();
+
+    return new SComboBox<>(list);
+  }
+
+  /**
+   * Return a JComboBox containing all default trigger types.
+   *
+   * @return a JComboBox containing all default trigger types
+   */
+  public static JComboBox<String> getActivationTimeComboBox() {
+    final String[] list = new String[ActivationTime.values().length];
+
+    for (int i = 0; i < list.length; i++)
+      list[i] = ActivationTime.values()[i].getName();
+
+    return new SComboBox<>(list);
+  }
+
+
 
   /**
    * Grow rectangle in this way: x-size, y-size, width+size*2, height+size*2.

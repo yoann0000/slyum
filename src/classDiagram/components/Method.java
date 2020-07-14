@@ -234,9 +234,6 @@ public class Method
 
   /**
    * Get a String representing the Method.
-   *
-   * @param method
-   *          the method to convert to String
    * @param style
    *          the style of display for parameters
    * @return the string converted

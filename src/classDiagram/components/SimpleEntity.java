@@ -85,7 +85,7 @@ public class SimpleEntity extends Entity {
    * 
    * @param method
    *          the new method.
-   * @return
+   * @return if the add was successful
    */
   public boolean addMethod(Method method) {
     return addMethod(method, methods.size());

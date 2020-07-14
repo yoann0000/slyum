@@ -1,9 +1,10 @@
 package classDiagram.components;
 
-import change.BufferCreationAttribute;
 import change.BufferCreationRelAttribute;
+import change.BufferCreationTrigger;
 import change.Change;
 import swing.XMLParser;
+
 import java.util.LinkedList;
 
 public class RelationalEntity extends Entity{
@@ -11,7 +12,9 @@ public class RelationalEntity extends Entity{
     private final LinkedList<Key> foreignKeys = new LinkedList<>();
     private final LinkedList<Key> alternateKeys = new LinkedList<>();
     private LinkedList<RelationalAttribute> attributes = new LinkedList<>();
+    private LinkedList<Trigger> triggers = new LinkedList<>();
     private RelationalAttribute lastAddedAttribute;
+    private Trigger lastAddedTrigger;
 
     public RelationalEntity(String name) {
         super(name);
@@ -62,6 +65,15 @@ public class RelationalEntity extends Entity{
         return attributes;
     }
 
+    public RelationalAttribute getAttributeByName(String name) {
+        for (RelationalAttribute a : attributes){
+            if (a.getName().equals(name)){
+                return a;
+            }
+        }
+        return null;
+    }
+
     /**
      * Add a new attribute.
      *
@@ -108,6 +120,56 @@ public class RelationalEntity extends Entity{
             return false;
     }
 
+    public LinkedList<Trigger> getTriggers() {
+        return triggers;
+    }
+
+    /**
+     * Add a new trigger.
+     *
+     * @param trigger
+     *          the new trigger.
+     */
+    public void addTrigger(Trigger trigger) {
+        addTrigger(trigger, triggers.size());
+    }
+
+    /**
+     * Add a new trigger.
+     *
+     * @param trigger
+     *          the new trigger.
+     * @param index the position of the new trigger in the list.
+     */
+    public void addTrigger(Trigger trigger, int index) {
+        if (trigger == null)
+            throw new IllegalArgumentException("trigger is null");
+
+        triggers.add(index, trigger);
+        lastAddedTrigger = trigger;
+        int i = triggers.indexOf(trigger);
+        Change.push(new BufferCreationTrigger(this, trigger, true, i));
+        Change.push(new BufferCreationTrigger(this, trigger, false, i));
+
+        setChanged();
+    }
+
+    public boolean removeTrigger(Trigger trigger) {
+        if (trigger == null)
+            throw new IllegalArgumentException("attribute is null");
+
+        int i = triggers.indexOf(trigger);
+
+        if (triggers.remove(trigger)) {
+            Change.push(new BufferCreationTrigger(this, trigger, false, i));
+            Change.push(new BufferCreationTrigger(this, trigger, true, i));
+
+            setChanged();
+            return true;
+        } else
+            return false;
+    }
+
     public LinkedList<Key> getAllKeys() {
         LinkedList<Key> keyList = new LinkedList<>();
         keyList.add(primaryKey);
@@ -120,6 +182,10 @@ public class RelationalEntity extends Entity{
         moveComponentPosition(attributes, attribute, offset);
     }
 
+    public void moveTriggerPosition(Trigger trigger, int offset) {
+        moveComponentPosition(triggers, trigger, offset);
+    }
+
     @Override
     protected String getEntityType() {
         return XMLParser.EntityType.TABLE.toString();
@@ -127,5 +193,9 @@ public class RelationalEntity extends Entity{
 
     public RelationalAttribute getLastAddedAttribute() {
         return lastAddedAttribute;
+    }
+
+    public Trigger getLastAddedTrigger() {
+        return lastAddedTrigger;
     }
 }

@@ -652,20 +652,16 @@ public abstract class EntityView extends MovableComponent implements Observer, C
     FontMetrics metrics = g2.getFontMetrics(entityName.getEffectivFont());
     int textBoxHeight = metrics.getHeight();
 
-    bounds.height = computeHeight(classNameSize.height, stereotypeHeight,
-                                                        textBoxHeight);
+    bounds.height = computeHeight(classNameSize.height, stereotypeHeight, textBoxHeight);
     
     Rectangle bounds = getBounds();
 
     int offset = bounds.y + VERTICAL_SPACEMENT / 2;
-    int stereotypeLocationWidth = bounds.x
-                                  + (bounds.width - stereotypeSize.width) / 2;
+    int stereotypeLocationWidth = bounds.x + (bounds.width - stereotypeSize.width) / 2;
     
-    entityName.setBounds(new Rectangle(1, 1, bounds.width - 15,
-        textBoxHeight + 2));
+    entityName.setBounds(new Rectangle(1, 1, bounds.width - 15, textBoxHeight + 2));
     Rectangle entityNameBounds = entityName.getBounds();
-    int classNameLocationX = bounds.x + (bounds.width - entityNameBounds.width)
-                                        / 2;
+    int classNameLocationX = bounds.x + (bounds.width - entityNameBounds.width) / 2;
     
     // draw background
     g2.setPaint(background);

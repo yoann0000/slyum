@@ -5,14 +5,7 @@ import classDiagram.IComponentsObserver;
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
 import classDiagram.components.*;
-import classDiagram.relationships.Aggregation;
-import classDiagram.relationships.Association;
-import classDiagram.relationships.Binary;
-import classDiagram.relationships.Composition;
-import classDiagram.relationships.Dependency;
-import classDiagram.relationships.Inheritance;
-import classDiagram.relationships.InnerClass;
-import classDiagram.relationships.Multi;
+import classDiagram.relationships.*;
 import graphic.GraphicComponent;
 import graphic.GraphicView;
 import java.awt.Color;
@@ -375,6 +368,10 @@ public class HierarchicalView
     addAssociation(component, "resources/icon/association.png");
   }
 
+  public void addRelationalAssociation(RelAssociation component) {
+    addAssociation(component, "resources/icon/relAssociation.png");
+  }
+
   public void addClassEntity(ClassEntity component) {
     addNode(new NodeSimpleEntity(component, treeModel, tree,
         PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "class.png")),
@@ -551,6 +548,11 @@ public class HierarchicalView
   @Override
   public void notifyBinaryCreation(Binary component) {
     addBinary(component);
+  }
+
+  @Override
+  public void notifyRelationalAssociationCreation(RelAssociation component) {
+    addRelationalAssociation(component);
   }
 
   @Override

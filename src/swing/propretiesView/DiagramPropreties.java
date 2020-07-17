@@ -3,24 +3,23 @@ package swing.propretiesView;
 import classDiagram.ClassDiagram;
 import classDiagram.IDiagramComponent.UpdateMessage;
 import classDiagram.components.Method;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.GroupLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.*;
+
+import graphic.relations.RelationView;
+import swing.MultiViewManager;
 import swing.PanelClassDiagram;
+import swing.Slyum;
+import swing.slyumCustomizedComponents.FlatButton;
 import swing.slyumCustomizedComponents.SCheckBox;
 import swing.slyumCustomizedComponents.SComboBox;
+import utility.PersonalizedIcon;
+import utility.RelValidation.RelValidator;
 
 public class DiagramPropreties 
     extends GlobalPropreties 
@@ -50,20 +49,24 @@ public class DiagramPropreties
   }
 
   JPanel west = createJPanelInformations(),
-         panelInformations = createJPanelInformations();
+         panelInformations = createJPanelInformations(),
+          relValidator = createJPanelInformations();
   
   private final String ACTION_ENTITY_VIEW = "1",
                        ACTION_METHODS_VIEW = "2",
                        ACTION_VISIBLE_TYPE = "3",
-                       ACTION_VISIBLE_ENUM = "4";
+                       ACTION_VISIBLE_ENUM = "4",
+                       ACTION_VALIDATE = "5";
   
   private final SComboBox<ClassDiagram.ViewEntity> cbbEntityView;
   private final SComboBox<Method.ParametersViewStyle> cbbParametersView;
   private final SCheckBox chkDisplayTypes;
   private final SCheckBox chkViewEnum;
-  private final JTextArea txaDiagramsInformations;
+  private final JTextArea txaDiagramsInformations, txtRelVal;
   
   private boolean raiseEvent;
+
+  private final RelValidator rv = RelValidator.getInstance();
 
   private DiagramPropreties() {
     
@@ -134,6 +137,11 @@ public class DiagramPropreties
     lblInformationsTitle.setHorizontalTextPosition(JLabel.LEFT);
     lblInformationsTitle.setVerticalTextPosition(JLabel.BOTTOM);
     lblInformationsTitle.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 0));
+
+    JLabel lblRelValidator = new JLabel("Relational Diagram Validator");
+    lblInformationsTitle.setHorizontalTextPosition(JLabel.LEFT);
+    lblInformationsTitle.setVerticalTextPosition(JLabel.BOTTOM);
+    lblInformationsTitle.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 0));
     
     panelInformations.setBorder(null);
     
@@ -149,7 +157,35 @@ public class DiagramPropreties
         PanelClassDiagram.getInstance().getClassDiagram().setInformation(txaDiagramsInformations.getText());
       }
       
-    });    
+    });
+
+    relValidator.add(lblRelValidator);
+
+    txtRelVal = new JTextArea();
+    txtRelVal.setLineWrap(true);
+    txtRelVal.setWrapStyleWord(true);
+    txtRelVal.setEditable(false);
+
+    JScrollPane textAreaPaneRel = new JScrollPane(txtRelVal);
+    textAreaPaneRel.setPreferredSize(new Dimension(250, 0));
+    textAreaPaneRel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    textAreaPaneRel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+
+    relValidator.setBackground(null);
+    relValidator.add(textAreaPaneRel);
+
+    class ButtonValidate extends FlatButton {
+      public ButtonValidate() {
+        super("Validate Diagram", PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "check-mark.png"));
+        setActionCommand(ACTION_VALIDATE);
+        setMaximumSize(new Dimension(250, 100));
+        setHorizontalAlignment(SwingUtilities.LEFT);
+      }
+    }
+
+    ButtonValidate validateBtn = new ButtonValidate();
+    validateBtn.addActionListener(this);
+    relValidator.add(validateBtn);
     
     JScrollPane textAreaPane = new JScrollPane(txaDiagramsInformations);
     textAreaPane.setPreferredSize(new Dimension(250, 0));
@@ -160,17 +196,17 @@ public class DiagramPropreties
     pnlDiagramInformations.add(lblInformationsTitle);
     pnlDiagramInformations.add(panelInformations);
 
-    //TODO create stored procedures and views here
+    //TODO create validator here
 
     setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
     add(pnlDiagramProperties);
     add(Box.createHorizontalStrut(10));
     add(pnlDiagramInformations);
-    //add(Box.createHorizontalStrut(10));
-    //add(pnlRelInfo);
     add(Box.createHorizontalGlue());
     add(new JLabel("Select a component to see it's members"));
     add(Box.createHorizontalGlue());
+    add(relValidator);
+
   }
 
   @Override
@@ -182,7 +218,6 @@ public class DiagramPropreties
     if (p == null) return;
     ClassDiagram cd = p.getClassDiagram();
     if (cd == null) return;
-    
     switch (e.getActionCommand()) {
       case ACTION_ENTITY_VIEW:
         cd.setViewEntity(
@@ -202,6 +237,21 @@ public class DiagramPropreties
         cd.setVisibleType(chkDisplayTypes.isSelected());
         cd.notifyObservers();
         break;
+      case ACTION_VALIDATE:
+        if (MultiViewManager.getSelectedGraphicView().isRelational()){
+          rv.setClassDiagram(cd);
+          rv.validate();
+          if (rv.getErrors() == 0) {
+            txtRelVal.setForeground(Color.GREEN);
+            txtRelVal.setText("No Errors");
+          } else {
+            txtRelVal.setForeground(Color.RED);
+            txtRelVal.setText(rv.getErrorString());
+          }
+        } else {
+          txtRelVal.setForeground(Color.RED);
+          txtRelVal.setText("Select a relational view before validating");
+        }
     }
   }
 

@@ -3,8 +3,6 @@ package swing.propretiesView;
 import classDiagram.IDiagramComponent;
 import classDiagram.components.*;
 import classDiagram.verifyName.TypeName;
-import graphic.entity.ClassView;
-import swing.MultiViewManager;
 import swing.Slyum;
 import swing.slyumCustomizedComponents.FlatPanel;
 import swing.slyumCustomizedComponents.SButton;
@@ -227,7 +225,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
         }
     }
 
-    //TODO
+    //FIXME
     private class PKTableModel extends AbstractTableModel implements Observer, TableModelListener, MouseListener {
         private final String[] columnNames = {"Pk Attributes"};
 
@@ -236,11 +234,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
         private final HashMap<RelationalAttribute, Integer> mapIndex = new HashMap<>();
 
         public void addAttribute(RelationalAttribute attribute) {
-            data.add(new Object[] { attribute.getName(),
-                    attribute.getType().getName(),
-                    attribute.isUnique(),
-                    attribute.isNotNull()
-            });
+            data.add(new Object[] { attribute.getName()});
 
             attribute.addObserver(this);
             mapIndex.put(attribute, data.size() - 1);
@@ -358,7 +352,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
             attribute.notifyObservers();
             attribute.getType().notifyObservers();
 
-            attributesTable.addRowSelectionInterval(row, row);
+            keyAttributesTable.addRowSelectionInterval(row, row);
         }
 
         @Override
@@ -412,7 +406,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
                     trigger.getProcedure() });
 
             trigger.addObserver(this);
-            //trigger.addObserver((RelationalEntityProperties.ParametersTableModel) parametersTable.getModel());//FIXME
+            trigger.addObserver(triggerProcedure);//FIXME
             mapIndex.put(trigger, data.size() - 1);
 
             fireTableRowsInserted(0, data.size());
@@ -455,8 +449,8 @@ public class RelationalEntityProperties extends GlobalPropreties{
         }
 
         @Override
-        public boolean isCellEditable(int row, int col) {
-            Boolean isInterfaceEntityClass = currentObject.getClass()
+        public boolean isCellEditable(int row, int col) { //FIXME change this
+            boolean isInterfaceEntityClass = currentObject.getClass()
                     .equals(InterfaceEntity.class);
             boolean isConstructorClass = Utility.getKeysByValue(mapIndex, row)
                     .iterator().next().getClass()
@@ -478,14 +472,13 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
         @Override
         public void mousePressed(MouseEvent e) {
-            if (currentObject == null || !(currentObject instanceof SimpleEntity))
+            if (currentObject == null || !(currentObject instanceof RelationalEntity))
                 return;
 
             // Get the selected trigger
             final int index = triggerTable.getSelectionModel()
                     .getLeadSelectionIndex();
-            final Trigger trigger = Utility.getKeysByValue(mapIndex, index).iterator()
-                    .next();
+            final Trigger trigger = Utility.getKeysByValue(mapIndex, index).iterator().next();
 
             // Unselect all triggers
             for (final Trigger t : ((RelationalEntity) currentObject).getTriggers()) {
@@ -495,8 +488,9 @@ public class RelationalEntityProperties extends GlobalPropreties{
                 t.notifyObservers(IDiagramComponent.UpdateMessage.UNSELECT);
             }
 
-            // Select the selected method
+            // Select the selected trigger
             trigger.select();
+            triggerProcedure.setText(trigger.getProcedure());
             trigger.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
         }
 
@@ -585,6 +579,41 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
     }
 
+    private class TriggerProcedure extends JTextArea implements Observer {
+
+        private Trigger currentTrigger;
+
+        public TriggerProcedure() {
+            super();
+            this.setEditable(false);
+            this.setText("Select a Trigger to Edit");
+        }
+
+        public Trigger getCurrentTrigger() {
+            return currentTrigger;
+        }
+
+        @Override
+        public void update(Observable observable, Object o) {
+            if (o instanceof IDiagramComponent.UpdateMessage) {
+                switch ((IDiagramComponent.UpdateMessage) o) {
+                    case SELECT:
+                        currentTrigger = (Trigger) observable;
+                        this.setText(currentTrigger.getProcedure());
+                        this.setEditable(true);
+                        break;
+                    case UNSELECT:
+                        currentTrigger = null;
+                        this.setText("Select a Trigger to Edit");
+                        this.setEditable(false);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
     private final STable attributesTable, keyAttributesTable, triggerTable;
     private final JButton btnRemoveAttribute, btnUpAttribute, btnDownAttribute,
             btnUpPkAttribute, btnDownPkAttribute, btnRemovePkAttribute,
@@ -592,6 +621,8 @@ public class RelationalEntityProperties extends GlobalPropreties{
     private final JTextField textName = new TextFieldWithPrompt("", "Enter the entity's name"),
                                pkName = new TextFieldWithPrompt("","Enter the Primary key's name");
     private final JLabel pk = new JLabel();
+    private final JLabel proc = new JLabel();
+    private final TriggerProcedure triggerProcedure = new TriggerProcedure();
 
     public RelationalEntityProperties() {
         // Buttons for attributes.
@@ -697,7 +728,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
         {
             final JButton button = new SButton(
-                    PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "plus.png"),
+                    PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "plusKey.png"),
                     "Add");
             button.setAlignmentX(CENTER_ALIGNMENT);
             button.addActionListener(arg0 -> addPkAttribute(true));
@@ -987,6 +1018,42 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
         p.add(panel, BorderLayout.CENTER);
         p.add(panelButton, BorderLayout.EAST);
+        add(p);
+
+        p = new FlatPanel();
+        p.setAlignmentY(TOP_ALIGNMENT);
+        p.setLayout(new BorderLayout());
+        panel = createWhitePanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+
+
+        triggerProcedure.setLineWrap(true);
+        triggerProcedure.setWrapStyleWord(true);
+        triggerProcedure.addKeyListener(new KeyAdapter() {
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                change.Change.setHasChange(true);
+                Trigger trigger = triggerProcedure.getCurrentTrigger();
+                if(trigger != null)
+                    trigger.setProcedure(triggerProcedure.getText());
+            }
+
+
+
+        });
+
+        JScrollPane textAreaPane = new JScrollPane(triggerProcedure);
+        textAreaPane.setPreferredSize(new Dimension(250, 0));
+        textAreaPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        textAreaPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+
+        proc.setText("Trigger Procedure");
+        panel.add(proc);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(textAreaPane);
+
+        p.add(panel, BorderLayout.CENTER);
         add(p);
     }
 

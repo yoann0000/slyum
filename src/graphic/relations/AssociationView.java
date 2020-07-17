@@ -7,15 +7,12 @@ import classDiagram.relationships.Association.NavigateDirection;
 import graphic.GraphicView;
 import graphic.entity.EntityView;
 import graphic.textbox.TextBoxLabelTitle;
-import java.awt.Graphics2D;
-import java.awt.Point;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.Observable;
-import javax.swing.ButtonGroup;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 
 /**
  * The LineView class represent a collection of lines making a link between two
@@ -35,8 +32,8 @@ import javax.swing.JPopupMenu;
  */
 public abstract class AssociationView extends RelationView {
   protected Association association;
-  private ButtonGroup btnGrpNavigation;
-  private JMenuItem navBidirectional, navFirstToSecond, navSecondToFirst;
+  private final ButtonGroup btnGrpNavigation;
+  private final JMenuItem navBidirectional, navFirstToSecond, navSecondToFirst;
 
   public AssociationView(GraphicView parent, EntityView source,
           EntityView target, Association association, Point posSource,
@@ -63,6 +60,7 @@ public abstract class AssociationView extends RelationView {
 
     setMenuItemText();
   }
+
 
   @Override
   public void actionPerformed(ActionEvent e) {

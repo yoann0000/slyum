@@ -13,6 +13,7 @@ import swing.MultiViewManager;
 import swing.PanelClassDiagram;
 import swing.Slyum;
 import utility.PersonalizedIcon;
+import utility.Utility;
 
 import javax.swing.*;
 import java.awt.*;
@@ -69,7 +70,7 @@ public class RelationalEntityView extends EntityView {
     public RelationalEntityView(GraphicView parent, RelationalEntity component) {
        super(parent, component);
         initViewType();
-        addDefaultAttribute();
+        //addDefaultAttribute();
         addDefaultKey();
     }
 
@@ -149,11 +150,11 @@ public class RelationalEntityView extends EntityView {
     }
 
     private void addDefaultKey(){
-        RelationalAttribute re = ((RelationalEntity) component).getAttributeByName("id");
-        if(re == null)
-            throw new IllegalArgumentException("default id was not created");
+        RelationalEntity re = (RelationalEntity) component;
+        if(re.getPrimaryKey() != null)
+            return;
         final Key pk = new Key("ID", re);
-        ((RelationalEntity) component).setPrimaryKey(pk);
+        re.setPrimaryKey(pk);
     }
 
     /**
@@ -336,17 +337,6 @@ public class RelationalEntityView extends EntityView {
         }
         super.maybeShowPopup(e, popupMenu);
     }
-//
-//    /**
-//     * Change the display style of parameters for all methods.
-//     *
-//     * @param newStyle
-//     *          the new display style
-//     */
-//    public void triggerViewChange(ParametersViewStyle newStyle) {
-//        for (TextBoxTrigger tbm : triggersView)
-//            ((Trigger) tbm.getAssociedComponent()).setParametersViewStyle(newStyle);
-//    }
 
     /**
      * Remove the attribute associated with TextBoxAttribute from model (UML).
@@ -506,7 +496,8 @@ public class RelationalEntityView extends EntityView {
     }
 
     @Override
-    protected int paintTextBoxes(Graphics2D g2, Rectangle bounds, int textboxHeight, int offset) { //TODO add keys here I think
+    protected int paintTextBoxes(Graphics2D g2, Rectangle bounds,
+                                 int textboxHeight, int offset) { //TODO add keys here
 
         if (displayAttributes) {
             // draw attributs separator

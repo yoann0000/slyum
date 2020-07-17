@@ -4,14 +4,7 @@ import change.Change;
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
 import classDiagram.components.Entity;
-import classDiagram.relationships.Aggregation;
-import classDiagram.relationships.Binary;
-import classDiagram.relationships.Composition;
-import classDiagram.relationships.Dependency;
-import classDiagram.relationships.Inheritance;
-import classDiagram.relationships.InnerClass;
-import classDiagram.relationships.Relation;
-import classDiagram.relationships.RelationChanger;
+import classDiagram.relationships.*;
 import graphic.GraphicComponent;
 import graphic.GraphicView;
 import graphic.entity.EntityView;
@@ -64,7 +57,7 @@ public abstract class RelationView extends LineView implements Observer {
         if (source != null && target != null) {
           GraphicComponent gc = view.createAndAddRelation(relation, source, target);
           
-          if (gc != null && gc instanceof RelationView)
+          if (gc instanceof RelationView)
             ((RelationView)gc).center();
         }
       }
@@ -103,13 +96,16 @@ public abstract class RelationView extends LineView implements Observer {
     else if (relation.getClass() == InnerClass.class)
       return new InnerClassView(graphicView, source, target, (InnerClass)relation,
           pSourceCenter, pTargetCenter, false);
+    else if (relation.getClass() == RelAssociation.class)
+      return new RelAssociationView(graphicView, source, target, (RelAssociation)relation,
+              pSourceCenter, pTargetCenter, false);
     //else if (relation.getClass() == Multi.class)
      
     return null;
   }
   
   
-  private Relation relation;
+  protected Relation relation;
 
   public RelationView(GraphicView graphicView, 
                       GraphicComponent source,

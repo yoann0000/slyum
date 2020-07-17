@@ -17,7 +17,7 @@ public class TableFactory extends EntityFactory {
      */
     public TableFactory(GraphicView parent) {
         super(parent);
-        GraphicView.setButtonFactory(SPanelDiagramComponent.getInstance().getBtnClass());
+        GraphicView.setButtonFactory(SPanelDiagramComponent.getInstance().getBtnTable());
     }
 
     @Override

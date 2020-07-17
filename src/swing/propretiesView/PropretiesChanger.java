@@ -3,15 +3,8 @@ package swing.propretiesView;
 import classDiagram.IComponentsObserver;
 import classDiagram.IDiagramComponent;
 import classDiagram.components.*;
-import classDiagram.relationships.Aggregation;
-import classDiagram.relationships.Association;
-import classDiagram.relationships.Binary;
-import classDiagram.relationships.Composition;
-import classDiagram.relationships.Dependency;
-import classDiagram.relationships.Inheritance;
-import classDiagram.relationships.InnerClass;
-import classDiagram.relationships.Multi;
-import classDiagram.relationships.Role;
+import classDiagram.relationships.*;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -72,7 +65,6 @@ public class PropretiesChanger extends SScrollPane implements IComponentsObserve
     association.addObserver(RelationPropreties.getInstance());
 
     for (final Role role : association.getRoles())
-
       role.addObserver(RelationPropreties.getInstance());
   }
 
@@ -82,6 +74,13 @@ public class PropretiesChanger extends SScrollPane implements IComponentsObserve
 
   public void addBinary(Binary component) {
     addAssociation(component);
+  }
+
+  public void addRelationalAssociation(RelAssociation association) {
+    association.addObserver(RelationalRelationProperties.getInstance());
+
+    for (final Role role : association.getRoles())
+      role.addObserver(RelationalRelationProperties.getInstance());
   }
 
   public void addClassEntity(ClassEntity component) {
@@ -137,6 +136,11 @@ public class PropretiesChanger extends SScrollPane implements IComponentsObserve
   @Override
   public void notifyBinaryCreation(Binary component) {
     addBinary(component);
+  }
+
+  @Override
+  public void notifyRelationalAssociationCreation(RelAssociation component) {
+    addRelationalAssociation(component);
   }
 
   @Override

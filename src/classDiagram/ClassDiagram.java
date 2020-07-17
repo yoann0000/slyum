@@ -3,14 +3,7 @@ package classDiagram;
 import change.BufferDiagramComponentCreation;
 import change.Change;
 import classDiagram.components.*;
-import classDiagram.relationships.Aggregation;
-import classDiagram.relationships.Binary;
-import classDiagram.relationships.Composition;
-import classDiagram.relationships.Dependency;
-import classDiagram.relationships.Inheritance;
-import classDiagram.relationships.InnerClass;
-import classDiagram.relationships.Multi;
-import classDiagram.relationships.Relation;
+import classDiagram.relationships.*;
 import graphic.GraphicView;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,6 +85,18 @@ public class ClassDiagram extends Observable
       for (final IComponentsObserver c : observers)
         if (notifyGraphicView || !(c instanceof GraphicView))
           c.notifyBinaryCreation(component);
+  }
+
+  public void addRelAssociation(RelAssociation component) {
+    addRelAssociation(component, true);
+  }
+
+  public void addRelAssociation(RelAssociation component, boolean notifyGraphicView) {
+
+    if (addComponent(component))
+      for (final IComponentsObserver c : observers)
+        if (notifyGraphicView || !(c instanceof GraphicView))
+          c.notifyRelationalAssociationCreation(component);
   }
   
   public void addClassEntity(ClassEntity component) {

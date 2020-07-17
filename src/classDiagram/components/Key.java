@@ -13,14 +13,17 @@ import java.util.List;
 public class Key extends Type implements IDiagramComponent {
     protected final int id = ClassDiagram.getNextId();
     private final LinkedList<RelationalAttribute> keyComponents = new LinkedList<>();
+    private final RelationalEntity table;
 
-    public Key(String name) {
+    public Key(String name, RelationalEntity table) {
         super(name);
+        this.table = table;
     }
 
-    public Key(String name, RelationalAttribute attribute){
+    public Key(String name, RelationalAttribute attribute, RelationalEntity table){
         super(name);
         keyComponents.add(attribute);
+        this.table = table;
     }
 
     public LinkedList<RelationalAttribute> getKeyComponents() {
@@ -33,6 +36,26 @@ public class Key extends Type implements IDiagramComponent {
 
     public void removeKeyComponent(RelationalAttribute attribute) {
         keyComponents.remove(attribute);
+    }
+
+    public RelationalEntity getTable() {
+        return table;
+    }
+
+    public String getFullKeyString(boolean froeignKey) {
+        StringBuilder sb = new StringBuilder(name);
+        sb.append(" <");
+        if (!keyComponents.isEmpty()){
+            sb.append(keyComponents.get(0).getName());
+            for (int i = 1; i < keyComponents.size(); i++) {
+                sb.append(", ").append(keyComponents.get(i).getName());
+            }
+        }
+        sb.append(">");
+        if (froeignKey) {
+            sb.append(" [").append(table.getName()).append("]");
+        }
+        return sb.toString();
     }
 
     @Override

@@ -10,30 +10,12 @@ import classDiagram.IDiagramComponent;
 import classDiagram.INameObserver;
 import classDiagram.components.*;
 import classDiagram.components.Method.ParametersViewStyle;
-import classDiagram.relationships.Aggregation;
-import classDiagram.relationships.Binary;
-import classDiagram.relationships.Composition;
-import classDiagram.relationships.Dependency;
-import classDiagram.relationships.Inheritance;
-import classDiagram.relationships.InnerClass;
-import classDiagram.relationships.Multi;
-import classDiagram.relationships.Relation;
-import classDiagram.relationships.Role;
+import classDiagram.relationships.*;
 import graphic.entity.*;
 import graphic.export.ExportViewImage;
 import graphic.factory.CreateComponent;
 import graphic.factory.MultiFactory;
-import graphic.relations.AggregationView;
-import graphic.relations.BinaryView;
-import graphic.relations.CompositionView;
-import graphic.relations.DependencyView;
-import graphic.relations.InheritanceView;
-import graphic.relations.InnerClassView;
-import graphic.relations.LineCommentary;
-import graphic.relations.LineView;
-import graphic.relations.MultiLineView;
-import graphic.relations.MultiView;
-import graphic.relations.RelationView;
+import graphic.relations.*;
 import graphic.textbox.TextBoxCommentary;
 import graphic.textbox.TextBoxDiagramName;
 import java.awt.BasicStroke;
@@ -789,6 +771,27 @@ public class GraphicView extends GraphicComponent
           new BinaryView(this, source, target, component,
               source.middleBounds(), target.middleBounds(), false),
           linesView);
+    }
+  }
+
+  public void addRelAssociation(RelAssociation component) {
+    final GraphicComponent result = searchAssociedComponent(component);
+
+    if (result == null) {
+      final LinkedList<Role> roles = component.getRoles();
+      final EntityView source = (EntityView) searchAssociedComponent(roles
+              .getFirst().getEntity());
+      final EntityView target = (EntityView) searchAssociedComponent(roles
+              .getLast().getEntity());
+
+      // Are Components in this graphic view?
+      if (source == null || target == null)
+        return;
+
+      addComponentIn(
+              new RelAssociationView(this, source, target, component,
+                      source.middleBounds(), target.middleBounds(), false),
+              linesView);
     }
   }
 
@@ -2298,7 +2301,12 @@ public class GraphicView extends GraphicComponent
   public void notifyBinaryCreation(Binary component) {
     addBinary(component);
   }
-  
+
+  @Override
+  public void notifyRelationalAssociationCreation(RelAssociation component) {
+    addRelAssociation(component);
+  }
+
   @Override
   public void notifyClassEntityCreation(ClassEntity component) {
     if (MultiViewManager.getSelectedGraphicView() == this ||

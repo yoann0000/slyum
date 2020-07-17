@@ -5,11 +5,8 @@ import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
 import classDiagram.components.*;
 import classDiagram.components.Method.ParametersViewStyle;
+import classDiagram.relationships.*;
 import classDiagram.relationships.Association.NavigateDirection;
-import classDiagram.relationships.Binary;
-import classDiagram.relationships.Composition;
-import classDiagram.relationships.Multi;
-import classDiagram.relationships.Multiplicity;
 import classDiagram.verifyName.MethodName;
 import classDiagram.verifyName.SyntaxeNameException;
 import classDiagram.verifyName.TypeName;
@@ -47,8 +44,8 @@ import swing.propretiesView.DiagramPropreties;
  */
 public class XMLParser extends DefaultHandler {
   public enum Aggregation {
-    AGGREGATE, COMPOSE, MULTI, NONE
-  };
+    AGGREGATE, COMPOSE, MULTI, NONE, REL
+  }
 
   private class Association {
     int id = -1;
@@ -56,7 +53,7 @@ public class XMLParser extends DefaultHandler {
     Aggregation aggregation = Aggregation.NONE;
     NavigateDirection direction = NavigateDirection.BIDIRECTIONAL;
     String name = null;
-  };
+  }
 
   private class ClassDiagram {
     LinkedList<UMLView> uMLView = new LinkedList<>();
@@ -635,6 +632,10 @@ public class XMLParser extends DefaultHandler {
 
           ac = new Multi(entities, a.id);
           classDiagram.addMulti((Multi) ac);
+          break;
+        case REL:
+          ac = new RelAssociation(source, target, a.direction, a.id);
+          classDiagram.addRelAssociation((RelAssociation) ac);
           break;
       }
 

@@ -46,9 +46,6 @@ public class TextBoxRelAttribute extends TextBox implements Observer {
     public TextBoxRelAttribute(GraphicView parent, RelationalAttribute attribute) {
         super(parent, getStringFromAttribute(attribute));
 
-        if (attribute == null)
-            throw new IllegalArgumentException("attribute is null");
-
         this.attribute = attribute;
         attribute.addObserver(this);
     }

@@ -1,13 +1,7 @@
 package classDiagram;
 
 import classDiagram.components.*;
-import classDiagram.relationships.Aggregation;
-import classDiagram.relationships.Binary;
-import classDiagram.relationships.Composition;
-import classDiagram.relationships.Dependency;
-import classDiagram.relationships.Inheritance;
-import classDiagram.relationships.InnerClass;
-import classDiagram.relationships.Multi;
+import classDiagram.relationships.*;
 
 /**
  * Interface implemented by all listeners of class diagram. When the class
@@ -43,6 +37,14 @@ public interface IComponentsObserver {
    *          the component that was added.
    */
   public void notifyBinaryCreation(Binary component);
+
+  /**
+   * Adds a new relational association and notify that a new relational association has been added.
+   *
+   * @param component
+   *          the component that was added.
+   */
+  public void notifyRelationalAssociationCreation(RelAssociation component);
 
   /**
    * Adds a new class and notify that a new class has been added.

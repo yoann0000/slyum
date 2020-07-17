@@ -22,9 +22,9 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
   public enum Mode {
     CURSOR(getInstance().btnCursorMode), GRIP(getInstance().btnGripMode);
 
-    private SButton btnMode;
+    private final SButton btnMode;
 
-    private Mode(SButton btn) {
+    Mode(SButton btn) {
       btnMode = btn;
     }
 
@@ -79,16 +79,16 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
           + Utility.keystrokeToString(Slyum.KEY_LINK_NOTE);
 
   private static final String TT_REL_TABLE = "Table "
-          + Utility.keystrokeToString(Slyum.KEY_TABLE);//TODO make sure key works
+          + Utility.keystrokeToString(Slyum.KEY_TABLE);
 
   private static final String TT_REL_ASSOCIATION = "Relational association "
-          + Utility.keystrokeToString(Slyum.KEY_ASSOCIATION);//TODO change to new key
+          + Utility.keystrokeToString(Slyum.KEY_REL_ASSOCIATION);
 
   private static final String TT_VIEW = "View "
           + Utility.keystrokeToString(Slyum.KEY_ENUM);//TODO change to new key
 
 
-  private SButton btnCursorMode, btnGripMode, btnClass, btnEnum, btnInterface,
+  private final SButton btnCursorMode, btnGripMode, btnClass, btnEnum, btnInterface,
           btnClassAssociation, btnGeneralize, btnDependeny, btnInnerClass,
           btnAssociation, btnAggregation, btnComposition, btnMulti, btnNote,
           btnLinkNote, btnTable, btnAssocRel, btnView;
@@ -160,9 +160,8 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
             Slyum.ACTION_NEW_ENUM, Color.RED, TT_VIEW));
 
     add(btnAssocRel = createSButton(
-            PersonalizedIcon.createImageIcon(Slyum.ICON_PATH
-                    + "relAssociation.png"), Slyum.ACTION_NEW_ASSOCIATION,
-            Color.RED, TT_REL_ASSOCIATION));
+            PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "relAssociation.png"),
+            Slyum.ACTION_NEW_REL_ASSOCIATION, Color.RED, TT_REL_ASSOCIATION));
 
     btnTable.setEnabled(false);
     btnAssocRel.setEnabled(false);
@@ -264,6 +263,9 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
       case Slyum.ACTION_NEW_TABLE:
         gv.initNewComponent(new TableFactory(gv));
         break;
+      case Slyum.ACTION_NEW_REL_ASSOCIATION:
+        gv.initNewComponent(new RelAssociationFactory(gv));
+        break;
       case Slyum.ACTION_NEW_CLASS:
         gv.initNewComponent(new ClassFactory(gv));
         break;
@@ -362,5 +364,13 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
 
   public SButton getBtnEnum() {
     return btnEnum;
+  }
+
+  public SButton getBtnTable() {
+    return btnTable;
+  }
+
+  public SButton getBtnAssocRel() {
+    return btnAssocRel;
   }
 }

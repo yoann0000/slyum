@@ -50,7 +50,7 @@ public class RelAssociationView extends AssociationView {
     }
 
     public void addFk() {
-        if (relation.getSource() instanceof RelationalEntity && relation.getSource() instanceof RelationalEntity){
+        if (relation.getSource() instanceof RelationalEntity && relation.getTarget() instanceof RelationalEntity){
             RelationalEntity sourceEntity = (RelationalEntity) relation.getSource();
             RelationalEntity targetEntity = (RelationalEntity) relation.getTarget();
             Association.NavigateDirection direction = ((RelAssociation) relation).getDirected();
@@ -103,7 +103,7 @@ public class RelAssociationView extends AssociationView {
     }
 
     private void deleteFKs() {
-        if (relation.getSource() instanceof RelationalEntity && relation.getSource() instanceof RelationalEntity){
+        if (relation.getSource() instanceof RelationalEntity && relation.getTarget() instanceof RelationalEntity){
             RelationalEntity sourceEntity = (RelationalEntity) relation.getSource();
             RelationalEntity targetEntity = (RelationalEntity) relation.getTarget();
             sourceEntity.getForeignKeys().remove(targetEntity.getPrimaryKey());

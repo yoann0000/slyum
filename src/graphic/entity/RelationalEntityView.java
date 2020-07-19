@@ -658,8 +658,7 @@ public class RelationalEntityView extends EntityView {
 
     protected void restoreEntity() {
         if (parent.getClassDiagram().searchComponentById(getAssociedComponent().getId()) == null)
-            parent.getClassDiagram().addTableEntity(
-                    (RelationalEntity) getAssociedComponent());
+            parent.getClassDiagram().addTableEntity((RelationalEntity) getAssociedComponent());
     }
 
 }

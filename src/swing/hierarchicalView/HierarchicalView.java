@@ -370,6 +370,9 @@ public class HierarchicalView
 
   public void addRelationalAssociation(RelAssociation component) {
     addAssociation(component, "resources/icon/relAssociation.png");
+    ((NodeEntity)searchAssociedNode(component.getSource())).reloadChildsNodes();
+    ((NodeEntity)searchAssociedNode(component.getTarget())).reloadChildsNodes();
+
   }
 
   public void addClassEntity(ClassEntity component) {
@@ -382,6 +385,11 @@ public class HierarchicalView
     addNode(new NodeRelationalEntity(component, treeModel, tree,
                     PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "tableRel.png")),
             entitiesNode);
+  }
+
+  public void addRelViewEntity(RelViewEntity component) {
+    addNode(new NodeViewEntity(component, treeModel, tree,
+                    PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "view.png")), entitiesNode);
   }
 
   public void addComposition(Composition component) {
@@ -564,6 +572,12 @@ public class HierarchicalView
   public void notifyRelationalEntityCreation(RelationalEntity component) {
     addRelationalEntity(component);
   }
+
+  @Override
+  public void notifyRelViewCreation(RelViewEntity component) {
+    addRelViewEntity(component);
+  }
+
 
   @Override
   public void notifyCompositionCreation(Composition component) {

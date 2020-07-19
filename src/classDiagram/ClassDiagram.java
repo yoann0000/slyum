@@ -127,6 +127,19 @@ public class ClassDiagram extends Observable
     }
   }
 
+  public void addRelViewEntity(RelViewEntity component) {
+    addRelViewEntity(component, true);
+  }
+
+  public void addRelViewEntity(RelViewEntity component, boolean notifyGraphicView) {
+    if(addComponent(component)) {
+      for (final IComponentsObserver c : observers)
+        if (notifyGraphicView || !(c instanceof GraphicView))
+          c.notifyRelViewCreation(component);
+      entities.addFirst(component);
+    }
+  }
+
   /**
    * Add a new observer who will be notified when the class diagram changed.
    * 

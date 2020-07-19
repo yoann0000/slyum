@@ -83,6 +83,7 @@ public class Slyum extends JFrame implements ActionListener {
   public static final String ACTION_NEW_PROJECT = "NewProject";
   public static final String ACTION_NEW_REL_ASSOCIATION = "NewRelAssociation";
   public static final String ACTION_NEW_TABLE = "NewTable";
+  public static final String ACTION_NEW_REL_VIEW = "NewRelView";
   public static final String ACTION_OPEN = "Open";
   public static final String ACTION_OPEN_RECENT_RPOJECT = "openRecentProject";
   public static final String ACTION_OPEN_VIEW = "openView";
@@ -149,6 +150,7 @@ public class Slyum extends JFrame implements ActionListener {
   public static final String KEY_CLASS = "C";
   public static final String KEY_TABLE = "T";
   public static final String KEY_REL_ASSOCIATION = "ctrl R";
+  public static final String KEY_REL_VIEW = "V";
   
   public final static String KEY_CLOSE_VIEW = "ctrl W";
   public static final String KEY_COLOR = "ctrl L";

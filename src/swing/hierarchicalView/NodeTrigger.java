@@ -2,6 +2,7 @@ package swing.hierarchicalView;
 
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
+import classDiagram.components.Method;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.ImageIcon;
@@ -9,56 +10,49 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import classDiagram.components.Key;
+import classDiagram.components.Trigger;
 import swing.PanelClassDiagram;
-import swing.Slyum;
 import swing.hierarchicalView.HierarchicalView.STree;
-import utility.PersonalizedIcon;
 
-public class NodeKey
-        extends DefaultMutableTreeNode
-        implements ICustomizedIconNode, Observer, IClassDiagramNode {
-    private final Key key;
+@SuppressWarnings("serial")
+public class NodeTrigger extends DefaultMutableTreeNode implements Observer, IClassDiagramNode, ICustomizedIconNode {
+    private final Trigger trigger;
     private final STree tree;
     private final DefaultTreeModel treeModel;
-    private final int keyType;
 
     /**
-     * Create a new node associated with a key.
+     * Create a new node associated with a trigger.
      *
-     * @param key
-     *          the key associated
+     * @param trigger
+     *          the attribute trigger
      * @param treeModel
      *          the model of the JTree
      * @param tree
      *          the JTree
-     * @param keyType
-     *          the type of key (0 -> primarykey, 1 -> foreign key, 2 -> alternate key)
      */
-    public NodeKey(Key key, DefaultTreeModel treeModel, STree tree, int keyType) {
-        super(key.nodeKeyName(keyType));
+    public NodeTrigger(Trigger trigger, DefaultTreeModel treeModel, STree tree) {
+        super(trigger.getName());
 
         if (treeModel == null)
             throw new IllegalArgumentException("treeModel is null");
 
         if (tree == null) throw new IllegalArgumentException("tree is null");
 
-        this.key = key;
+        this.trigger = trigger;
         this.treeModel = treeModel;
         this.tree = tree;
-        this.keyType = keyType;
 
-        key.addObserver(this);
+        trigger.addObserver(this);
     }
 
     @Override
     public IDiagramComponent getAssociedComponent() {
-        return key;
+        return trigger;
     }
 
     @Override
     public ImageIcon getCustomizedIcon() {
-        return PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "key.png");
+        return trigger.getImageIcon();
     }
 
     @Override
@@ -68,8 +62,9 @@ public class NodeKey
 
             switch ((UpdateMessage) o) {
                 case SELECT:
-                    if (!PanelClassDiagram.getInstance().isDisabledUpdate())
+                    if (!PanelClassDiagram.getInstance().isDisabledUpdate()) {
                         tree.addSelectionPathNoFire(path);
+                    }
                     break;
                 case UNSELECT:
                     tree.removeSelectionPathNoFire(path);
@@ -78,7 +73,7 @@ public class NodeKey
                     break;
             }
         } else {
-            setUserObject(key.nodeKeyName(keyType));
+            setUserObject(trigger.getName());
             treeModel.reload(this);
         }
     }

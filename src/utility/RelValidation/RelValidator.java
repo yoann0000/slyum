@@ -3,6 +3,7 @@ package utility.RelValidation;
 import classDiagram.ClassDiagram;
 import classDiagram.IDiagramComponent;
 import classDiagram.components.*;
+import classDiagram.relationships.Association;
 import classDiagram.relationships.RelAssociation;
 
 import java.util.*;
@@ -29,26 +30,46 @@ public class RelValidator {
         errorString = "";
         LinkedList<IDiagramComponent> components = classDiagram.getComponents();
         LinkedList<RelationalEntity> re = new LinkedList<>();
-        LinkedList<View> views = new LinkedList<>();
+        LinkedList<RelViewEntity> views = new LinkedList<>();
         LinkedList<RelAssociation> ra = new LinkedList<>();
-        for (IDiagramComponent component : components) {
-            if (component instanceof RelationalEntity) {
-                re.add((RelationalEntity) component);
-            } else if (component instanceof View){
-                views.add((View) component);
-            } else if (component instanceof RelAssociation) {
-                ra.add((RelAssociation) component);
-            } else {
-                //TODO verify no non relational components are present
-                System.out.println("TODO");
-            }
-        }
 
         StringBuilder sb = new StringBuilder();
         int previousErrors = 0;
+
+        for (IDiagramComponent component : components) {
+            if (component instanceof RelationalEntity) {
+                re.add((RelationalEntity) component);
+            } else if (component instanceof RelViewEntity){
+                views.add((RelViewEntity) component);
+            } else if (component instanceof RelAssociation) {
+                ra.add((RelAssociation) component);
+            } else if (component instanceof ClassEntity) {
+                sb.append("Class ").append(((ClassEntity) component).getName())
+                        .append(" should not be in a relational diagram\n");
+                errors++;
+            } else if (component instanceof EnumEntity) {
+                sb.append("Enum ").append(((EnumEntity) component).getName())
+                        .append(" should not be in a relational diagram\n");
+                errors++;
+            } else if (component instanceof Association) {
+                sb.append("Association ").append(((Association) component).getName())
+                        .append(" should not be in a relational diagram\n");
+                errors++;
+            }
+        }
+
+        LinkedList<String> reNames = new LinkedList<>();
+
         for (RelationalEntity entity : re) {
             previousErrors = errors;
             sb.append("Table ").append(entity.getName()).append(" :\n");
+
+            if (reNames.contains(entity.getName())){
+                sb.append("There is already a table called ").append(entity.getName()).append("\n");
+                errors++;
+            }
+            reNames.add(entity.getName());
+
             validateEntity(entity, sb);
             if (errors == previousErrors){
                 sb.append("None\n");

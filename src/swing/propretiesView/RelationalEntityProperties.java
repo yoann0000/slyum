@@ -27,7 +27,7 @@ import java.util.*;
 
 public class RelationalEntityProperties extends GlobalPropreties{
 
-    private static RelationalEntityProperties instance = new RelationalEntityProperties();
+    private static final RelationalEntityProperties instance = new RelationalEntityProperties();
 
     public static RelationalEntityProperties getInstance() {
         return instance;
@@ -205,6 +205,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
                             btnRemoveAttribute.setEnabled(true);
                             btnUpAttribute.setEnabled(index > 0);
                             btnDownAttribute.setEnabled(index < mapIndex.size() - 1);
+                            btnAddAttributeToPk.setEnabled(true);
                             showInProperties();
                             attributesTable.addRowSelectionInterval(index, index);
                             attributesTable.scrollRectToVisible(attributesTable.getCellRect(
@@ -615,7 +616,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
     }
 
     private final STable attributesTable, keyAttributesTable, triggerTable;
-    private final JButton btnRemoveAttribute, btnUpAttribute, btnDownAttribute,
+    private final JButton btnRemoveAttribute, btnUpAttribute, btnDownAttribute, btnAddAttributeToPk,
             btnUpPkAttribute, btnDownPkAttribute, btnRemovePkAttribute,
             btnUpTrigger, btnDownTrigger, btnRemoveTrigger;
     private final JTextField textName = new TextFieldWithPrompt("", "Enter the entity's name"),
@@ -627,38 +628,32 @@ public class RelationalEntityProperties extends GlobalPropreties{
     public RelationalEntityProperties() {
         // Buttons for attributes.
         btnUpAttribute = new SButton(
-                PersonalizedIcon.createImageIcon(
-                        Slyum.ICON_PATH + "arrow-up-24.png"), "Up");
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-up-24.png"), "Up");
         btnDownAttribute = new SButton(
-                PersonalizedIcon.createImageIcon(
-                        Slyum.ICON_PATH + "arrow-down-24.png"), "Down");
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-down-24.png"), "Down");
         btnRemoveAttribute = new SButton(
-                PersonalizedIcon.createImageIcon(
-                        Slyum.ICON_PATH + "minus.png"), "Remove");
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "minus.png"), "Remove");
+        btnAddAttributeToPk = new SButton(
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "plusKey.png"), "Add to Pk");
+
 
         // Buttons for pk attributes.
         btnUpPkAttribute = new SButton(
-                PersonalizedIcon.createImageIcon(
-                        Slyum.ICON_PATH + "arrow-up-24.png"), "Up");
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-up-24.png"), "Up");
         btnDownPkAttribute = new SButton(
-                PersonalizedIcon.createImageIcon(
-                        Slyum.ICON_PATH + "arrow-down-24.png"), "Down");
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-down-24.png"), "Down");
         btnRemovePkAttribute = new SButton(
-                PersonalizedIcon.createImageIcon(
-                        Slyum.ICON_PATH + "minus.png"), "Remove");
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "minus.png"), "Remove");
 
         btnUpTrigger = new SButton(
-                PersonalizedIcon.createImageIcon(
-                        Slyum.ICON_PATH + "arrow-up-24.png"), "Up");
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-up-24.png"), "Up");
         btnDownTrigger = new SButton(
-                PersonalizedIcon.createImageIcon(
-                        Slyum.ICON_PATH + "arrow-down-24.png"), "Down");
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-down-24.png"), "Down");
         btnRemoveTrigger = new SButton(
-                PersonalizedIcon.createImageIcon(
-                        Slyum.ICON_PATH + "minus.png"), "Remove");
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "minus.png"), "Remove");
 
-        attributesTable = new STable(new RelationalEntityProperties.AttributeTableModel(), ()
-                -> addAttribute(false));
+        attributesTable = new STable(new RelationalEntityProperties.AttributeTableModel(),
+                () -> addAttribute(false));
         attributesTable.setEmptyText("No attribute");
         attributesTable.setPreferredScrollableViewportSize(new Dimension(200, 0));
 
@@ -725,16 +720,6 @@ public class RelationalEntityProperties extends GlobalPropreties{
         JPanel panelButton = new JPanel();
         panelButton.setOpaque(false);
         panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.PAGE_AXIS));
-
-        {
-            final JButton button = new SButton(
-                    PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "plusKey.png"),
-                    "Add");
-            button.setAlignmentX(CENTER_ALIGNMENT);
-            button.addActionListener(arg0 -> addPkAttribute(true));
-
-            panelButton.add(button);
-        }
 
         {
             btnUpPkAttribute.setAlignmentX(CENTER_ALIGNMENT);
@@ -912,6 +897,26 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
             panelButton.add(btnRemoveAttribute);
 
+        }
+
+        {
+            btnAddAttributeToPk.setAlignmentX(CENTER_ALIGNMENT);
+            btnAddAttributeToPk.setEnabled(false);
+            btnAddAttributeToPk.addActionListener(arg0 -> {
+                // Get the selected attribute
+                final int index = attributesTable.getSelectionModel().getLeadSelectionIndex();
+                RelationalAttribute attribute = Utility
+                        .getKeysByValue(
+                                ((RelationalEntityProperties.AttributeTableModel) attributesTable.getModel())
+                                        .getMapIndex(), index).iterator().next();
+
+                if (!(((RelationalEntity) currentObject).getPrimaryKey().getKeyComponents().contains(attribute))) {
+                    ((RelationalEntity) currentObject).getPrimaryKey().addKeyComponent(attribute);
+                    ((RelationalEntity) currentObject).notifyObservers(IDiagramComponent.UpdateMessage.ADD_PK_ATTRIBUTE_NO_EDIT);
+                }
+            });
+
+            panelButton.add(btnAddAttributeToPk);
         }
 
         p.add(panel, BorderLayout.CENTER);
@@ -1150,8 +1155,12 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
     private void stopEditingTables() {
         TableCellEditor a = attributesTable.getCellEditor();
+        TableCellEditor pk = keyAttributesTable.getCellEditor();
+        TableCellEditor t = triggerTable.getCellEditor();
 
         if (a != null) a.stopCellEditing();
+        if (pk != null) pk.stopCellEditing();
+        if (t != null) t.stopCellEditing();
     }
 
     @Override

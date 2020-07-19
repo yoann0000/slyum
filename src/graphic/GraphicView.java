@@ -807,6 +807,12 @@ public class GraphicView extends GraphicComponent
       addEntity(new RelationalEntityView(this, component));
   }
 
+  public void addRelViewEntity(RelViewEntity component) {
+    GraphicComponent result = searchAssociedComponent(component);
+    if (result == null)
+      addEntity(new RelViewEntityView(this, component));
+  }
+
   public <T extends GraphicComponent> boolean addComponentIn(T component, LinkedList<T> list) {
     if (component == null)
       throw new IllegalArgumentException("component is null");
@@ -2319,6 +2325,13 @@ public class GraphicView extends GraphicComponent
     if (MultiViewManager.getSelectedGraphicView() == this ||
             PanelClassDiagram.getInstance().isXmlImportation())
       addTableEntity(component);
+  }
+
+  @Override
+  public void notifyRelViewCreation(RelViewEntity component) {
+    if (MultiViewManager.getSelectedGraphicView() == this ||
+            PanelClassDiagram.getInstance().isXmlImportation())
+      addRelViewEntity(component);
   }
 
   @Override

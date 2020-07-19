@@ -58,6 +58,19 @@ public class Key extends Type implements IDiagramComponent {
         return sb.toString();
     }
 
+    public String nodeKeyName(int keyType) {
+        switch (keyType){
+            case 0:
+                return name + " <PK>";
+            case 1:
+                return name + " <FK " + table.getName() + ">";
+            case 2:
+                return name + " <AK>";
+            default:
+                return name;
+        }
+    }
+
     @Override
     public int getId() {
         return id;

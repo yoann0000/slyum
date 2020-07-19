@@ -1,5 +1,10 @@
 package classDiagram.components;
 
+import swing.Slyum;
+import utility.PersonalizedIcon;
+
+import javax.swing.*;
+
 public class Trigger extends Type {
     private TriggerType triggerType;
     private ActivationTime activationTime;
@@ -55,6 +60,11 @@ public class Trigger extends Type {
 
     public void setProcedure(String procedure) {
         this.procedure = procedure;
+    }
+
+
+    public ImageIcon getImageIcon() {
+        return PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "method.png");
     }
 }
 

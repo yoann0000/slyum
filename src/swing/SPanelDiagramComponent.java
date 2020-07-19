@@ -1,5 +1,6 @@
 package swing;
 
+import classDiagram.components.RelViewEntity;
 import graphic.GraphicView;
 import graphic.factory.*;
 
@@ -85,7 +86,7 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
           + Utility.keystrokeToString(Slyum.KEY_REL_ASSOCIATION);
 
   private static final String TT_VIEW = "View "
-          + Utility.keystrokeToString(Slyum.KEY_ENUM);//TODO change to new key
+          + Utility.keystrokeToString(Slyum.KEY_REL_VIEW);
 
 
   private final SButton btnCursorMode, btnGripMode, btnClass, btnEnum, btnInterface,
@@ -150,14 +151,14 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
             Slyum.ACTION_NEW_INNER_CLASS, Color.RED, TT_INNER_CLASS));
 
     add(new SSeparator());
-    //TODO MORE BUTTONS!!! & fix button actions
+    
     add(btnTable = createSButton(
             PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "tableRel.png"),
             Slyum.ACTION_NEW_TABLE, Color.RED, TT_REL_TABLE));
 
     add(btnView = createSButton(
             PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "view.png"),
-            Slyum.ACTION_NEW_ENUM, Color.RED, TT_VIEW));
+            Slyum.ACTION_NEW_REL_VIEW, Color.RED, TT_VIEW));
 
     add(btnAssocRel = createSButton(
             PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "relAssociation.png"),
@@ -265,6 +266,9 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
         break;
       case Slyum.ACTION_NEW_REL_ASSOCIATION:
         gv.initNewComponent(new RelAssociationFactory(gv));
+        break;
+      case Slyum.ACTION_NEW_REL_VIEW:
+        gv.initNewComponent(new RelViewFactory(gv));
         break;
       case Slyum.ACTION_NEW_CLASS:
         gv.initNewComponent(new ClassFactory(gv));

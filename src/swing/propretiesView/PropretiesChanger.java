@@ -91,6 +91,10 @@ public class PropretiesChanger extends SScrollPane implements IComponentsObserve
     component.addObserver(RelationalEntityProperties.getInstance());
   }
 
+  public void addRelViewEntity(RelViewEntity component) {
+    component.addObserver(RelViewEntityProperties.getInstance());
+  }
+
   public void addEnumEntity(EnumEntity component) {
     component.addObserver(EnumEntityPropreties.getInstance());
   }
@@ -151,6 +155,11 @@ public class PropretiesChanger extends SScrollPane implements IComponentsObserve
   @Override
   public void notifyRelationalEntityCreation(RelationalEntity component) {
     addRelationalEntity(component);
+  }
+
+  @Override
+  public void notifyRelViewCreation(RelViewEntity component) {
+    addRelViewEntity(component);
   }
 
   @Override

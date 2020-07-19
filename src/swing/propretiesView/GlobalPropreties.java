@@ -24,7 +24,7 @@ import utility.PersonalizedIcon;
  */
 public abstract class GlobalPropreties extends JPanel implements Observer {
 
-  class ButtonChangeOrientation extends FlatButton {
+  static class ButtonChangeOrientation extends FlatButton {
 
     public ButtonChangeOrientation() {
       super("Change orientation", PersonalizedIcon

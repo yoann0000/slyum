@@ -3,36 +3,26 @@ package graphic.entity;
 import classDiagram.ClassDiagram.ViewEntity;
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
-import classDiagram.components.Attribute;
-import classDiagram.components.ConstructorMethod;
-import classDiagram.components.Method;
+import classDiagram.components.*;
 import classDiagram.components.Method.ParametersViewStyle;
-import classDiagram.components.PrimitiveType;
-import classDiagram.components.SimpleEntity;
-import classDiagram.components.Visibility;
-import graphic.GraphicComponent;
 import graphic.GraphicView;
 import graphic.textbox.TextBox;
 import graphic.textbox.TextBoxAttribute;
 import graphic.textbox.TextBoxMethod;
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Observable;
-import javax.swing.ButtonGroup;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import swing.MultiViewManager;
 import swing.PanelClassDiagram;
 import swing.Slyum;
 import utility.PersonalizedIcon;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Observable;
 
 public abstract class SimpleEntityView extends EntityView {
 
@@ -139,11 +129,11 @@ public abstract class SimpleEntityView extends EntityView {
       int offset = 1;
       if (Slyum.ACTION_TEXTBOX_UP.equals(e.getActionCommand())) offset = -1;
       if (pressedTextBox.getClass() == TextBoxAttribute.class) {
-        final Attribute attribute = (Attribute) ((TextBoxAttribute) pressedTextBox)
+        final Attribute attribute = (Attribute) pressedTextBox
             .getAssociedComponent();
         ((SimpleEntity) component).moveAttributePosition(attribute, offset);
       } else if (pressedTextBox.getClass() == TextBoxMethod.class) {
-        final Method method = (Method) ((TextBoxMethod) pressedTextBox)
+        final Method method = (Method) pressedTextBox
             .getAssociedComponent();
         ((SimpleEntity) component).moveMethodPosition(method, offset);
       } else if (Slyum.ACTION_DUPLICATE.equals(e.getActionCommand())) {

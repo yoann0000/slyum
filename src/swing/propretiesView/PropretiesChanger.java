@@ -2,19 +2,9 @@ package swing.propretiesView;
 
 import classDiagram.IComponentsObserver;
 import classDiagram.IDiagramComponent;
-import classDiagram.components.AssociationClass;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.InterfaceEntity;
-import classDiagram.relationships.Aggregation;
-import classDiagram.relationships.Association;
-import classDiagram.relationships.Binary;
-import classDiagram.relationships.Composition;
-import classDiagram.relationships.Dependency;
-import classDiagram.relationships.Inheritance;
-import classDiagram.relationships.InnerClass;
-import classDiagram.relationships.Multi;
-import classDiagram.relationships.Role;
+import classDiagram.components.*;
+import classDiagram.relationships.*;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -75,7 +65,6 @@ public class PropretiesChanger extends SScrollPane implements IComponentsObserve
     association.addObserver(RelationPropreties.getInstance());
 
     for (final Role role : association.getRoles())
-
       role.addObserver(RelationPropreties.getInstance());
   }
 
@@ -87,8 +76,23 @@ public class PropretiesChanger extends SScrollPane implements IComponentsObserve
     addAssociation(component);
   }
 
+  public void addRelationalAssociation(RelAssociation association) {
+    association.addObserver(RelationalRelationProperties.getInstance());
+
+    for (final Role role : association.getRoles())
+      role.addObserver(RelationalRelationProperties.getInstance());
+  }
+
   public void addClassEntity(ClassEntity component) {
     component.addObserver(SimpleEntityPropreties.getInstance());
+  }
+
+  public void addRelationalEntity(RelationalEntity component) {
+    component.addObserver(RelationalEntityProperties.getInstance());
+  }
+
+  public void addRelViewEntity(RelViewEntity component) {
+    component.addObserver(RelViewEntityProperties.getInstance());
   }
 
   public void addEnumEntity(EnumEntity component) {
@@ -139,8 +143,23 @@ public class PropretiesChanger extends SScrollPane implements IComponentsObserve
   }
 
   @Override
+  public void notifyRelationalAssociationCreation(RelAssociation component) {
+    addRelationalAssociation(component);
+  }
+
+  @Override
   public void notifyClassEntityCreation(ClassEntity component) {
     addClassEntity(component);
+  }
+
+  @Override
+  public void notifyRelationalEntityCreation(RelationalEntity component) {
+    addRelationalEntity(component);
+  }
+
+  @Override
+  public void notifyRelViewCreation(RelViewEntity component) {
+    addRelViewEntity(component);
   }
 
   @Override

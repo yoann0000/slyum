@@ -58,48 +58,27 @@ public class RelationPropreties extends GlobalPropreties {
     // Panel général
     textFieldLabel = new TextFieldWithPrompt("", "Enter the relation's name");
     textFieldLabel.setMaximumSize(new Dimension(Short.MAX_VALUE, 25));
-    textFieldLabel.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        if (currentObject != null) if (currentObject instanceof Association) {
-          ((Association) currentObject).setLabel(textFieldLabel.getText());
-          ((Association) currentObject).notifyObservers();
-        } else if (currentObject instanceof Dependency) {
-          ((Dependency) currentObject).setLabel(textFieldLabel.getText());
-          ((Dependency) currentObject).notifyObservers();
-        }
+    textFieldLabel.addActionListener(e -> {
+      if (currentObject != null) if (currentObject instanceof Association) {
+        ((Association) currentObject).setLabel(textFieldLabel.getText());
+        ((Association) currentObject).notifyObservers();
+      } else if (currentObject instanceof Dependency) {
+        ((Dependency) currentObject).setLabel(textFieldLabel.getText());
+        ((Dependency) currentObject).notifyObservers();
       }
     });
 
     radBidirectional = new SRadioButton();
     radBidirectional.setBackground(null);
-    radBidirectional.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent evt) {
-        setCurrentObjectDirected(NavigateDirection.BIDIRECTIONAL);
-      }
-    });
+    radBidirectional.addActionListener(evt -> setCurrentObjectDirected(NavigateDirection.BIDIRECTIONAL));
 
     radFirstToSecond = new SRadioButton();
     radFirstToSecond.setBackground(null);
-    radFirstToSecond.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent evt) {
-        setCurrentObjectDirected(NavigateDirection.FIRST_TO_SECOND);
-      }
-    });
+    radFirstToSecond.addActionListener(evt -> setCurrentObjectDirected(NavigateDirection.FIRST_TO_SECOND));
 
     radSecondToFirst = new SRadioButton();
     radSecondToFirst.setBackground(null);
-    radSecondToFirst.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent evt) {
-        setCurrentObjectDirected(NavigateDirection.SECOND_TO_FIRST);
-      }
-    });
+    radSecondToFirst.addActionListener(evt -> setCurrentObjectDirected(NavigateDirection.SECOND_TO_FIRST));
 
     btnGrpNavigation = new ButtonGroup();
     btnGrpNavigation.add(radBidirectional);

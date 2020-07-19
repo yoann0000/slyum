@@ -1,61 +1,28 @@
 package swing;
 
-import swing.slyumCustomizedComponents.SButton;
 import com.apple.java.OSXAdapter;
 import graphic.GraphicComponent;
 import graphic.GraphicView;
-import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.Frame;
-import java.awt.GraphicsEnvironment;
-import java.awt.Point;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
+import swing.SPanelDiagramComponent.Mode;
+import swing.slyumCustomizedComponents.SButton;
+import update.UpdateInfo;
+import utility.*;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import swing.SPanelDiagramComponent.Mode;
-import swing.hierarchicalView.HierarchicalView;
-import update.UpdateInfo;
-import static update.UpdateInfo.isUpdateAvailable;
-import static update.UpdateInfo.UPDATER_FILE;
-import static update.UpdateInfo.TAG_UPDATER_VERSION;
-import utility.OSValidator;
-import utility.PersonalizedIcon;
-import utility.SMessageDialog;
-import utility.TagDownload;
-import utility.Utility;
+
+import static update.UpdateInfo.*;
 
 /**
  * Main class! Create a new Instance of Slyum and display it. Create menu.
@@ -114,6 +81,9 @@ public class Slyum extends JFrame implements ActionListener {
   public static final String ACTION_NEW_NOTE = "NewNote";
   public static final String ACTION_NEW_NOTE_ASSOCIED = "NewNoteAssocied";
   public static final String ACTION_NEW_PROJECT = "NewProject";
+  public static final String ACTION_NEW_REL_ASSOCIATION = "NewRelAssociation";
+  public static final String ACTION_NEW_TABLE = "NewTable";
+  public static final String ACTION_NEW_REL_VIEW = "NewRelView";
   public static final String ACTION_OPEN = "Open";
   public static final String ACTION_OPEN_RECENT_RPOJECT = "openRecentProject";
   public static final String ACTION_OPEN_VIEW = "openView";
@@ -178,6 +148,9 @@ public class Slyum extends JFrame implements ActionListener {
   public static final String KEY_ASSOCIATION = "A";
   public static final String KEY_ASSOCIATION_CLASS = "X";
   public static final String KEY_CLASS = "C";
+  public static final String KEY_TABLE = "T";
+  public static final String KEY_REL_ASSOCIATION = "ctrl R";
+  public static final String KEY_REL_VIEW = "V";
   
   public final static String KEY_CLOSE_VIEW = "ctrl W";
   public static final String KEY_COLOR = "ctrl L";
@@ -1040,7 +1013,6 @@ public class Slyum extends JFrame implements ActionListener {
     final JMenuBar menuBar = new JMenuBar();
     menuBar.setBackground(DEFAULT_BACKGROUND);
     menuBar.setBorder(null);
-
     JMenuItem menuItem;
 
     // Menu file

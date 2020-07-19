@@ -23,7 +23,7 @@ import utility.EditableCellFocusAction;
 public class STable extends JTable {
   
   public interface TableTriggerNewRow {
-    public void addRow();
+    void addRow();
   }
   
   public class CustomCellEditor extends DefaultCellEditor {
@@ -46,14 +46,14 @@ public class STable extends JTable {
 
     @Override
     public boolean stopCellEditing() {
-      ((JComponent)getComponent()).removeFocusListener(fa);
+      getComponent().removeFocusListener(fa);
       isAlreadyStopedEditing = true;
       return super.stopCellEditing();
     }
 
     @Override
     public void cancelCellEditing() {
-      ((JComponent)getComponent()).removeFocusListener(fa);
+      getComponent().removeFocusListener(fa);
       super.cancelCellEditing();
     }
 
@@ -78,15 +78,8 @@ public class STable extends JTable {
     new EditableCellFocusAction(this, KeyStroke.getKeyStroke("TAB"));
     setDefaultEditor(String.class, new CustomCellEditor());
     setDefaultEditor(Boolean.class, new DefaultCellEditor(new SCheckBox()));
-    setDefaultRenderer(Boolean.class, new TableCellRenderer() {
-
-      @Override
-      public Component getTableCellRendererComponent(
-          JTable table, Object value, boolean isSelected, 
-          boolean hasFocus, int row, int column) {
-        return new SCheckBox("", (boolean)value);
-      }
-    });
+    setDefaultRenderer(Boolean.class, (table, value, isSelected, hasFocus, row, column)
+            -> new SCheckBox("", (boolean)value));
     setBorder(null);
     scrollPane = new SScrollPane(this) {
       @Override

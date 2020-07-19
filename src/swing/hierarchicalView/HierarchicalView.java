@@ -4,18 +4,8 @@ import classDiagram.ClassDiagram;
 import classDiagram.IComponentsObserver;
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
-import classDiagram.components.AssociationClass;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.InterfaceEntity;
-import classDiagram.relationships.Aggregation;
-import classDiagram.relationships.Association;
-import classDiagram.relationships.Binary;
-import classDiagram.relationships.Composition;
-import classDiagram.relationships.Dependency;
-import classDiagram.relationships.Inheritance;
-import classDiagram.relationships.InnerClass;
-import classDiagram.relationships.Multi;
+import classDiagram.components.*;
+import classDiagram.relationships.*;
 import graphic.GraphicComponent;
 import graphic.GraphicView;
 import java.awt.Color;
@@ -378,10 +368,28 @@ public class HierarchicalView
     addAssociation(component, "resources/icon/association.png");
   }
 
+  public void addRelationalAssociation(RelAssociation component) {
+    addAssociation(component, "resources/icon/relAssociation.png");
+    ((NodeEntity)searchAssociedNode(component.getSource())).reloadChildsNodes();
+    ((NodeEntity)searchAssociedNode(component.getTarget())).reloadChildsNodes();
+
+  }
+
   public void addClassEntity(ClassEntity component) {
     addNode(new NodeSimpleEntity(component, treeModel, tree,
         PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "class.png")),
             entitiesNode);
+  }
+
+  public void addRelationalEntity(RelationalEntity component) { //TODO change to new branch maybe?
+    addNode(new NodeRelationalEntity(component, treeModel, tree,
+                    PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "tableRel.png")),
+            entitiesNode);
+  }
+
+  public void addRelViewEntity(RelViewEntity component) {
+    addNode(new NodeViewEntity(component, treeModel, tree,
+                    PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "view.png")), entitiesNode);
   }
 
   public void addComposition(Composition component) {
@@ -551,9 +559,25 @@ public class HierarchicalView
   }
 
   @Override
+  public void notifyRelationalAssociationCreation(RelAssociation component) {
+    addRelationalAssociation(component);
+  }
+
+  @Override
   public void notifyClassEntityCreation(ClassEntity component) {
     addClassEntity(component);
   }
+
+  @Override
+  public void notifyRelationalEntityCreation(RelationalEntity component) {
+    addRelationalEntity(component);
+  }
+
+  @Override
+  public void notifyRelViewCreation(RelViewEntity component) {
+    addRelViewEntity(component);
+  }
+
 
   @Override
   public void notifyCompositionCreation(Composition component) {

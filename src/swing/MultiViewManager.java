@@ -88,7 +88,8 @@ public class MultiViewManager {
     uip.setVisible(true);
 
     if (uip.isAccepted())
-      return addNewView(uip.getText(), uip.isRel());
+      return uip.isRel() ? addNewView(uip.getText() + " - REL", true)
+                         : addNewView(uip.getText() + " - UML", false);
 
     return null;
   }
@@ -134,7 +135,7 @@ public class MultiViewManager {
       STab.getInstance().openTab(graphicView);
       
       if (!isXmlImportation())
-        changeViewStatInFile(graphicView, true);
+        changeViewStatInFile(graphicView, true, graphicView.isRelational());
     }
     
     setSelectedGraphicView(graphicView);
@@ -160,7 +161,7 @@ public class MultiViewManager {
   
   public static GraphicView closeView(GraphicView graphicView) {
     if (!isXmlImportation())
-      changeViewStatInFile(graphicView, false);
+      changeViewStatInFile(graphicView, false, graphicView.isRelational());
     
     JTabbedPane pane = STab.getInstance();
     int selectedIndex = pane.getSelectedIndex();
@@ -231,8 +232,8 @@ public class MultiViewManager {
     return openView(addNewView());
   }
   
-  public static GraphicView addAndOpenNewView(String title) {
-    return openView(addNewView(title, false));
+  public static GraphicView addAndOpenNewView(String title, boolean rel) {
+    return openView(addNewView(title, rel));
   }
   
   public static void cleanGraphicViews() {
@@ -242,7 +243,7 @@ public class MultiViewManager {
     }
   }
   
-  public static void changeViewStatInFile(GraphicView graphicView, boolean open) {
+  public static void changeViewStatInFile(GraphicView graphicView, boolean open, boolean rel) {
     if (getCurrentFile() == null)
       return;
     
@@ -251,6 +252,7 @@ public class MultiViewManager {
       
       String strOpen = String.valueOf(open);
       Document doc = getDocumentFromCurrentFile();
+      String strRel = String.valueOf(rel);
       
       Node nodeUmlView = doc.getElementsByTagName("umlView").item(
           instance.graphicViews.indexOf(graphicView));
@@ -262,7 +264,15 @@ public class MultiViewManager {
         ((Element)nodeUmlView).setAttribute("open", strOpen);
       else
         openNode.setTextContent(strOpen);
-      
+
+      //Same for relational
+      Node relNode = nodeUmlView.getAttributes().getNamedItem("rel");
+
+      if (relNode == null)
+        ((Element)nodeUmlView).setAttribute("rel", strOpen);
+      else
+        relNode.setTextContent(strOpen);
+
       saveDocumentInCurrentFile(doc);
       
     } catch (TransformerException | ParserConfigurationException | SAXException | IOException ex) {
@@ -315,7 +325,7 @@ public class MultiViewManager {
   }
   
   private static void saveDocumentInCurrentFile(Document doc) 
-      throws TransformerConfigurationException, TransformerException {
+      throws TransformerException {
     PanelClassDiagram.saveDocumentInCurrentFile(doc, PanelClassDiagram.getFileOpen());
   }
   

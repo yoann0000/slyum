@@ -5,11 +5,7 @@ import change.BufferDeepCreation;
 import change.Change;
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
-import classDiagram.components.AssociationClass;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.Entity;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.InterfaceEntity;
+import classDiagram.components.*;
 import graphic.ColoredComponent;
 import graphic.GraphicComponent;
 import graphic.GraphicView;
@@ -61,16 +57,17 @@ public abstract class EntityView extends MovableComponent implements Observer, C
   private static Color basicColor = new Color(baseColor.getRGB());
 
   private static final Font stereotypeFontBasic = new Font(
-      Slyum.getInstance().defaultFont.getFamily(), 0, 11);
+      Slyum.getInstance().defaultFont.getFamily(), Font.PLAIN, 11);
   
-  public static EntityView createFromEntity(
-      GraphicView graphicView, Entity entity) {
+  public static EntityView createFromEntity(GraphicView graphicView, Entity entity) {
      if (entity.getClass() == ClassEntity.class)
-        return new ClassView(graphicView, (ClassEntity)entity);
+       return new ClassView(graphicView, (ClassEntity)entity);
      else if (entity.getClass() == InterfaceEntity.class)
-        return new InterfaceView(graphicView, (InterfaceEntity)entity);
+       return new InterfaceView(graphicView, (InterfaceEntity)entity);
      else if (entity.getClass() == EnumEntity.class)
-        return new EnumView(graphicView, (EnumEntity)entity);
+       return new EnumView(graphicView, (EnumEntity)entity);
+     else if (entity.getClass() == RelationalEntity.class)
+       return new RelationalEntityView(graphicView, (RelationalEntity)entity);
      //else if (entity.getClass() == AssociationClass.class)
        //return new AssociationClassView(graphicView, (AssociationClass)entity, (BinaryView)graphicView.searchAssociedComponent(((AssociationClass)entity).getAssociation()), new Rectangle());
     return null;
@@ -195,19 +192,19 @@ public abstract class EntityView extends MovableComponent implements Observer, C
     int distLeft = (int) lineLeft.ptSegDist(ptIntersectLeft)
                    + (int) relationLine.ptSegDist(ptIntersectLeft);
     
-    if (ptIntersectTop != null && distTop == 0) {
+    if (distTop == 0) {
       return new Point(RelationGrip.adjust((int) ptIntersectTop.getX()),
           (int) ptIntersectTop.getY());
       
-    } else if (ptIntersectRight != null && distRight == 0) {
+    } else if (distRight == 0) {
       return new Point((int) ptIntersectRight.getX(),
           RelationGrip.adjust((int) ptIntersectRight.getY()));
       
-    } else if (ptIntersectBottom != null && distBottom == 0) {
+    } else if (distBottom == 0) {
       return new Point(RelationGrip.adjust((int) ptIntersectBottom.getX()),
           (int) ptIntersectBottom.getY());
       
-    } else if (ptIntersectLeft != null && distLeft == 0) {
+    } else if (distLeft == 0) {
       return new Point((int) ptIntersectLeft.getX(),
               RelationGrip.adjust((int) ptIntersectLeft.getY()));
 
@@ -506,8 +503,7 @@ public abstract class EntityView extends MovableComponent implements Observer, C
     final Rectangle newBounds = new Rectangle(ajustOnGrid(bounds.x),
         ajustOnGrid(bounds.y), ajustOnGrid(bounds.width), bounds.height);
     
-    newBounds.width = newBounds.width < MINIMUM_SIZE.x ? MINIMUM_SIZE.x
-            : newBounds.width;
+    newBounds.width = Math.max(newBounds.width, MINIMUM_SIZE.x);
 
     this.bounds = newBounds;
 
@@ -626,8 +622,8 @@ public abstract class EntityView extends MovableComponent implements Observer, C
 
     Paint background;
     if (GraphicView.isEntityGradient())
-      background = new GradientPaint(bounds.x, bounds.y, getColor(), bounds.x
-                                                                     + bounds.width, bounds.y + bounds.height, getColor().darker());
+      background = new GradientPaint(bounds.x, bounds.y, getColor(), bounds.x + bounds.width,
+              bounds.y + bounds.height, getColor().darker());
     else
       background = getColor();
 
@@ -640,8 +636,7 @@ public abstract class EntityView extends MovableComponent implements Observer, C
 
     Dimension classNameSize = new Dimension(classNameWidth, classNameHeight);
 
-    stereotypeFont = stereotypeFont.deriveFont(stereotypeFontBasic.getSize()
-                                               * parent.getZoom());
+    stereotypeFont = stereotypeFont.deriveFont(stereotypeFontBasic.getSize() * parent.getZoom());
     
     g2.setFont(stereotypeFont);
     final String fullStereotype = "<< " + component.getStereotype() + " >>";
@@ -657,20 +652,16 @@ public abstract class EntityView extends MovableComponent implements Observer, C
     FontMetrics metrics = g2.getFontMetrics(entityName.getEffectivFont());
     int textBoxHeight = metrics.getHeight();
 
-    bounds.height = computeHeight(classNameSize.height, stereotypeHeight,
-                                                        textBoxHeight);
+    bounds.height = computeHeight(classNameSize.height, stereotypeHeight, textBoxHeight);
     
     Rectangle bounds = getBounds();
 
     int offset = bounds.y + VERTICAL_SPACEMENT / 2;
-    int stereotypeLocationWidth = bounds.x
-                                  + (bounds.width - stereotypeSize.width) / 2;
+    int stereotypeLocationWidth = bounds.x + (bounds.width - stereotypeSize.width) / 2;
     
-    entityName.setBounds(new Rectangle(1, 1, bounds.width - 15,
-        textBoxHeight + 2));
+    entityName.setBounds(new Rectangle(1, 1, bounds.width - 15, textBoxHeight + 2));
     Rectangle entityNameBounds = entityName.getBounds();
-    int classNameLocationX = bounds.x + (bounds.width - entityNameBounds.width)
-                                        / 2;
+    int classNameLocationX = bounds.x + (bounds.width - entityNameBounds.width) / 2;
     
     // draw background
     g2.setPaint(background);

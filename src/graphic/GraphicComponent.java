@@ -670,7 +670,7 @@ public abstract class GraphicComponent extends Observable implements ActionListe
 
     Point p = centerRect.getLocation();
     parent.getScrollPane().getViewport().setViewPosition(
-      new Point(p.x < 0 ? 0 : p.x, p.y < 0 ? 0 : p.y));
+      new Point(Math.max(p.x, 0), Math.max(p.y, 0)));
   }
   
   public boolean isHighlight() {

@@ -3,23 +3,10 @@ package swing;
 import classDiagram.ClassDiagram.ViewEntity;
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
-import classDiagram.components.AssociationClass;
-import classDiagram.components.Attribute;
-import classDiagram.components.ClassEntity;
-import classDiagram.components.ConstructorMethod;
-import classDiagram.components.EnumEntity;
-import classDiagram.components.EnumValue;
-import classDiagram.components.InterfaceEntity;
-import classDiagram.components.Method;
+import classDiagram.components.*;
 import classDiagram.components.Method.ParametersViewStyle;
-import classDiagram.components.SimpleEntity;
-import classDiagram.components.Type;
-import classDiagram.components.Visibility;
+import classDiagram.relationships.*;
 import classDiagram.relationships.Association.NavigateDirection;
-import classDiagram.relationships.Binary;
-import classDiagram.relationships.Composition;
-import classDiagram.relationships.Multi;
-import classDiagram.relationships.Multiplicity;
 import classDiagram.verifyName.MethodName;
 import classDiagram.verifyName.SyntaxeNameException;
 import classDiagram.verifyName.TypeName;
@@ -57,8 +44,8 @@ import swing.propretiesView.DiagramPropreties;
  */
 public class XMLParser extends DefaultHandler {
   public enum Aggregation {
-    AGGREGATE, COMPOSE, MULTI, NONE
-  };
+    AGGREGATE, COMPOSE, MULTI, NONE, REL
+  }
 
   private class Association {
     int id = -1;
@@ -66,7 +53,7 @@ public class XMLParser extends DefaultHandler {
     Aggregation aggregation = Aggregation.NONE;
     NavigateDirection direction = NavigateDirection.BIDIRECTIONAL;
     String name = null;
-  };
+  }
 
   private class ClassDiagram {
     LinkedList<UMLView> uMLView = new LinkedList<>();
@@ -177,7 +164,6 @@ public class XMLParser extends DefaultHandler {
 
     GraphicView graphicView;
     String name = null;
-    boolean open = true;
 
     LinkedList<Note> notes = new LinkedList<>();
 
@@ -189,13 +175,13 @@ public class XMLParser extends DefaultHandler {
       graphicView = MultiViewManager.getSelectedGraphicView();
     }
 
-    public UMLView(String name, boolean open) {
+    public UMLView(String name, boolean open, boolean rel) {
       this.name = name;
       
       if (open)
-        graphicView = MultiViewManager.addAndOpenNewView(name);
+        graphicView = MultiViewManager.addAndOpenNewView(name, rel);
       else
-        graphicView = MultiViewManager.addNewView(name, false); //TODO change to diff uml and rel
+        graphicView = MultiViewManager.addNewView(name, rel); //TODO change to diff uml and rel
     }
   }
   
@@ -210,6 +196,8 @@ public class XMLParser extends DefaultHandler {
     String name = null;
     Type type = null;
     Visibility visibility = null;
+    boolean unique = false;
+    boolean notNull = false;
   }
 
   LinkedList<AssociationClass> associationClassEntities = new LinkedList<>();
@@ -281,6 +269,7 @@ public class XMLParser extends DefaultHandler {
     classDiagram.components.Entity ce = null;
     e.name = TypeName.verifyAndAskNewName(e.name);
     boolean isSimpleEntity = true;
+    boolean isRelEntity = false;
 
     switch (e.entityType) {
       case CLASS:
@@ -323,7 +312,14 @@ public class XMLParser extends DefaultHandler {
         classDiagram.addAssociationClass((AssociationClass) ce);
 
         break;
-        
+
+      case TABLE:
+        isSimpleEntity = false;
+        isRelEntity = true;
+        ce = new RelationalEntity(e.name, e.id);
+        classDiagram.addTableEntity((RelationalEntity) ce);
+        break;
+
         default:
           throw new SAXNotRecognizedException(
               e.entityType + ": wrong entity type.");
@@ -369,6 +365,19 @@ public class XMLParser extends DefaultHandler {
         }
         m.notifyObservers();
       }
+    } else if(isRelEntity) {
+      RelationalEntity se = (RelationalEntity) ce;
+      for (Variable v : e.attribute) {
+        RelationalAttribute a = new RelationalAttribute(VariableName.verifyAndAskNewName(v.name),
+                v.type);
+
+        se.addAttribute(a);
+        se.notifyObservers(UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
+        a.setDefaultValue(v.defaultValue);
+        a.setUnique(v.unique);
+        a.setNotNull(v.notNull);
+        a.notifyObservers();
+      }
     } else {
       EnumEntity ee = (EnumEntity) ce;
       for (EnumValue v : e.enums) {
@@ -381,7 +390,7 @@ public class XMLParser extends DefaultHandler {
   }
 
   @Override
-  public void endDocument() throws SAXException {
+  public void endDocument() {
     
   }
 
@@ -417,8 +426,7 @@ public class XMLParser extends DefaultHandler {
   }
 
   @Override
-  public void endElement(String uri, String localName, String qName)
-          throws SAXException {
+  public void endElement(String uri, String localName, String qName) {
     switch (qName) {
       case "entity":
         currentEntity = null;
@@ -625,6 +633,10 @@ public class XMLParser extends DefaultHandler {
           ac = new Multi(entities, a.id);
           classDiagram.addMulti((Multi) ac);
           break;
+        case REL:
+          ac = new RelAssociation(source, target, a.direction, a.id);
+          classDiagram.addRelAssociation((RelAssociation) ac);
+          break;
       }
 
       for (int i = 0; i < a.role.size(); i++) {
@@ -802,30 +814,27 @@ public class XMLParser extends DefaultHandler {
           l.setColor(rl.color);
           final LinkedList<TextBox> tb = l.getTextBoxRole();
 
-          SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-              if (tb.size() >= 1) {
-                ((TextBoxLabel) tb.getFirst()).computeDeplacement(new Point(
-                        rl.labelAssociation.x, rl.labelAssociation.y));
+          SwingUtilities.invokeLater(() -> {
+            if (tb.size() >= 1) {
+              ((TextBoxLabel) tb.getFirst()).computeDeplacement(new Point(
+                      rl.labelAssociation.x, rl.labelAssociation.y));
 
-                if (tb.size() >= 3) {
-                  ((TextBoxLabel) tb.get(1)).computeDeplacement(new Point(
-                          rl.roleAssociations.get(0).x, rl.roleAssociations
-                                  .get(0).y));
-                  ((TextBoxLabel) tb.get(2)).computeDeplacement(new Point(
-                          rl.roleAssociations.get(1).x, rl.roleAssociations
-                                  .get(1).y));
+              if (tb.size() >= 3) {
+                ((TextBoxLabel) tb.get(1)).computeDeplacement(new Point(
+                        rl.roleAssociations.get(0).x, rl.roleAssociations
+                                .get(0).y));
+                ((TextBoxLabel) tb.get(2)).computeDeplacement(new Point(
+                        rl.roleAssociations.get(1).x, rl.roleAssociations
+                                .get(1).y));
 
-                  ((TextBoxRole) tb.get(1)).getTextBoxMultiplicity()
-                          .computeDeplacement(
-                                  new Point(rl.multipliciteAssociations.get(0).x,
-                                          rl.multipliciteAssociations.get(0).y));
-                  ((TextBoxRole) tb.get(2)).getTextBoxMultiplicity()
-                          .computeDeplacement(
-                                  new Point(rl.multipliciteAssociations.get(1).x,
-                                          rl.multipliciteAssociations.get(1).y));
-                }
+                ((TextBoxRole) tb.get(1)).getTextBoxMultiplicity()
+                        .computeDeplacement(
+                                new Point(rl.multipliciteAssociations.get(0).x,
+                                        rl.multipliciteAssociations.get(0).y));
+                ((TextBoxRole) tb.get(2)).getTextBoxMultiplicity()
+                        .computeDeplacement(
+                                new Point(rl.multipliciteAssociations.get(1).x,
+                                        rl.multipliciteAssociations.get(1).y));
               }
             }
           });
@@ -867,20 +876,16 @@ public class XMLParser extends DefaultHandler {
             // Role
             final LinkedList<TextBox> tb = mlv.getTextBoxRole();
 
-            SwingUtilities.invokeLater(new Runnable() {
+            SwingUtilities.invokeLater(() -> {
+              if (tb.size() == 1) {
+                ((TextBoxLabel) tb.getFirst()).computeDeplacement(new Point(
+                        rl.roleAssociations.get(0).x, rl.roleAssociations
+                                .get(0).y));
 
-              @Override
-              public void run() {
-                if (tb.size() == 1) {
-                  ((TextBoxLabel) tb.getFirst()).computeDeplacement(new Point(
-                          rl.roleAssociations.get(0).x, rl.roleAssociations
-                                  .get(0).y));
-
-                  ((TextBoxRole) tb.getFirst()).getTextBoxMultiplicity()
-                          .computeDeplacement(
-                                  new Point(rl.multipliciteAssociations.get(0).x,
-                                          rl.multipliciteAssociations.get(0).y));
-                }
+                ((TextBoxRole) tb.getFirst()).getTextBoxMultiplicity()
+                        .computeDeplacement(
+                                new Point(rl.multipliciteAssociations.get(0).x,
+                                        rl.multipliciteAssociations.get(0).y));
               }
             });
           }
@@ -920,11 +925,11 @@ public class XMLParser extends DefaultHandler {
         
         if (attributes.getValue("defaultViewEnum") != null)
           umlClassDiagram.defaultViewEnum = 
-              Boolean.valueOf(attributes.getValue("defaultViewEnum"));
+              Boolean.parseBoolean(attributes.getValue("defaultViewEnum"));
         
         if (attributes.getValue("defaultVisibleTypes") != null)
           umlClassDiagram.defaultVisibleTypes = 
-              Boolean.valueOf(attributes.getValue("defaultVisibleTypes"));
+              Boolean.parseBoolean(attributes.getValue("defaultVisibleTypes"));
         
         break;
       case "entity":
@@ -969,7 +974,7 @@ public class XMLParser extends DefaultHandler {
                 .getValue("view"));
           
           if (attributes.getValue("is-constructor") != null)
-            currentMethod.isConstructor = Boolean.valueOf(attributes
+            currentMethod.isConstructor = Boolean.parseBoolean(attributes
                 .getValue("is-constructor"));
           
           currentEntity.method.add(currentMethod);
@@ -1075,14 +1080,18 @@ public class XMLParser extends DefaultHandler {
         try {
           UMLView newUMLView;
           boolean open = true;
+          boolean rel = false;
           
           if (attributes.getValue("open") != null)
-            open = Boolean.valueOf(attributes.getValue("open"));
+            open = Boolean.parseBoolean(attributes.getValue("open"));
+
+          if (attributes.getValue("rel") != null)
+            rel = Boolean.parseBoolean(attributes.getValue("rel"));
           
           if (umlClassDiagram.uMLView.size() == 0) // root graphic view
             newUMLView = new UMLView();
           else // new view
-            newUMLView = new UMLView(attributes.getValue("name"), open);
+            newUMLView = new UMLView(attributes.getValue("name"), open, rel);
           
           currentUMLView = newUMLView;
           umlClassDiagram.uMLView.add(newUMLView);

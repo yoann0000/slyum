@@ -1,19 +1,9 @@
 package swing;
 
+import classDiagram.components.RelViewEntity;
 import graphic.GraphicView;
-import graphic.factory.AggregationFactory;
-import graphic.factory.AssociationClassFactory;
-import graphic.factory.BinaryFactory;
-import graphic.factory.ClassFactory;
-import graphic.factory.CompositionFactory;
-import graphic.factory.DependencyFactory;
-import graphic.factory.EnumFactory;
-import graphic.factory.InheritanceFactory;
-import graphic.factory.InnerClassFactory;
-import graphic.factory.InterfaceFactory;
-import graphic.factory.LineCommentaryFactory;
-import graphic.factory.MultiFactory;
-import graphic.factory.NoteFactory;
+import graphic.factory.*;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -33,9 +23,9 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
   public enum Mode {
     CURSOR(getInstance().btnCursorMode), GRIP(getInstance().btnGripMode);
 
-    private SButton btnMode;
+    private final SButton btnMode;
 
-    private Mode(SButton btn) {
+    Mode(SButton btn) {
       btnMode = btn;
     }
 
@@ -90,16 +80,19 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
           + Utility.keystrokeToString(Slyum.KEY_LINK_NOTE);
 
   private static final String TT_REL_TABLE = "Table "
-          + Utility.keystrokeToString(Slyum.KEY_CLASS);//TODO change to new key
+          + Utility.keystrokeToString(Slyum.KEY_TABLE);
 
-  private static final String TT_REL_ASSOCIATION = "Table "
-          + Utility.keystrokeToString(Slyum.KEY_ASSOCIATION);//TODO change to new key
+  private static final String TT_REL_ASSOCIATION = "Relational association "
+          + Utility.keystrokeToString(Slyum.KEY_REL_ASSOCIATION);
+
+  private static final String TT_VIEW = "View "
+          + Utility.keystrokeToString(Slyum.KEY_REL_VIEW);
 
 
-  private SButton btnCursorMode, btnGripMode, btnClass, btnEnum, btnInterface,
+  private final SButton btnCursorMode, btnGripMode, btnClass, btnEnum, btnInterface,
           btnClassAssociation, btnGeneralize, btnDependeny, btnInnerClass,
           btnAssociation, btnAggregation, btnComposition, btnMulti, btnNote,
-          btnLinkNote, btnTable, btnAssocRel;
+          btnLinkNote, btnTable, btnAssocRel, btnView;
 
   private Mode currentMode;
   private static SPanelDiagramComponent instance;
@@ -158,15 +151,18 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
             Slyum.ACTION_NEW_INNER_CLASS, Color.RED, TT_INNER_CLASS));
 
     add(new SSeparator());
-    //TODO MORE BUTTONS!!!
+    
     add(btnTable = createSButton(
             PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "tableRel.png"),
-            Slyum.ACTION_NEW_CLASS, Color.RED, TT_REL_TABLE));
+            Slyum.ACTION_NEW_TABLE, Color.RED, TT_REL_TABLE));
+
+    add(btnView = createSButton(
+            PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "view.png"),
+            Slyum.ACTION_NEW_REL_VIEW, Color.RED, TT_VIEW));
 
     add(btnAssocRel = createSButton(
-            PersonalizedIcon.createImageIcon(Slyum.ICON_PATH
-                    + "relAssociation.png"), Slyum.ACTION_NEW_ASSOCIATION,
-            Color.RED, TT_REL_ASSOCIATION));
+            PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "relAssociation.png"),
+            Slyum.ACTION_NEW_REL_ASSOCIATION, Color.RED, TT_REL_ASSOCIATION));
 
     btnTable.setEnabled(false);
     btnAssocRel.setEnabled(false);
@@ -240,6 +236,7 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
     GraphicView gv = MultiViewManager.getSelectedGraphicView();
     boolean isRel = gv.isRelational();
     btnTable.setEnabled(isRel);
+    btnView.setEnabled(isRel);
     btnAssocRel.setEnabled(isRel);
     btnClass.setEnabled(!isRel);
     btnInterface.setEnabled(!isRel);
@@ -264,6 +261,15 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
     
     GraphicView gv = MultiViewManager.getSelectedGraphicView();
     switch (e.getActionCommand()) {
+      case Slyum.ACTION_NEW_TABLE:
+        gv.initNewComponent(new TableFactory(gv));
+        break;
+      case Slyum.ACTION_NEW_REL_ASSOCIATION:
+        gv.initNewComponent(new RelAssociationFactory(gv));
+        break;
+      case Slyum.ACTION_NEW_REL_VIEW:
+        gv.initNewComponent(new RelViewFactory(gv));
+        break;
       case Slyum.ACTION_NEW_CLASS:
         gv.initNewComponent(new ClassFactory(gv));
         break;
@@ -362,5 +368,13 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
 
   public SButton getBtnEnum() {
     return btnEnum;
+  }
+
+  public SButton getBtnTable() {
+    return btnTable;
+  }
+
+  public SButton getBtnAssocRel() {
+    return btnAssocRel;
   }
 }

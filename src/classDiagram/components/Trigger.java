@@ -1,5 +1,7 @@
 package classDiagram.components;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import swing.Slyum;
 import utility.PersonalizedIcon;
 
@@ -65,6 +67,23 @@ public class Trigger extends Type {
 
     public ImageIcon getImageIcon() {
         return PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "method.png");
+    }
+
+    @Override
+    public Element getXmlElement(Document doc) {
+
+        Element variable = doc.createElement(getXmlTagName());
+        variable.setAttribute("name", name);
+        variable.setAttribute("procedure", getProcedure());
+        variable.setAttribute("activationTime", activationTime.getName());
+        variable.setAttribute("triggerType", triggerType.getName());
+
+        return variable;
+    }
+
+    @Override
+    public String getXmlTagName() {
+        return "trigger";
     }
 }
 

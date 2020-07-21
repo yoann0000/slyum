@@ -55,9 +55,9 @@ public class RelAssociationView extends AssociationView {
             RelationalEntity targetEntity = (RelationalEntity) relation.getTarget();
             Association.NavigateDirection direction = ((RelAssociation) relation).getDirected();
             if (direction == Association.NavigateDirection.FIRST_TO_SECOND) {
-                targetEntity.addForeignKey(sourceEntity.getPrimaryKey());
+                sourceEntity.addForeignKey(sourceEntity.getPrimaryKey());
             } else if (direction == Association.NavigateDirection.SECOND_TO_FIRST) {
-                sourceEntity.addForeignKey(targetEntity.getPrimaryKey());
+                targetEntity.addForeignKey(targetEntity.getPrimaryKey());
             }
         }
     }

@@ -13,10 +13,10 @@ public class RelValidator {
     private int errors;
     private String errorString;
 
-    private static RelValidator instance;
+    private static final RelValidator instance = new RelValidator();
 
     public static RelValidator getInstance() {
-        return instance == null ? new RelValidator() : instance;
+        return instance;
     }
 
     private RelValidator() {

@@ -70,7 +70,6 @@ public class RelationalEntityView extends EntityView {
     public RelationalEntityView(GraphicView parent, RelationalEntity component) {
        super(parent, component);
         initViewType();
-        //addDefaultAttribute();
         addDefaultKey();
     }
 

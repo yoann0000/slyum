@@ -12,8 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -27,6 +26,7 @@ import swing.dialog.DialogDeleteView;
 import swing.hierarchicalView.HierarchicalView;
 import utility.SMessageDialog;
 import utility.WatchDir;
+import utility.relConverter.RelConverter;
 
 /**
  * 
@@ -105,6 +105,14 @@ public class MultiViewManager {
     if (!isXmlImportation())
       addNewViewInFile(newGraphicView);
     
+    return newGraphicView;
+  }
+
+  public static GraphicView addNewView(GraphicView newGraphicView) {
+    instance.graphicViews.add(newGraphicView);
+    instance.hierarchicalView.addView(newGraphicView);
+    newGraphicView.notifyObservers();
+
     return newGraphicView;
   }
   
@@ -231,6 +239,10 @@ public class MultiViewManager {
   public static GraphicView addAndOpenNewView() {
     return openView(addNewView());
   }
+
+  public static GraphicView addAndOpenNewView(GraphicView graphicView) {
+    return openView(addNewView(graphicView));
+  }
   
   public static GraphicView addAndOpenNewView(String title, boolean rel) {
     return openView(addNewView(title, rel));
@@ -348,5 +360,19 @@ public class MultiViewManager {
     
     STab.initialize(rootGraphicView);
   }
-  
+
+  public static void ConvertSelectedView() {
+    if (getSelectedGraphicView().isRelational()) //should never happen but just in case
+      JOptionPane.showMessageDialog(Slyum.getInstance(), "You must select a UML view to convert");
+
+    else {
+      int dialogResult = JOptionPane.showConfirmDialog (Slyum.getInstance(),
+              "Convert \"" + getSelectedGraphicView().getName() + "\" to REL"
+              ,"Conversion confirmation",JOptionPane.YES_NO_OPTION);
+      if(dialogResult == JOptionPane.YES_OPTION){
+        RelConverter.getInstance().setGraphicView(getSelectedGraphicView());
+        addAndOpenNewView(RelConverter.getInstance().getRelGraphicView());
+      }
+    }
+  }
 }

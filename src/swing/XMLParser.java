@@ -7,10 +7,7 @@ import classDiagram.components.*;
 import classDiagram.components.Method.ParametersViewStyle;
 import classDiagram.relationships.*;
 import classDiagram.relationships.Association.NavigateDirection;
-import classDiagram.verifyName.MethodName;
-import classDiagram.verifyName.SyntaxeNameException;
-import classDiagram.verifyName.TypeName;
-import classDiagram.verifyName.VariableName;
+import classDiagram.verifyName.*;
 import graphic.GraphicComponent;
 import graphic.GraphicView;
 import graphic.entity.EntityView;
@@ -106,10 +103,12 @@ public class XMLParser extends DefaultHandler {
     LinkedList<Variable> attribute = new LinkedList<>();
     LinkedList<Operation> method = new LinkedList<>();
     LinkedList<EnumValue> enums = new LinkedList<>();
+    LinkedList<Operation> triggers = new LinkedList<>();
+    String procedure = null;
   }
 
   public enum EntityType {
-    ASSOCIATION_CLASS, CLASS, INTERFACE, ENUM, TABLE
+    ASSOCIATION_CLASS, CLASS, INTERFACE, ENUM, TABLE, VIEW;
   }
 
   private class Inheritance {
@@ -142,6 +141,9 @@ public class XMLParser extends DefaultHandler {
     LinkedList<Variable> variable = new LinkedList<>();
     Visibility visibility = Visibility.PUBLIC;
     boolean isConstructor = false;
+    TriggerType triggerType = TriggerType.FOR_EACH_ROW;
+    ActivationTime activationTime = ActivationTime.AFTER_CREATION;
+    String procedure = null;
   }
 
   private class RelationView {
@@ -181,7 +183,7 @@ public class XMLParser extends DefaultHandler {
       if (open)
         graphicView = MultiViewManager.addAndOpenNewView(name, rel);
       else
-        graphicView = MultiViewManager.addNewView(name, rel); //TODO change to diff uml and rel
+        graphicView = MultiViewManager.addNewView(name, rel);
     }
   }
   
@@ -266,14 +268,12 @@ public class XMLParser extends DefaultHandler {
 
   private void createEntity(Entity e) 
       throws SyntaxeNameException, SAXNotRecognizedException {
-    classDiagram.components.Entity ce = null;
+    classDiagram.components.Entity ce;
     e.name = TypeName.verifyAndAskNewName(e.name);
-    boolean isSimpleEntity = true;
-    boolean isRelEntity = false;
+    int entityTypeNumber = 0; //0 = class, 1 = enum, 2 = table, 3 = view
 
     switch (e.entityType) {
       case CLASS:
-
         ce = new ClassEntity(e.name, e.visibility, e.id);
 
         classDiagram.addClassEntity((ClassEntity) ce);
@@ -290,7 +290,7 @@ public class XMLParser extends DefaultHandler {
         break;
 
       case ENUM:
-        isSimpleEntity = false;
+        entityTypeNumber  = 1;
         ce = new EnumEntity(e.name, e.id);
         classDiagram.addEnumEntity((EnumEntity) ce);
 
@@ -314,78 +314,96 @@ public class XMLParser extends DefaultHandler {
         break;
 
       case TABLE:
-        isSimpleEntity = false;
-        isRelEntity = true;
+        entityTypeNumber = 2;
         ce = new RelationalEntity(e.name, e.id);
         classDiagram.addTableEntity((RelationalEntity) ce);
         break;
 
+      case VIEW:
+        entityTypeNumber  = 3;
+        ce = new RelViewEntity(e.name, e.id, e.procedure);
+        classDiagram.addRelViewEntity((RelViewEntity) ce);
+        break;
         default:
           throw new SAXNotRecognizedException(
               e.entityType + ": wrong entity type.");
     }
 
-    if (isSimpleEntity) {
+    switch (entityTypeNumber) {
+      case 0:
+        SimpleEntity se = (SimpleEntity) ce;
+        for (Variable v : e.attribute) {
+          Attribute a = new Attribute(VariableName.verifyAndAskNewName(v.name),
+                  v.type);
 
-      SimpleEntity se = (SimpleEntity) ce;
-      for (Variable v : e.attribute) {
-        Attribute a = new Attribute(VariableName.verifyAndAskNewName(v.name),
-                v.type);
-
-        se.addAttribute(a);
-        se.notifyObservers(UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
-        a.setConstant(v.constant);
-        a.setDefaultValue(v.defaultValue);
-        a.setStatic(v.isStatic);
-        a.setVisibility(v.visibility);
-        a.notifyObservers();
-      }
-
-      for (Operation o : e.method) {
-        Method m;
-        if (o.isConstructor)
-          m = new ConstructorMethod(
-              MethodName.verifyAndAskNewName(o.name), o.visibility, se);
-        else
-          m = new Method(
-              MethodName.verifyAndAskNewName(o.name),
-              new Type(TypeName.verifyAndAskNewName(o.returnType)), 
-              o.visibility, se);
-        se.addMethod(m);
-        se.notifyObservers(UpdateMessage.ADD_METHOD_NO_EDIT);
-
-        m.setParametersViewStyle(o.view);
-        m.setStatic(o.isStatic);
-        m.setAbstract(o.isAbstract);
-
-        for (Variable v : o.variable) {
-          classDiagram.components.Variable va = new classDiagram.components.Variable(
-                  VariableName.verifyAndAskNewName(v.name), v.type);
-          m.addParameter(va);
+          se.addAttribute(a);
+          se.notifyObservers(UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
+          a.setConstant(v.constant);
+          a.setDefaultValue(v.defaultValue);
+          a.setStatic(v.isStatic);
+          a.setVisibility(v.visibility);
+          a.notifyObservers();
         }
-        m.notifyObservers();
-      }
-    } else if(isRelEntity) {
-      RelationalEntity se = (RelationalEntity) ce;
-      for (Variable v : e.attribute) {
-        RelationalAttribute a = new RelationalAttribute(VariableName.verifyAndAskNewName(v.name),
-                v.type);
 
-        se.addAttribute(a);
-        se.notifyObservers(UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
-        a.setDefaultValue(v.defaultValue);
-        a.setUnique(v.unique);
-        a.setNotNull(v.notNull);
-        a.notifyObservers();
-      }
-    } else {
-      EnumEntity ee = (EnumEntity) ce;
-      for (EnumValue v : e.enums) {
-        ee.addEnumValue(v);
-        ee.notifyObservers(UpdateMessage.ADD_ENUM_NO_EDIT);
-      }
+        for (Operation o : e.method) {
+          Method m;
+          if (o.isConstructor)
+            m = new ConstructorMethod(
+                    MethodName.verifyAndAskNewName(o.name), o.visibility, se);
+          else
+            m = new Method(
+                    MethodName.verifyAndAskNewName(o.name),
+                    new Type(TypeName.verifyAndAskNewName(o.returnType)),
+                    o.visibility, se);
+          se.addMethod(m);
+          se.notifyObservers(UpdateMessage.ADD_METHOD_NO_EDIT);
+
+          m.setParametersViewStyle(o.view);
+          m.setStatic(o.isStatic);
+          m.setAbstract(o.isAbstract);
+
+          for (Variable v : o.variable) {
+            classDiagram.components.Variable va = new classDiagram.components.Variable(
+                    VariableName.verifyAndAskNewName(v.name), v.type);
+            m.addParameter(va);
+          }
+          m.notifyObservers();
+        }
+        break;
+
+      case 1:
+        EnumEntity ee = (EnumEntity) ce;
+        for (EnumValue v : e.enums) {
+          ee.addEnumValue(v);
+          ee.notifyObservers(UpdateMessage.ADD_ENUM_NO_EDIT);
+        }
+        break;
+
+      case 2:
+        RelationalEntity re = (RelationalEntity) ce;
+        for (Variable v : e.attribute) {
+          RelationalAttribute a = new RelationalAttribute(VariableName.verifyAndAskNewName(v.name),
+                  v.type);
+
+          re.addAttribute(a);
+          re.notifyObservers(UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
+          a.setDefaultValue(v.defaultValue);
+          a.setUnique(v.unique);
+          a.setNotNull(v.notNull);
+          a.notifyObservers();
+        }
+
+        for (Operation o : e.triggers) {
+          Trigger t = new Trigger(TriggerName.verifyAndAskNewName(o.name));
+          re.addTrigger(t);
+          re.notifyObservers(UpdateMessage.ADD_TRIGGER_NO_EDIT);
+          t.setProcedure(o.procedure);
+          t.setTriggerType(o.triggerType);
+          t.setActivationTime(o.activationTime);
+          t.notifyObservers();
+        }
+        break;
     }
-
     ce.notifyObservers();
   }
 

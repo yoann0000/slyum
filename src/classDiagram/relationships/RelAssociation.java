@@ -23,10 +23,10 @@ public class RelAssociation extends Binary{
     }
 
     public void addForeignKeys(){
-        ((RelationalEntity)getTarget()).addAlternateKey(((RelationalEntity)getSource()).getPrimaryKey());
+        ((RelationalEntity)getSource()).addForeignKey(((RelationalEntity)getSource()).getPrimaryKey());
     }
 
     public void removeForeignKeys() {
-        ((RelationalEntity)getTarget()).removeAlternateKey(((RelationalEntity)getSource()).getPrimaryKey());
+        ((RelationalEntity)getSource()).removeForeignKey(((RelationalEntity)getTarget()).getPrimaryKey());
     }
 }

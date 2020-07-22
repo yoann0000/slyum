@@ -12,8 +12,7 @@ public class NodeRelationalEntity extends NodeEntity {
     private final int FOREIGN_KEY = 1;
     private final int ALTERNATE_KEY = 2;
 
-    public NodeRelationalEntity(Entity entity, DefaultTreeModel treeModel,
-                                HierarchicalView.STree tree, ImageIcon icon) {
+    public NodeRelationalEntity(Entity entity, DefaultTreeModel treeModel, HierarchicalView.STree tree, ImageIcon icon) {
         super(entity, treeModel, tree, icon);
     }
 

@@ -29,8 +29,7 @@ public class ClassFactory extends EntityFactory {
   public ClassFactory(GraphicView parent) {
     super(parent);
 
-    GraphicView.setButtonFactory(SPanelDiagramComponent.getInstance()
-            .getBtnClass());
+    GraphicView.setButtonFactory(SPanelDiagramComponent.getInstance().getBtnClass());
   }
 
   @Override

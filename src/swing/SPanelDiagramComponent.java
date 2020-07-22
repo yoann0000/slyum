@@ -1,22 +1,18 @@
 package swing;
 
-import classDiagram.components.RelViewEntity;
 import graphic.GraphicView;
 import graphic.factory.*;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.ImageIcon;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import swing.slyumCustomizedComponents.SButton;
 import swing.slyumCustomizedComponents.SSeparator;
 import swing.slyumCustomizedComponents.SToolBar;
 import swing.slyumCustomizedComponents.SToolBarButton;
 import utility.PersonalizedIcon;
 import utility.Utility;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class SPanelDiagramComponent extends SToolBar implements ActionListener{
 
@@ -88,11 +84,14 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
   private static final String TT_VIEW = "View "
           + Utility.keystrokeToString(Slyum.KEY_REL_VIEW);
 
+  private static final String TT_CONVERT = "Convert "
+          + Utility.keystrokeToString(Slyum.KEY_CONVERT);
+
 
   private final SButton btnCursorMode, btnGripMode, btnClass, btnEnum, btnInterface,
           btnClassAssociation, btnGeneralize, btnDependeny, btnInnerClass,
           btnAssociation, btnAggregation, btnComposition, btnMulti, btnNote,
-          btnLinkNote, btnTable, btnAssocRel, btnView;
+          btnLinkNote, btnTable, btnAssocRel, btnView, btnUmlRel;
 
   private Mode currentMode;
   private static SPanelDiagramComponent instance;
@@ -197,6 +196,12 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
     add(btnLinkNote = createSButton(
             PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "linkNote.png"),
             Slyum.ACTION_NEW_LINK_NOTE, Color.RED, TT_LINK_NOTE));
+
+    add(new SSeparator());
+
+    add(btnUmlRel = createSButton(
+            PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "newRel.png"),
+            Slyum.ACTION_CONVERT_UML, Color.RED, TT_CONVERT));
   }
 
   public void setButtonModeStyle(SButton button) {
@@ -249,6 +254,7 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
     btnAggregation.setEnabled(!isRel);
     btnComposition.setEnabled(!isRel);
     btnMulti.setEnabled(!isRel);
+    btnUmlRel.setEnabled(!isRel);
   }
 
   @Override
@@ -314,6 +320,9 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
         break;
       case Slyum.ACTION_MODE_GRIP:
         setMode(Mode.GRIP);
+        break;
+      case Slyum.ACTION_CONVERT_UML:
+        MultiViewManager.ConvertSelectedView();
         break;
     }
   }

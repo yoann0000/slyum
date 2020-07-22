@@ -186,6 +186,10 @@ public class RelationalEntity extends Entity{
         moveComponentPosition(triggers, trigger, offset);
     }
 
+    public void moveAkPosition(Key ak, int offset) {
+        moveComponentPosition(alternateKeys, ak, offset);
+    }
+
     @Override
     protected String getEntityType() {
         return XMLParser.EntityType.TABLE.toString();

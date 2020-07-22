@@ -1,15 +1,17 @@
 package utility.RelValidation;
 
-import classDiagram.ClassDiagram;
 import classDiagram.IDiagramComponent;
 import classDiagram.components.*;
 import classDiagram.relationships.Association;
 import classDiagram.relationships.RelAssociation;
+import graphic.GraphicComponent;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class RelValidator {
-    private ClassDiagram classDiagram;
+    private LinkedList<IDiagramComponent> components;
     private int errors;
     private String errorString;
 
@@ -20,15 +22,15 @@ public class RelValidator {
     }
 
     private RelValidator() {
+        components = new LinkedList<>();
         errors = 0;
         errorString = "";
     }
 
     public void validate() {
-        if (classDiagram == null) return;
+        if (components == null) return;
         errors = 0;
         errorString = "";
-        LinkedList<IDiagramComponent> components = classDiagram.getComponents();
         LinkedList<RelationalEntity> re = new LinkedList<>();
         LinkedList<RelViewEntity> views = new LinkedList<>();
         LinkedList<RelAssociation> ra = new LinkedList<>();
@@ -145,7 +147,8 @@ public class RelValidator {
         return errorString;
     }
 
-    public void setClassDiagram(ClassDiagram classDiagram) {
-        this.classDiagram = classDiagram;
+    public void setComponents(LinkedList<GraphicComponent> components) {
+        this.components.clear();
+        components.forEach(graphicComponent -> this.components.add(graphicComponent.getAssociedComponent()));
     }
 }

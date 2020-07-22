@@ -346,8 +346,8 @@ public class MultiViewManager {
   }
   
   private ClassDiagram classDiagram;
-  private HierarchicalView hierarchicalView;
-  private LinkedList<GraphicView> graphicViews = new LinkedList<>();
+  private final HierarchicalView hierarchicalView;
+  private final LinkedList<GraphicView> graphicViews = new LinkedList<>();
 
   private MultiViewManager(
       ClassDiagram classDiagram, HierarchicalView hierarchicalView) {
@@ -371,7 +371,7 @@ public class MultiViewManager {
               ,"Conversion confirmation",JOptionPane.YES_NO_OPTION);
       if(dialogResult == JOptionPane.YES_OPTION){
         RelConverter.getInstance().setGraphicView(getSelectedGraphicView());
-        addAndOpenNewView(RelConverter.getInstance().getRelGraphicView());
+        RelConverter.getInstance().umlToRel();
       }
     }
   }

@@ -1,15 +1,20 @@
 package utility.relConverter;
 
 import classDiagram.ClassDiagram;
-import classDiagram.IDiagramComponent;
 import classDiagram.components.*;
 import classDiagram.relationships.*;
 import graphic.GraphicComponent;
 import graphic.GraphicView;
+import graphic.entity.ClassView;
 import graphic.entity.RelationalEntityView;
+import graphic.relations.MultiView;
+import graphic.relations.RelationView;
+import swing.MultiViewManager;
+import swing.PanelClassDiagram;
+import swing.propretiesView.PropretiesChanger;
 
+import java.awt.*;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 public class RelConverter {
@@ -35,91 +40,66 @@ public class RelConverter {
         converted = false;
     }
 
-    public GraphicView getRelGraphicView() {
-        if(converted)
-            return relGraphicView;
-        else
-            return umlToRel() ? relGraphicView : null;
-    }
+    public void umlToRel() {
+        if (graphicView.isRelational() || converted)
+            return;
 
-    public boolean umlToRel() {
-        if (graphicView.isRelational())
-            return false;
+        alreadyConverted = new HashMap<>();
+        createdFromMulti = new HashMap<>();
 
-        classDiagramUmlToRel();
+        relGraphicView = MultiViewManager.addNewView(graphicView.getName() + " - REL", true);
 
-        relGraphicView = new GraphicView(cdResult, false);
-
-        relGraphicView.setName(graphicView.getName() + " - REL");
-
-        relGraphicView.setRelational(true);
-
-        for (Entity entity : relGraphicView.getClassDiagram().getEntities()) {
-            if(entity instanceof RelationalEntity) {
-                relGraphicView.addTableEntity((RelationalEntity) entity);
-            }
-        }
-
-        for (Relation relation : relGraphicView.getClassDiagram().getRelations()) {
-            if(relation instanceof RelAssociation) {
-                relGraphicView.addRelAssociation((RelAssociation) relation);
+        for (GraphicComponent gc : graphicView.getAllDiagramComponents()) {
+            if (gc instanceof ClassView) {
+                RelationalEntity re = convertClass((ClassEntity) gc.getAssociedComponent());
+                addRelationalEntity(re, gc.getBounds());
             }
         }
 
         for (GraphicComponent gc : graphicView.getAllDiagramComponents()) {
-            IDiagramComponent component = gc.getAssociedComponent();
-            if(component instanceof ClassEntity) {
-                GraphicComponent relgc = relGraphicView.searchAssociedComponent(alreadyConverted.get(component));
-                relgc.setBounds(gc.getBounds());
-                for (RelationalAttribute ra : ((RelationalEntity)relgc.getAssociedComponent()).getAttributes()) {
-                    ((RelationalEntityView)relgc).addAttribute(ra, false);
-                }
-            } else if (component instanceof Multi) {
-                GraphicComponent relgc = relGraphicView.searchAssociedComponent(createdFromMulti.get(component));
-                relgc.setBounds(gc.getBounds());
-                for (RelationalAttribute ra : ((RelationalEntity)relgc.getAssociedComponent()).getAttributes()) {
-                    ((RelationalEntityView)relgc).addAttribute(ra, false);
-                }
+            if (gc instanceof RelationView) {
+                convertRelation((Relation)gc.getAssociedComponent());
+            } else if (gc instanceof MultiView) {
+                convertMulti((Multi) gc.getAssociedComponent(), gc.getBounds());
             }
         }
+
         converted = true;
-        return true;
+        MultiViewManager.openView(relGraphicView);
     }
 
     /**
-     * convert a uml class diagram to a relational diagram
-     * @return the converted diagram
+     * Add a relational entity to the diagram
+     * @param re the relational entity to add
+     * @param bounds the entity's position
      */
-    public void classDiagramUmlToRel() {
+    public void addRelationalEntity(RelationalEntity re, Rectangle bounds) {
+        relGraphicView.addTableEntity(re);
+        GraphicComponent component = relGraphicView.searchAssociedComponent(re);
+        component.setBounds(bounds);
 
-        alreadyConverted = new HashMap<>();
-        createdFromMulti = new HashMap<>();
-        cdResult = new ClassDiagram();
+        PropretiesChanger.getInstance().addRelationalEntity(re);
+        PanelClassDiagram.getInstance().getHierarchicalView().addRelationalEntity(re);
 
-        LinkedList<ClassEntity> classEntities = new LinkedList<>();
-        LinkedList<Relation> relations = new LinkedList<>();
-        ClassDiagram cd = graphicView.getClassDiagram();
-
-
-        for (Entity entity : cd.getEntities()) {
-            if(entity instanceof ClassEntity) {
-                classEntities.add((ClassEntity) entity);
-            }
+        for (RelationalAttribute ra : re.getAttributes()) {
+            ((RelationalEntityView) component).addAttribute(ra, false);
         }
+    }
 
-        for (Relation relation : cd.getRelations()) {
-            if (relation.getSource() instanceof ClassEntity && relation.getTarget() instanceof ClassEntity) {
-                relations.add(relation);
-            }
-        }
+    /**
+     * Create a converted association and add it to the class diagram
+     * @param source the source entity of the converted association
+     * @param target the target entity of the converted association
+     * @param name the name of the converted association
+     */
+    private void addRelAssociation(RelationalEntity source, RelationalEntity target, String name) {
+        RelAssociation ra = new RelAssociation(source, target);
+        ra.setName(name);
 
-        for (ClassEntity classEntity : classEntities) {
-            cdResult.addTableEntity(convertClass(classEntity), false);
-        }
+        relGraphicView.addRelAssociation(ra);
 
-        for (Relation relation : relations) {
-            convertRelation(relation);
-        }
+        PropretiesChanger.getInstance().addRelationalAssociation(ra);
+        PanelClassDiagram.getInstance().getHierarchicalView().addRelationalAssociation(ra);
     }
 
     /**
@@ -136,7 +116,6 @@ public class RelConverter {
                 re.addAttribute(convertAttribute(a));
             }
             alreadyConverted.put(classEntity, re);
-            cdResult.addTableEntity(re, false);
             return re;
         }
     }
@@ -164,11 +143,7 @@ public class RelConverter {
             return;
 
         if (relation instanceof Inheritance) {
-            RelAssociation r = convertInheritance((Inheritance) relation);
-            cdResult.addRelAssociation(r, false);
-
-        } else if (relation instanceof Multi) {
-            convertMulti((Multi) relation);
+            convertInheritance((Inheritance) relation);
         } else {
             convertBinary((Binary) relation);
         }
@@ -203,12 +178,11 @@ public class RelConverter {
             if (m2.isZeroToOne() || m2.isOne()) { //1-1
                 source = convertClass((ClassEntity) binary.getSource());
                 target = convertClass((ClassEntity) binary.getTarget());
-                addRelAssociation(source, target, name);
             } else { //1-N
                 source = convertClass((ClassEntity) binary.getTarget());
                 target = convertClass((ClassEntity) binary.getSource());
-                addRelAssociation(source, target, name);
             }
+            addRelAssociation(source, target, name);
         } else {
             if (m2.isZeroToOne() || m2.isOne()) { //N-1
                 source = convertClass((ClassEntity) binary.getSource());
@@ -217,11 +191,18 @@ public class RelConverter {
             } else { //N-M
                 source = convertClass((ClassEntity) binary.getSource());
                 target = convertClass((ClassEntity) binary.getTarget());
-                RelationalEntity re = new RelationalEntity(source.getName() + " - " + target.getName());
+                RelationalEntity re = new RelationalEntity(source.getName() + "-" + target.getName());
                 source.getPrimaryKey().getKeyComponents().forEach(re::addAttribute);
                 target.getPrimaryKey().getKeyComponents().forEach(re::addAttribute);
                 re.getAttributes().forEach(attribute -> re.getPrimaryKey().addKeyComponent(attribute));
-                cdResult.addTableEntity(re);
+
+                Rectangle sourceBounds = relGraphicView.searchAssociedComponent(source).getBounds();
+                Rectangle targetBounds = relGraphicView.searchAssociedComponent(target).getBounds();
+
+                Rectangle bounds = new Rectangle((sourceBounds.x + targetBounds.x)/2,
+                        (sourceBounds.y + targetBounds.y)/2, sourceBounds.width, sourceBounds.height);
+
+                addRelationalEntity(re, bounds);
 
                 addRelAssociation(re, source, name + " 1");
                 addRelAssociation(re, target, name + " 2");
@@ -230,44 +211,29 @@ public class RelConverter {
     }
 
     /**
-     * Create a converted association and add it to the class diagram
-     * @param source the source entity of the converted association
-     * @param target the target entity of the converted association
-     * @param name the name of the converted association
-     */
-    private void addRelAssociation(RelationalEntity source, RelationalEntity target, String name) {
-        RelAssociation ra = new RelAssociation(source, target);
-        ra.setName(name);
-        cdResult.addRelAssociation(ra, false);
-    }
-
-    /**
      * Convert an inheritance to a relational association
      * @param inheritance the inheritance to convert
-     * @return the converted inheritance
      */
-    private RelAssociation convertInheritance(Inheritance inheritance) {
+    private void convertInheritance(Inheritance inheritance) {
         RelationalEntity target = convertClass((ClassEntity) inheritance.getSource());
         RelationalEntity source = convertClass((ClassEntity) inheritance.getTarget());
         target.setPrimaryKey(source.getPrimaryKey());
-        return new RelAssociation(source, target);
+        addRelAssociation(source, target, "");
     }
 
     /**
      * Convert a multi association to table and relational associations
      * @param multi the multi association to convert
      */
-    private void convertMulti(Multi multi) {
+    private void convertMulti(Multi multi, Rectangle bounds) {
         String name = multi.getName().equals("") ? "Multi" : multi.getName();
         RelationalEntity source = new RelationalEntity(name);
-        cdResult.addTableEntity(source, false);
+        addRelationalEntity(source, bounds);
         for (Role role : multi.getRoles()){
             if (role.getEntity() instanceof ClassEntity) {
                 RelationalEntity target = convertClass((ClassEntity) role.getEntity());
-                RelAssociation ra = new RelAssociation(source, target);
-                cdResult.addRelAssociation(ra, false);
+                addRelAssociation(source, target, "");
             }
         }
-        createdFromMulti.put(multi, source);
     }
 }

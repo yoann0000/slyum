@@ -247,18 +247,6 @@ public class RelationalEntityView extends EntityView {
         initViewType();
     }
 
-    /**
-     * Set the display state for methods.
-     *
-     * @param display
-     *          the new display state for methods.
-     */
-    public void setDisplayTriggers(boolean display) {
-        displayTriggers = display;
-        displayDefault = false;
-        updateHeight();
-    }
-
     @Override
     public void setPictureMode(boolean enable) {
         super.setPictureMode(enable);
@@ -541,22 +529,6 @@ public class RelationalEntityView extends EntityView {
      *          the attribute to prepare
      */
     protected void prepareNewAttribute(RelationalAttribute attribute){}
-
-    /**
-     * Change the display style of parameters for the pressed TextBox if exists,
-     * or for all otherwise.
-     *
-     * @param newStyle
-     *          the new display style
-     */
-    private void methodViewChangeClicked(ParametersViewStyle newStyle) {
-//        if (pressedTextBox instanceof TextBoxMethod)
-//            ((Method) pressedTextBox.getAssociedComponent())
-//                    .setParametersViewStyle(newStyle);
-//        else
-//            for (RelationalEntityView ev : getSelectedRelationalEntityView(parent))
-//                ev.triggerViewChange(newStyle);
-    }
 
     private void updateMenuItemMethodsView() {
         JMenuItem itemToSelect;

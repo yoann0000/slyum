@@ -171,4 +171,16 @@ public class Multiplicity extends Observable implements IDiagramComponent {
 
     return multiplicity;
   }
+
+  public boolean isZero() {
+    return lowerBound == 0 && upperBound == 0;
+  }
+
+  public boolean isZeroToOne() {
+    return lowerBound == 0 && upperBound == 1;
+  }
+
+  public boolean isOne() {
+    return lowerBound == 1 && upperBound == 1;
+  }
 }

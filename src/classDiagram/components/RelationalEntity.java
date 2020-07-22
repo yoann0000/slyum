@@ -8,7 +8,7 @@ import swing.XMLParser;
 import java.util.LinkedList;
 
 public class RelationalEntity extends Entity{
-    private Key primaryKey;
+    private Key primaryKey = new Key("ID", this);
     private final LinkedList<Key> foreignKeys = new LinkedList<>();
     private final LinkedList<Key> alternateKeys = new LinkedList<>();
     private LinkedList<RelationalAttribute> attributes = new LinkedList<>();
@@ -184,6 +184,10 @@ public class RelationalEntity extends Entity{
 
     public void moveTriggerPosition(Trigger trigger, int offset) {
         moveComponentPosition(triggers, trigger, offset);
+    }
+
+    public void moveAkPosition(Key ak, int offset) {
+        moveComponentPosition(alternateKeys, ak, offset);
     }
 
     @Override

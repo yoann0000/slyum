@@ -16,6 +16,11 @@ public class RelViewEntity extends Entity {
         this.procedure = procedure;
     }
 
+    public RelViewEntity(String name, int id, String procedure) {
+        super(name, id);
+        this.procedure = procedure;
+    }
+
     @Override
     protected String getEntityType() {
         return "View";

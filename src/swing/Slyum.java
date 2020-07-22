@@ -7,6 +7,7 @@ import swing.SPanelDiagramComponent.Mode;
 import swing.slyumCustomizedComponents.SButton;
 import update.UpdateInfo;
 import utility.*;
+import utility.relConverter.RelConverter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,6 +61,7 @@ public class Slyum extends JFrame implements ActionListener {
   public final static String ACTION_LOCATE = "locate";
 
   // Action command
+  public static final String ACTION_CONVERT_UML = "ConvertUml";
   public static final String ACTION_MODE_CURSOR = "ModeCursor";
   public static final String ACTION_MODE_GRIP = "ModeGrip";
   public static final String ACTION_MOVE_BOTTOM = "MoveBottom";
@@ -151,6 +153,8 @@ public class Slyum extends JFrame implements ActionListener {
   public static final String KEY_TABLE = "T";
   public static final String KEY_REL_ASSOCIATION = "ctrl R";
   public static final String KEY_REL_VIEW = "V";
+
+  public static final String KEY_CONVERT = "alt C";
   
   public final static String KEY_CLOSE_VIEW = "ctrl W";
   public static final String KEY_COLOR = "ctrl L";

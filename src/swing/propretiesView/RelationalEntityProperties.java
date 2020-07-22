@@ -407,7 +407,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
                     trigger.getProcedure() });
 
             trigger.addObserver(this);
-            trigger.addObserver(triggerProcedure);//FIXME
+            trigger.addObserver(triggerProcedure);
             mapIndex.put(trigger, data.size() - 1);
 
             fireTableRowsInserted(0, data.size());
@@ -615,14 +615,396 @@ public class RelationalEntityProperties extends GlobalPropreties{
         }
     }
 
-    private final STable attributesTable, keyAttributesTable, triggerTable;
+    /*private class AlternateKeyTableModel extends AbstractTableModel
+            implements Observer, TableModelListener, MouseListener {
+
+        private final String[] columnNames = {"name"};
+
+        private final LinkedList<Object[]> data = new LinkedList<>();
+
+        private final HashMap<Key, Integer> mapIndex = new HashMap<>();
+
+        public void addAk(Key key) {
+            data.add(new Object[] { key.getName() });
+
+            key.addObserver(this);
+            key.addObserver((RelationalEntityProperties.AkComponentTableModel) akComponentsTable.getModel());
+            mapIndex.put(key, data.size() - 1);
+
+            fireTableRowsInserted(0, data.size());
+        }
+
+        public void clearAll() {
+            data.clear();
+            mapIndex.clear();
+            fireTableDataChanged();
+        }
+
+        @Override
+        public Class<?> getColumnClass(int c) {
+            return getValueAt(0, c).getClass();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public String getColumnName(int col) {
+            return columnNames[col];
+        }
+
+        @SuppressWarnings({ "unchecked" })
+        public HashMap<Key, Integer> getMapIndex() {
+            return (HashMap<Key, Integer>) mapIndex.clone();
+        }
+
+        @Override
+        public int getRowCount() {
+            return data.size();
+        }
+
+        @Override
+        public Object getValueAt(int row, int col) {
+            return data.get(row)[col];
+        }
+
+        @Override
+        public boolean isCellEditable(int row, int col) {
+            return true;
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {}
+
+        @Override
+        public void mouseEntered(MouseEvent e) {}
+
+        @Override
+        public void mouseExited(MouseEvent e) {}
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (currentObject == null || !(currentObject instanceof SimpleEntity))
+                return;
+
+            // Get the selected key
+            final int index = alternateKeyTable.getSelectionModel()
+                    .getLeadSelectionIndex();
+            final Key key = Utility.getKeysByValue(mapIndex, index).iterator()
+                    .next();
+
+            // Unselect all keys
+            for (final Key k : ((RelationalEntity) currentObject).getAlternateKeys()) {
+                if (k.equals(key)) continue;
+
+                k.select();
+                k.notifyObservers(IDiagramComponent.UpdateMessage.UNSELECT);
+            }
+
+            // Select the selected key
+            key.select();
+            key.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {}
+
+        public void setKey(Key key, int index) {
+            data.set(index,
+                    new Object[] { key.getName() });
+
+            fireTableRowsUpdated(index, index);
+        }
+
+        @Override
+        public void setValueAt(Object value, int row, int col) {
+            try {
+                data.get(row)[col] = value;
+                fireTableCellUpdated(row, col);
+            } catch (Exception ignored) {
+
+            }
+        }
+
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            final int row = e.getFirstRow();
+            final int column = e.getColumn();
+
+            if (column == -1) return;
+
+            final TableModel model = (TableModel) e.getSource();
+            final Object data = model.getValueAt(row, column);
+            final Key key = Utility.getKeysByValue(mapIndex, row).iterator()
+                    .next();
+
+            if (column == 0) { // nom
+                if (key.setName((String) data))
+                    setValueAt(key.getName(), row, column);
+            }
+
+            key.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+            //key.getReturnType().notifyObservers();
+
+            alternateKeyTable.addRowSelectionInterval(row, row);
+        }
+
+        @Override
+        public void update(Observable observable, Object o) {
+            try {
+                final int index = mapIndex.get(observable);
+
+                if (index == -1) return;
+
+                if (o instanceof IDiagramComponent.UpdateMessage)
+                    switch ((IDiagramComponent.UpdateMessage) o) {
+                        case SELECT:
+                            btnRemoveAk.setEnabled(true);
+                            btnUpAk.setEnabled(index > 0);
+                            btnDownAk.setEnabled(index < mapIndex.size() - 1);
+                            showInProperties();
+                            alternateKeyTable.addRowSelectionInterval(index, index);
+                            alternateKeyTable.scrollRectToVisible(alternateKeyTable.getCellRect(
+                                    alternateKeyTable.getSelectedRow(),
+                                    alternateKeyTable.getSelectedColumn(), true));
+                            break;
+                        case UNSELECT:
+                            alternateKeyTable.removeRowSelectionInterval(index, index);
+                            break;
+                        default:
+                            break;
+                    }
+
+                setKey((Key) observable, index);
+            } catch (final Exception ignored) {
+
+            }
+        }
+
+    }
+
+    private class AkComponentTableModel
+            extends AbstractTableModel
+            implements Observer, TableModelListener, ActionListener, MouseListener {
+        private final String[] columnNames = { "name" };
+
+        private Key currentAk;
+
+        private RelationalAttribute currentAttribute;
+
+        private final LinkedList<Object[]> data = new LinkedList<>();
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+        }
+
+        public void clearAll() {
+            if (currentAk != null)
+                for (Variable v : currentAk.getKeyComponents())
+                    v.deleteObserver(this);
+
+            data.clear();
+            fireTableDataChanged();
+        }
+
+        @Override
+        public Class<?> getColumnClass(int c) {
+            return getValueAt(0, c).getClass();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public String getColumnName(int col) {
+            return columnNames[col];
+        }
+
+        public RelationalAttribute getCurrentAttribute() {
+            return currentAttribute;
+        }
+
+        public Key getCurrentAk() {
+            return currentAk;
+        }
+
+        @Override
+        public int getRowCount() {
+            return data.size();
+        }
+
+        @Override
+        public Object getValueAt(int row, int col) {
+            return data.get(row)[col];
+        }
+
+        @Override
+        public boolean isCellEditable(int row, int col) {
+            return true;
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent arg0) {}
+
+        @Override
+        public void mouseEntered(MouseEvent arg0) {}
+
+        @Override
+        public void mouseExited(MouseEvent arg0) {}
+
+        @Override
+        public void mousePressed(MouseEvent arg0) {
+            if (currentAk == null) return;
+
+            // Get the selected parameter
+            final int index = akComponentsTable.getSelectionModel()
+                    .getLeadSelectionIndex();
+            final RelationalAttribute attribute = currentAk.getKeyComponents().get(index);
+
+            setCurrentAttribute(attribute);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent arg0) {}
+
+        private void attributeSelected() {
+            btnRemoveAkAttribute.setEnabled(currentAttribute != null);
+            btnUpAkAttribute.setEnabled(currentAk.getKeyComponents().indexOf(
+                    currentAttribute) > 0);
+            btnDownAkAttribute.setEnabled(currentAk.getKeyComponents().indexOf(
+                    currentAttribute) < currentAk.getKeyComponents().size() - 1);
+        }
+
+        public void removeCurrentAttribute() {
+            final RelationalAttribute attribute = getCurrentAttribute();
+            int index = currentAk.getKeyComponents().indexOf(attribute);
+
+            if (attribute == null) return;
+
+            currentAk.removeKeyComponent(attribute);
+            attribute.notifyObservers();
+            currentAk.select();
+            currentAk.notifyObservers();
+            currentAk.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+
+            {
+                currentAk.select();
+                currentAk.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+
+                final int size = currentAk.getKeyComponents().size();
+                if (size == index) index--;
+
+                if (size == 0) return;
+
+                akComponentsTable.addRowSelectionInterval(index, index);
+                ((RelationalEntityProperties.AkComponentTableModel) akComponentsTable.getModel())
+                        .setCurrentAttribute(currentAk.getKeyComponents().get(index));
+            }
+        }
+
+        public void setCurrentAttribute(RelationalAttribute attribute) {
+            currentAttribute = attribute;
+            attributeSelected();
+        }
+
+        public void setAttribute(Key key) {
+            if (key == null) return;
+
+            clearAll();
+            for (final RelationalAttribute ra : key.getKeyComponents()) {
+                ra.addObserver(this);
+                data.add(new Object[] { ra.getName() });
+            }
+
+            fireTableRowsInserted(0, data.size());
+        }
+
+        @Override
+        public void setValueAt(Object value, int row, int col) {
+            data.get(row)[col] = value;
+
+            fireTableCellUpdated(row, col);
+        }
+
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            if (currentAk == null) return;
+
+            final int row = e.getFirstRow();
+            final int column = e.getColumn();
+
+            if (column == -1) return;
+
+            final TableModel model = (TableModel) e.getSource();
+            final Object data = model.getValueAt(row, column);
+
+            if (column == 0) { // Attribute name
+                currentAk.getKeyComponents().get(row).setName((String) data);
+            }
+
+            currentAk.getKeyComponents().get(row).notifyObservers();
+            currentAk.notifyObservers();
+            currentAk.getKeyComponents().get(row).getType().notifyObservers();
+            currentAk.select();
+            currentAk.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+
+            final RelationalAttribute attribute = currentAk.getKeyComponents().get(row);
+
+            akComponentsTable.addRowSelectionInterval(row, row);
+            ((RelationalEntityProperties.AkComponentTableModel) akComponentsTable.getModel())
+                    .setCurrentAttribute(attribute);
+        }
+
+        @Override
+        public void update(Observable observable, Object o) {
+            if (o instanceof IDiagramComponent.UpdateMessage) {
+                switch ((IDiagramComponent.UpdateMessage) o) {
+                    case SELECT:
+                        showInProperties();
+                        clearAll();
+                        currentAk = (Key) observable;
+                        setAttribute(currentAk);
+                        panelAkAttributes.setVisible(true);
+                        final boolean hasAttributes = currentAk.getKeyComponents().size() > 0;
+                        scrollPaneAkAttributes.setVisible(hasAttributes);
+                        imgNoAttribute.setVisible(!hasAttributes);
+                        imgAkSelected.setVisible(false);
+                        break;
+                    case UNSELECT:
+                        clearAll();
+                        scrollPaneAkAttributes.setVisible(false);
+                        imgAkSelected.setVisible(true);
+                        imgNoAttribute.setVisible(false);
+                        btnRemoveAkAttribute.setEnabled(false);
+                        btnUpAkAttribute.setEnabled(false);
+                        btnDownAkAttribute.setEnabled(false);
+                        break;
+                    default:
+                        break;
+                }
+            } else
+                setAttribute(currentAk);
+        }
+    }*/
+
+
+    private final STable attributesTable, keyAttributesTable, triggerTable; //, alternateKeyTable, akComponentsTable;
     private final JButton btnRemoveAttribute, btnUpAttribute, btnDownAttribute, btnAddAttributeToPk,
             btnUpPkAttribute, btnDownPkAttribute, btnRemovePkAttribute,
             btnUpTrigger, btnDownTrigger, btnRemoveTrigger;
+            //, btnUpAk, btnDownAk, btnRemoveAk,
+            //btnUpAkAttribute, btnDownAkAttribute, btnRemoveAkAttribute;
     private final JTextField textName = new TextFieldWithPrompt("", "Enter the entity's name"),
                                pkName = new TextFieldWithPrompt("","Enter the Primary key's name");
+    //private final JLabel imgAkSelected, imgNoAttribute;
     private final JLabel pk = new JLabel();
-    private final JLabel proc = new JLabel();
+    //private final JPanel panelAkAttributes;
+    //private final JScrollPane scrollPaneAkAttributes;
     private final TriggerProcedure triggerProcedure = new TriggerProcedure();
 
     public RelationalEntityProperties() {
@@ -645,12 +1027,43 @@ public class RelationalEntityProperties extends GlobalPropreties{
         btnRemovePkAttribute = new SButton(
                 PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "minus.png"), "Remove");
 
+        //Buttons for triggers
         btnUpTrigger = new SButton(
                 PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-up-24.png"), "Up");
         btnDownTrigger = new SButton(
                 PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-down-24.png"), "Down");
         btnRemoveTrigger = new SButton(
                 PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "minus.png"), "Remove");
+
+        /*
+        //Buttons for Alternate keys
+        btnUpAk = new SButton(
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-up-24.png"), "Up");
+        btnDownAk = new SButton(
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-down-24.png"), "Down");
+        btnRemoveAk = new SButton(
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "minus.png"), "Remove");
+
+        // Buttons for ak attributes.
+        btnUpAkAttribute = new SButton(
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-up-24.png"), "Up");
+        btnDownAkAttribute = new SButton(
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "arrow-down-24.png"), "Down");
+        btnRemoveAkAttribute = new SButton(
+                PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "minus.png"), "Remove");
+
+        // Others components
+        imgAkSelected = new JLabel(
+                PersonalizedIcon.createImageIcon(
+                        Slyum.ICON_PATH + "select_ak.png"));
+        imgAkSelected.setAlignmentX(CENTER_ALIGNMENT);
+
+        imgNoAttribute = new JLabel(
+                PersonalizedIcon.createImageIcon(
+                        Slyum.ICON_PATH + "empty_attribute.png"));
+        imgNoAttribute.setAlignmentX(CENTER_ALIGNMENT);
+        imgNoAttribute.setVisible(false);
+        */
 
         attributesTable = new STable(new RelationalEntityProperties.AttributeTableModel(),
                 () -> addAttribute(false));
@@ -665,7 +1078,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
                 (RelationalEntityProperties.AttributeTableModel) attributesTable.getModel()
         );
 
-        keyAttributesTable = new STable(new PKTableModel(), () -> addAttribute(false));
+        keyAttributesTable = new STable(new PKTableModel());
         keyAttributesTable.setEmptyText("No key attribute");
         keyAttributesTable.setPreferredScrollableViewportSize(new Dimension(70, 0));
 
@@ -687,6 +1100,21 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
         comboBoxColumn = triggerTable.getColumnModel().getColumn(2);
         comboBoxColumn.setCellEditor(new DefaultCellEditor(Utility.getTriggerTypeComboBox()));
+
+        /*
+        alternateKeyTable = new STable(new RelationalEntityProperties.AlternateKeyTableModel(), () -> addAk(false));
+        alternateKeyTable.setEmptyText("No alternate keys");
+        alternateKeyTable.setPreferredScrollableViewportSize(new Dimension(70, 0));
+        alternateKeyTable.getModel().addTableModelListener(
+                (RelationalEntityProperties.AlternateKeyTableModel) alternateKeyTable.getModel());
+        alternateKeyTable.addMouseListener((RelationalEntityProperties.AlternateKeyTableModel) alternateKeyTable.getModel());
+
+        akComponentsTable = new STable(new RelationalEntityProperties.AkComponentTableModel());
+        akComponentsTable.setPreferredScrollableViewportSize(new Dimension(70, 0));
+        akComponentsTable.getModel().addTableModelListener(
+                (RelationalEntityProperties.AkComponentTableModel) akComponentsTable.getModel());
+        akComponentsTable.addMouseListener((RelationalEntityProperties.AkComponentTableModel) akComponentsTable.getModel());
+         */
 
         JPanel p = new FlatPanel();
         p.setAlignmentY(TOP_ALIGNMENT);
@@ -910,10 +1338,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
                                 ((RelationalEntityProperties.AttributeTableModel) attributesTable.getModel())
                                         .getMapIndex(), index).iterator().next();
 
-                if (!(((RelationalEntity) currentObject).getPrimaryKey().getKeyComponents().contains(attribute))) {
-                    ((RelationalEntity) currentObject).getPrimaryKey().addKeyComponent(attribute);
-                    ((RelationalEntity) currentObject).notifyObservers(IDiagramComponent.UpdateMessage.ADD_PK_ATTRIBUTE_NO_EDIT);
-                }
+                addPkAttribute(attribute, false);
             });
 
             panelButton.add(btnAddAttributeToPk);
@@ -1053,6 +1478,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
         textAreaPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         textAreaPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
+        JLabel proc = new JLabel();
         proc.setText("Trigger Procedure");
         panel.add(proc);
         panel.add(Box.createVerticalStrut(5));
@@ -1060,6 +1486,169 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
         p.add(panel, BorderLayout.CENTER);
         add(p);
+
+        /*
+        panelButton = new JPanel();
+        panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.PAGE_AXIS));
+        panelButton.setOpaque(false);
+
+        {
+            btnUpAk.setAlignmentX(CENTER_ALIGNMENT);
+            btnUpAk.setEnabled(false);
+            btnUpAk.addActionListener(evt -> {
+
+                // Get the selected key
+                final int index = alternateKeyTable.getSelectionModel()
+                        .getLeadSelectionIndex();
+                final Key key = Utility
+                        .getKeysByValue(
+                                ((RelationalEntityProperties.AlternateKeyTableModel) alternateKeyTable.getModel())
+                                        .getMapIndex(), index).iterator().next();
+
+                ((RelationalEntity) currentObject).moveAkPosition(key, -1);
+                ((RelationalEntity) currentObject).notifyObservers();
+                key.select();
+                key.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+            });
+
+            panelButton.add(btnUpAk);
+        }
+        {
+            btnDownAk.setAlignmentX(CENTER_ALIGNMENT);
+            btnDownAk.setEnabled(false);
+            btnDownAk.addActionListener(evt -> {
+
+                // Get the selected key
+                final int index = alternateKeyTable.getSelectionModel()
+                        .getLeadSelectionIndex();
+                final Key key = Utility
+                        .getKeysByValue(
+                                ((RelationalEntityProperties.AlternateKeyTableModel) alternateKeyTable.getModel())
+                                        .getMapIndex(), index).iterator().next();
+
+                ((RelationalEntity) currentObject).moveAkPosition(key, 1);
+                ((SimpleEntity) currentObject).notifyObservers();
+                key.select();
+                key.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+            });
+
+            panelButton.add(btnDownAk);
+        }
+
+        {
+            btnRemoveAk.setAlignmentX(CENTER_ALIGNMENT);
+            btnRemoveAk.setEnabled(false);
+            btnRemoveAk.addActionListener(arg0 -> {
+                // Get the selected key
+                final int index = alternateKeyTable.getSelectionModel()
+                        .getLeadSelectionIndex();
+                Key key = Utility
+                        .getKeysByValue(
+                                ((RelationalEntityProperties.AlternateKeyTableModel) alternateKeyTable.getModel())
+                                        .getMapIndex(), index).iterator().next();
+
+                ((RelationalEntity) currentObject).removeAlternateKey(key);
+                ((RelationalEntity) currentObject).notifyObservers();
+
+                for (int i = 0; i <= 1; i++) {
+                    try {
+                        key = Utility
+                                .getKeysByValue(
+                                        ((RelationalEntityProperties.AlternateKeyTableModel) alternateKeyTable.getModel())
+                                                .getMapIndex(), index - i).iterator()
+                                .next();
+                    } catch (final NoSuchElementException e) {
+                        continue;
+                    }
+
+                    key.select();
+                    key.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+                    break;
+                }
+            });
+
+            panelButton.add(btnRemoveAk);
+        }
+
+        p.add(panel, BorderLayout.CENTER);
+        p.add(panelButton, BorderLayout.EAST);
+        add(p);
+
+        panel = panelAkAttributes = new FlatPanel();
+        panel.setLayout(new MultiBorderLayout());
+        panel.setAlignmentY(TOP_ALIGNMENT);
+        scrollPaneAkAttributes = akComponentsTable.getScrollPane();
+        scrollPaneAkAttributes.setVisible(false);
+        panel.setMaximumSize(new Dimension(100, Short.MAX_VALUE));
+        panel.setPreferredSize(new Dimension(200, 0));
+        panel.add(scrollPaneAkAttributes, BorderLayout.CENTER);
+
+        final JPanel btnPanel = new JPanel();
+
+        btnUpAkAttribute.setAlignmentX(CENTER_ALIGNMENT);
+        btnUpAkAttribute.setEnabled(false);
+        btnUpAkAttribute.addActionListener(e -> {
+            // Get the selected relationalAttribute
+            int index = alternateKeyTable.getSelectionModel().getLeadSelectionIndex();
+            final Key key = Utility
+                    .getKeysByValue(
+                            ((RelationalEntityProperties.AlternateKeyTableModel) alternateKeyTable.getModel())
+                                    .getMapIndex(), index).iterator().next();
+
+            final RelationalAttribute relationalAttribute = key.getKeyComponents().get(
+                    akComponentsTable.getSelectionModel().getLeadSelectionIndex());
+
+            index = akComponentsTable.getSelectionModel().getLeadSelectionIndex();
+            key.moveAttributePosition(relationalAttribute, -1);
+            key.notifyObservers();
+
+            key.select();
+            key.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+
+            index--;
+            akComponentsTable.addRowSelectionInterval(index, index);
+            ((RelationalEntityProperties.AkComponentTableModel) akComponentsTable.getModel())
+                    .setCurrentAttribute(relationalAttribute);
+        });
+        btnPanel.add(btnUpAkAttribute);
+
+        btnDownAkAttribute.setAlignmentX(CENTER_ALIGNMENT);
+        btnDownAkAttribute.setEnabled(false);
+        btnDownAkAttribute.addActionListener(e -> {
+            // Get the selected attribute
+            int index = alternateKeyTable.getSelectionModel().getLeadSelectionIndex();
+            final Key key = Utility
+                    .getKeysByValue(
+                            ((RelationalEntityProperties.AlternateKeyTableModel) alternateKeyTable.getModel())
+                                    .getMapIndex(), index).iterator().next();
+
+            index = akComponentsTable.getSelectionModel().getLeadSelectionIndex();
+            final RelationalAttribute attribute = key.getKeyComponents().get(index);
+
+            key.moveAttributePosition(attribute, 1);
+            key.notifyObservers();
+
+            key.select();
+            key.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+
+            index++;
+            akComponentsTable.addRowSelectionInterval(index, index);
+            ((RelationalEntityProperties.AkComponentTableModel) akComponentsTable.getModel())
+                    .setCurrentAttribute(attribute);
+        });
+        btnPanel.add(btnDownAkAttribute);
+
+        btnRemoveAkAttribute.setAlignmentX(CENTER_ALIGNMENT);
+        btnRemoveAkAttribute.setEnabled(false);
+        btnRemoveAkAttribute.addActionListener(e -> ((RelationalEntityProperties.AkComponentTableModel) akComponentsTable.getModel())
+                .removeCurrentAttribute());
+        btnPanel.add(btnRemoveAkAttribute);
+        btnPanel.setBackground(null);
+        btnPanel.setPreferredSize(new Dimension(190, 30));
+        panel.add(imgAkSelected, BorderLayout.CENTER);
+        panel.add(imgNoAttribute, BorderLayout.CENTER);
+        panel.add(btnPanel, BorderLayout.SOUTH);
+        add(panel);*/
     }
 
 
@@ -1131,15 +1720,15 @@ public class RelationalEntityProperties extends GlobalPropreties{
             entity.notifyObservers(IDiagramComponent.UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
     }
 
-    private void addPkAttribute(boolean editRequest) {
-        RelationalEntity entity = (RelationalEntity)currentObject;
+    private void addPkAttribute(RelationalAttribute ra, boolean editRequest) {
+        Key key = ((RelationalEntity)currentObject).getPrimaryKey();
 
-        entity.getPrimaryKey().addKeyComponent(new RelationalAttribute("attribute", PrimitiveType.VOID_TYPE));
+        key.addKeyComponent(ra);
 
         if (editRequest)
-            entity.notifyObservers(IDiagramComponent.UpdateMessage.ADD_PK_ATTRIBUTE);
+            key.notifyObservers(IDiagramComponent.UpdateMessage.ADD_KEY);
         else
-            entity.notifyObservers(IDiagramComponent.UpdateMessage.ADD_PK_ATTRIBUTE_NO_EDIT);
+            key.notifyObservers(IDiagramComponent.UpdateMessage.ADD_KEY_NO_EDIT);
     }
 
     private void addTrigger(boolean editRequest) {
@@ -1152,6 +1741,18 @@ public class RelationalEntityProperties extends GlobalPropreties{
         else
             entity.notifyObservers(IDiagramComponent.UpdateMessage.ADD_TRIGGER_NO_EDIT);
     }
+
+    private void addAk(boolean editRequest) {
+        RelationalEntity entity = (RelationalEntity)currentObject;
+
+        entity.addAlternateKey(new Key("AK", entity));
+
+        if (editRequest)
+            entity.notifyObservers(IDiagramComponent.UpdateMessage.ADD_KEY);
+        else
+            entity.notifyObservers(IDiagramComponent.UpdateMessage.ADD_KEY_NO_EDIT);
+    }
+
 
     private void stopEditingTables() {
         TableCellEditor a = attributesTable.getCellEditor();
@@ -1225,8 +1826,8 @@ public class RelationalEntityProperties extends GlobalPropreties{
                     attributesTable.getRowCount(), attributesTable.getColumnCount(),
                     true));
 
-        if (msg == IDiagramComponent.UpdateMessage.ADD_PK_ATTRIBUTE
-                || msg == IDiagramComponent.UpdateMessage.ADD_PK_ATTRIBUTE_NO_EDIT)
+        if (msg == IDiagramComponent.UpdateMessage.ADD_KEY
+                || msg == IDiagramComponent.UpdateMessage.ADD_KEY_NO_EDIT)
             keyAttributesTable.scrollRectToVisible(keyAttributesTable.getCellRect(
                     keyAttributesTable.getRowCount(), keyAttributesTable.getColumnCount(),
                     true));

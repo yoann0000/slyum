@@ -239,7 +239,7 @@ public class DiagramPropreties
         break;
       case ACTION_VALIDATE:
         if (MultiViewManager.getSelectedGraphicView().isRelational()){
-          rv.setClassDiagram(cd);
+          rv.setComponents(MultiViewManager.getSelectedGraphicView().getAllDiagramComponents());
           rv.validate();
           if (rv.getErrors() == 0) {
             txtRelVal.setForeground(Color.GREEN);

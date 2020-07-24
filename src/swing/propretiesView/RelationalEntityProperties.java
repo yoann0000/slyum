@@ -1339,6 +1339,8 @@ public class RelationalEntityProperties extends GlobalPropreties{
                                         .getMapIndex(), index).iterator().next();
 
                 addPkAttribute(attribute, false);
+                ((PKTableModel) keyAttributesTable.getModel()).fireTableDataChanged();
+                keyAttributesTable.repaint();
             });
 
             panelButton.add(btnAddAttributeToPk);
@@ -1677,6 +1679,8 @@ public class RelationalEntityProperties extends GlobalPropreties{
         });
         panel.add(textName);
         panel.add(Box.createVerticalStrut(5));
+
+        //pk name
         pk.setText("Primary Key Name");
         panel.add(pk);
 
@@ -1691,7 +1695,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
                     if (!relationalEntity.getPrimaryKey().setName(pkName.getText()))
                         pkName.setText(relationalEntity.getPrimaryKey().getName());
                     else
-                        relationalEntity.notifyObservers();
+                        relationalEntity.getPrimaryKey().notifyObservers();
                 }
             }
         });

@@ -10,6 +10,7 @@ import graphic.GraphicComponent;
 import graphic.GraphicView;
 import graphic.entity.EntityView;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Observable;
@@ -75,9 +76,8 @@ public class RelAssociationView extends AssociationView {
 
     @Override
     public void delete() {
-        super.delete();
         deleteFKs();
-
+        super.delete();
     }
 
     @Override
@@ -113,5 +113,25 @@ public class RelAssociationView extends AssociationView {
             sourceEntity.getForeignKeys().remove(targetEntity.getPrimaryKey());
             targetEntity.getForeignKeys().remove(sourceEntity.getPrimaryKey());
         }
+    }
+
+    @Override
+    protected void setMenuItemText() {
+        String sourceName = association.getSource().getName(), targetName = association
+                .getTarget().getName();
+        navFirstToSecond.setText(String.format("%s -> %s", sourceName, targetName));
+        navSecondToFirst.setText(String.format("%s -> %s", targetName, sourceName));
+    }
+
+    @Override
+    public void popupmenuInit() {
+        JMenu menuNavigation = new JMenu("Navigability");
+        popupMenu.addSeparator();
+        popupMenu.add(menuNavigation);
+        btnGrpNavigation = new ButtonGroup();
+        menuNavigation.add(navFirstToSecond = makeRadioButtonMenuItem("",
+                Association.NavigateDirection.FIRST_TO_SECOND.toString(), btnGrpNavigation));
+        menuNavigation.add(navSecondToFirst = makeRadioButtonMenuItem("",
+                Association.NavigateDirection.SECOND_TO_FIRST.toString(), btnGrpNavigation));
     }
 }

@@ -301,6 +301,10 @@ public class HierarchicalView
         if (node instanceof IClassDiagramNode)
           ((IClassDiagramNode) node).remove();
         super.removeNodeFromParent(node);
+        if (node instanceof NodeRelAssociation) {
+          ((NodeEntity)searchAssociedNode(((NodeRelAssociation) node).getSource())).reloadChildsNodes();
+          ((NodeEntity)searchAssociedNode(((NodeRelAssociation) node).getTarget())).reloadChildsNodes();
+        }
       }
     };
     tree = new STree(treeModel);
@@ -369,7 +373,8 @@ public class HierarchicalView
   }
 
   public void addRelationalAssociation(RelAssociation component) {
-    addAssociation(component, "resources/icon/relAssociation.png");
+    addNode(new NodeRelAssociation(component, treeModel,
+            PersonalizedIcon.createImageIcon("resources/icon/relAssociation.png"), tree), associationsNode);
     ((NodeEntity)searchAssociedNode(component.getSource())).reloadChildsNodes();
     ((NodeEntity)searchAssociedNode(component.getTarget())).reloadChildsNodes();
 
@@ -493,7 +498,7 @@ public class HierarchicalView
   public void maybeShowPopup(MouseEvent e, JPopupMenu popupMenu) {
     
     if (SwingUtilities.isRightMouseButton(e)) {
-      popupMenu.show(e.getComponent(), (int) (e.getX()), (int) (e.getY()));
+      popupMenu.show(e.getComponent(), e.getX(), e.getY());
       TreePath path = tree.getPathForLocation(e.getX(), e.getY());
       if (path != null)
         tree.setSelectionPath(path);
@@ -632,8 +637,8 @@ public class HierarchicalView
     NodeView nodeView = searchNodeViewAssociedWith(graphicView);
     
     if (nodeView != null) {
-      treeModel.removeNodeFromParent((DefaultMutableTreeNode) nodeView);
-      graphicView.deleteObserver((Observer) nodeView);
+      treeModel.removeNodeFromParent(nodeView);
+      graphicView.deleteObserver(nodeView);
     }
   }
 

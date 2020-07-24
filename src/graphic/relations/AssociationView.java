@@ -32,24 +32,30 @@ import java.util.Observable;
  */
 public abstract class AssociationView extends RelationView {
   protected Association association;
-  private final ButtonGroup btnGrpNavigation;
-  private final JMenuItem navBidirectional, navFirstToSecond, navSecondToFirst;
+  protected ButtonGroup btnGrpNavigation;
+  protected JMenuItem navBidirectional, navFirstToSecond, navSecondToFirst;
 
   public AssociationView(GraphicView parent, EntityView source,
           EntityView target, Association association, Point posSource,
           Point posTarget, boolean checkRecursivity) {
     super(parent, source, target, association, posSource, posTarget,
             checkRecursivity);
-    JMenu menuNavigation;
     TextBoxLabelTitle tb = new TextBoxLabelTitle(parent, association, this);
 
     this.association = association;
     tbRoles.add(tb);
     parent.addOthersComponents(tb);
 
+    popupmenuInit();
+
+    setMenuItemText();
+  }
+
+  protected void popupmenuInit(){
     // Gestion du menu contextuel
+    JMenu menuNavigation = new JMenu("Navigability");
     popupMenu.addSeparator();
-    popupMenu.add(menuNavigation = new JMenu("Navigability"));
+    popupMenu.add(menuNavigation);
     btnGrpNavigation = new ButtonGroup();
     menuNavigation.add(navBidirectional = makeRadioButtonMenuItem("",
             NavigateDirection.BIDIRECTIONAL.toString(), btnGrpNavigation));
@@ -57,8 +63,6 @@ public abstract class AssociationView extends RelationView {
             NavigateDirection.FIRST_TO_SECOND.toString(), btnGrpNavigation));
     menuNavigation.add(navSecondToFirst = makeRadioButtonMenuItem("",
             NavigateDirection.SECOND_TO_FIRST.toString(), btnGrpNavigation));
-
-    setMenuItemText();
   }
 
 
@@ -86,7 +90,7 @@ public abstract class AssociationView extends RelationView {
     super.maybeShowPopup(e, popupMenu);
   }
 
-  private void setMenuItemText() {
+  protected void setMenuItemText() {
     String sourceName = association.getSource().getName(), targetName = association
             .getTarget().getName();
     navBidirectional.setText("Bidirectional");

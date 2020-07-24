@@ -122,7 +122,6 @@ public class TextBoxKey extends TextBox implements Observer {
             }
         else
             super.setText(getStringFromKey(key));
-
         repaint();
     }
 

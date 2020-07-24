@@ -17,6 +17,7 @@ public class RelationalEntity extends Entity{
     private LinkedList<Trigger> triggers = new LinkedList<>();
     private RelationalAttribute lastAddedAttribute;
     private Trigger lastAddedTrigger;
+    private Key lastAddedKey;
 
     public RelationalEntity(String name) {
         super(name);
@@ -36,6 +37,7 @@ public class RelationalEntity extends Entity{
     }
 
     public void setPrimaryKey(Key primaryKey){
+        lastAddedKey = primaryKey;
         this.primaryKey = primaryKey;
     }
 
@@ -48,6 +50,7 @@ public class RelationalEntity extends Entity{
     }
 
     public void addForeignKey(Key fk) {
+        lastAddedKey = fk;
         foreignKeys.add(fk);
     }
 
@@ -56,6 +59,7 @@ public class RelationalEntity extends Entity{
     }
 
     public void addAlternateKey(Key ak) {
+        lastAddedKey = ak;
         alternateKeys.add(ak);
     }
 
@@ -202,6 +206,10 @@ public class RelationalEntity extends Entity{
 
     public Trigger getLastAddedTrigger() {
         return lastAddedTrigger;
+    }
+
+    public Key getLastAddedKey() {
+        return lastAddedKey;
     }
 
     @Override

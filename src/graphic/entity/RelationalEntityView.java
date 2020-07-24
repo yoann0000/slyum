@@ -68,9 +68,10 @@ public class RelationalEntityView extends EntityView {
     private JMenuItem menuItemViewNothing;
 
     public RelationalEntityView(GraphicView parent, RelationalEntity component) {
-       super(parent, component);
+        super(parent, component);
+        initializeComponents();
         initViewType();
-        addDefaultKey();
+        addPkTextbox();
     }
 
     @Override
@@ -134,7 +135,6 @@ public class RelationalEntityView extends EntityView {
     public void addAttribute() {
         final RelationalAttribute attribute = new RelationalAttribute("attribute",
                 PrimitiveType.VOID_TYPE);
-        prepareNewAttribute(attribute);
 
         ((RelationalEntity) component).addAttribute(attribute);
         component.notifyObservers(UpdateMessage.ADD_ATTRIBUTE);
@@ -143,14 +143,10 @@ public class RelationalEntityView extends EntityView {
     /**
      * Create a default key
      */
-    private void addDefaultKey(){
-        RelationalEntity re = (RelationalEntity) component;
-        if(re.getPrimaryKey() != null)
-            return;
-        final Key pk = new Key("ID", re);
-        keysView.add(new TextBoxKey(parent, pk));
+    private void addPkTextbox(){
+        TextBoxKey tbpk = new TextBoxKey(parent, ((RelationalEntity) component).getPrimaryKey());
+        keysView.add(tbpk);
         updateHeight();
-        re.setPrimaryKey(pk);
     }
 
     /**
@@ -191,7 +187,24 @@ public class RelationalEntityView extends EntityView {
         if (editing) newTextBox.editing();
     }
 
+    /**
+     * Create a new key view with the given key. If editing is a true,
+     * the new attribute view will be in editing mode while it created.
+     *
+     * @param key
+     *          the trigger
+     * @param editing
+     *          true if creating a new attribute view in editing mode; false
+     *          otherwise
+     */
+    public void addKey(Key key, boolean editing) {
+        final TextBoxKey newTextBox = new TextBoxKey(parent, key);
+        keysView.add(newTextBox);
 
+        updateHeight();
+
+        if (editing) newTextBox.editing();
+    }
 
     @Override
     public RelationalEntityView clone() throws CloneNotSupportedException {
@@ -225,23 +238,6 @@ public class RelationalEntityView extends EntityView {
     @Override
     public RelationalEntity getComponent() {
         return (RelationalEntity) super.getComponent();
-    }
-
-    /**
-     * Set the display state for attributes.
-     *
-     * @param display
-     *          the new display state for attributes.
-     */
-    public void setDisplayAttributes(boolean display) {
-        displayAttributes = display;
-        displayDefault = false;
-        updateHeight();
-    }
-
-    public void setDisplayDefault(boolean display) {
-        displayDefault = display;
-        initViewType();
     }
 
     @Override
@@ -364,12 +360,17 @@ public class RelationalEntityView extends EntityView {
     /**
      * Remove the trigger associated with TextBoxTrigger from model (UML)
      *
-     * @param tbFK
+     * @param tbKey
      *          the trigger to remove.
      * @return true if component has been removed; false otherwise.
      */
-    public boolean removeFk(TextBoxKey tbFK) {
-        ((RelationalEntity) component).removeForeignKey((Key) tbFK.getAssociedComponent());
+    public boolean removeKey(TextBoxKey tbKey) {
+        final RelationalEntity re = (RelationalEntity) component;
+        final Key key = (Key) tbKey.getAssociedComponent();
+        if (re.getAlternateKeys().contains(key))
+            re.removeAlternateKey(key);
+        else
+            re.removeForeignKey(key);
         component.notifyObservers();
         updateHeight();
         return true;
@@ -382,7 +383,7 @@ public class RelationalEntityView extends EntityView {
         else if (tb instanceof TextBoxTrigger)
             return removeTrigger((TextBoxTrigger) tb);
         else if (tb instanceof TextBoxKey)
-            return removeFk((TextBoxKey) tb);
+            return removeKey((TextBoxKey) tb);
         return false;
     }
 
@@ -400,6 +401,12 @@ public class RelationalEntityView extends EntityView {
                     enable = true;
                 case ADD_TRIGGER_NO_EDIT:
                     addTrigger(((RelationalEntity) component).getLastAddedTrigger(), enable);
+                    break;
+                case ADD_KEY:
+                    enable = true;
+                case ADD_KEY_NO_EDIT:
+                    addKey(((RelationalEntity) component).getLastAddedKey(), enable);
+                    break;
                 default:
                     super.update(observable, object);
                     break;
@@ -497,10 +504,9 @@ public class RelationalEntityView extends EntityView {
     }
 
     @Override
-    protected int paintTextBoxes(Graphics2D g2, Rectangle bounds,
-                                 int textboxHeight, int offset) { //TODO add keys here
+    protected int paintTextBoxes(Graphics2D g2, Rectangle bounds, int textboxHeight, int offset) { //TODO add keys here
 
-        // draw attributs separator
+        // draw keys separator
         offset += 10;
         g2.setStroke(new BasicStroke(BORDER_WIDTH));
         g2.setColor(DEFAULT_BORDER_COLOR);
@@ -510,6 +516,7 @@ public class RelationalEntityView extends EntityView {
         for (TextBoxKey tb : keysView) {
             tb.setBounds(new Rectangle(bounds.x + 8, offset + 2, bounds.width - 15,
                     textboxHeight + 2));
+            tb.setText(tb.getFullString());
             tb.paintComponent(g2);
 
             offset += textboxHeight;
@@ -517,7 +524,7 @@ public class RelationalEntityView extends EntityView {
 
 
         if (displayAttributes) {
-            // draw attributs separator
+            // draw attributes separator
             offset += 10;
             g2.setStroke(new BasicStroke(BORDER_WIDTH));
             g2.setColor(DEFAULT_BORDER_COLOR);
@@ -550,15 +557,6 @@ public class RelationalEntityView extends EntityView {
         }
         return offset;
     }
-
-    /**
-     * Method called before creating a new attribute, if modifications on
-     * attribute is necessary.
-     *
-     * @param attribute
-     *          the attribute to prepare
-     */
-    protected void prepareNewAttribute(RelationalAttribute attribute){}
 
     private void updateMenuItemMethodsView() {
         JMenuItem itemToSelect;

@@ -84,8 +84,5 @@ public class NodeKey
     }
 
     @Override
-    public void removeAllChildren() {}
-
-    @Override
     public void remove() {}
 }

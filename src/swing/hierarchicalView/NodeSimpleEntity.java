@@ -19,11 +19,11 @@ public class NodeSimpleEntity extends NodeEntity {
     setUserObject(simpleEntity.getName());
     removeAllChildren();
 
-    simpleEntity.getAttributes().stream().forEach((a) -> {
+    simpleEntity.getAttributes().forEach((a) -> {
       add(new NodeAttribute(a, treeModel, tree));
     });
 
-    simpleEntity.getMethods().stream().forEach((m) -> {
+    simpleEntity.getMethods().forEach((m) -> {
       add(new NodeMethod(m, treeModel, tree));
     });
 

@@ -390,7 +390,7 @@ public class MultiViewManager {
               JOptionPane.QUESTION_MESSAGE,
               null,
               possibilities,
-              "MYSQL");
+              "POSTGRES");
       SQLconverter.getInstance().setRelGraphicView(getSelectedGraphicView());
       String SQL = SQLconverter.getInstance().convertToSQL(s);
 

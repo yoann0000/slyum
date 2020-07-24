@@ -23,7 +23,7 @@ public class RelAssociation extends Binary{
     }
 
     public void addForeignKeys(){
-        ((RelationalEntity)getSource()).addForeignKey(((RelationalEntity)getSource()).getPrimaryKey());
+        ((RelationalEntity)getSource()).addForeignKey(((RelationalEntity)getTarget()).getPrimaryKey());
     }
 
     public void removeForeignKeys() {

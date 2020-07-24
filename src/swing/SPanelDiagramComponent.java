@@ -87,11 +87,14 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
   private static final String TT_CONVERT = "Convert "
           + Utility.keystrokeToString(Slyum.KEY_CONVERT);
 
+  private static final String TT_SQL = "Sql "
+          + Utility.keystrokeToString(Slyum.KEY_SQL);
+
 
   private final SButton btnCursorMode, btnGripMode, btnClass, btnEnum, btnInterface,
           btnClassAssociation, btnGeneralize, btnDependeny, btnInnerClass,
           btnAssociation, btnAggregation, btnComposition, btnMulti, btnNote,
-          btnLinkNote, btnTable, btnAssocRel, btnView, btnUmlRel;
+          btnLinkNote, btnTable, btnAssocRel, btnView, btnUmlRel, btnRelSql;
 
   private Mode currentMode;
   private static SPanelDiagramComponent instance;
@@ -164,6 +167,7 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
             Slyum.ACTION_NEW_REL_ASSOCIATION, Color.RED, TT_REL_ASSOCIATION));
 
     btnTable.setEnabled(false);
+    btnView.setEnabled(false);
     btnAssocRel.setEnabled(false);
 
     add(new SSeparator());
@@ -202,6 +206,10 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
     add(btnUmlRel = createSButton(
             PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "newRel.png"),
             Slyum.ACTION_CONVERT_UML, Color.RED, TT_CONVERT));
+
+    add(btnRelSql = createSButton(
+            PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "newSql.png"),
+            Slyum.ACTION_CONVERT_SQL, Color.RED, TT_SQL));
   }
 
   public void setButtonModeStyle(SButton button) {
@@ -255,6 +263,7 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
     btnComposition.setEnabled(!isRel);
     btnMulti.setEnabled(!isRel);
     btnUmlRel.setEnabled(!isRel);
+    btnRelSql.setEnabled(isRel);
   }
 
   @Override
@@ -323,6 +332,9 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
         break;
       case Slyum.ACTION_CONVERT_UML:
         MultiViewManager.ConvertSelectedView();
+        break;
+      case Slyum.ACTION_CONVERT_SQL:
+        MultiViewManager.SQLSelectedView();
         break;
     }
   }

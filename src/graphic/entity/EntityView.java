@@ -1,7 +1,6 @@
 package graphic.entity;
 
 import change.BufferBounds;
-import change.BufferDeepCreation;
 import change.Change;
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
@@ -10,21 +9,18 @@ import graphic.ColoredComponent;
 import graphic.GraphicComponent;
 import graphic.GraphicView;
 import graphic.MovableComponent;
-import graphic.relations.BinaryView;
 import graphic.relations.RelationGrip;
 import graphic.textbox.TextBox;
 import graphic.textbox.TextBoxEntityName;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Point;
-import java.awt.Rectangle;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import swing.PropertyLoader;
+import swing.SPanelElement;
+import swing.Slyum;
+import utility.Utility;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
@@ -33,15 +29,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import swing.PanelClassDiagram;
-import swing.PropertyLoader;
-import swing.SPanelElement;
-import swing.Slyum;
-import utility.Utility;
 
 /**
  * Represent the view of an entity in UML structure.

@@ -2,6 +2,7 @@ package swing.hierarchicalView;
 
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
+import classDiagram.components.Entity;
 import classDiagram.relationships.Association;
 import classDiagram.relationships.Role;
 import java.util.LinkedList;
@@ -44,7 +45,7 @@ public class NodeAssociation extends AbstractNode {
     return text.substring(PREFIX.length());
   }
 
-  private final Association association;
+  protected final Association association;
   private final ImageIcon imageIcon;
 
   /**
@@ -91,12 +92,12 @@ public class NodeAssociation extends AbstractNode {
 
   @Override
   public void remove() {
-    association.getRoles().stream().forEach(role -> role.deleteObserver(this));
+    association.getRoles().forEach(role -> role.deleteObserver(this));
   }
 
   @Override
   public void update(Observable observable, Object o) {
-    if (o != null && o instanceof UpdateMessage) {
+    if (o instanceof UpdateMessage) {
       final TreePath path = new TreePath(getPath());
 
       switch ((UpdateMessage) o) {

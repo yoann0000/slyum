@@ -6,6 +6,7 @@ import classDiagram.components.RelationalEntity;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
+import java.util.Observable;
 
 public class NodeRelationalEntity extends NodeEntity {
     private final int PRIMARY_KEY = 0;
@@ -38,5 +39,10 @@ public class NodeRelationalEntity extends NodeEntity {
 
         HierarchicalView.sortAlphabetically(this, treeModel, tree);
         treeModel.reload(this);
+    }
+
+    @Override
+    public void update(Observable arg0, Object arg1) {
+        super.update(arg0, arg1);
     }
 }

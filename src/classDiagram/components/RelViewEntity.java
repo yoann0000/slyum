@@ -2,6 +2,7 @@ package classDiagram.components;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import swing.XMLParser;
 
 public class RelViewEntity extends Entity {
     private String procedure;
@@ -23,7 +24,7 @@ public class RelViewEntity extends Entity {
 
     @Override
     protected String getEntityType() {
-        return "View";
+        return XMLParser.EntityType.VIEW.toString();
     }
 
     public String getProcedure() {
@@ -36,14 +37,12 @@ public class RelViewEntity extends Entity {
 
     @Override
     public Element getXmlElement(Document doc) {
-        Element viewValue = doc.createElement(getXmlTagName());
-        viewValue.setTextContent(getProcedure());
-        return viewValue;
-    }
-
-    @Override
-    public String getXmlTagName() {
-        return "View";
+        Element entity = doc.createElement(getXmlTagName());
+        entity.setAttribute("id", String.valueOf(getId()));
+        entity.setAttribute("name", toString());
+        entity.setAttribute("entityType", getEntityType());
+        entity.setAttribute("procedure", getProcedure());
+        return entity;
     }
 
     @Override

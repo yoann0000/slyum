@@ -3,6 +3,8 @@ package classDiagram.components;
 import change.BufferCreationRelAttribute;
 import change.BufferCreationTrigger;
 import change.Change;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import swing.XMLParser;
 
 import java.util.LinkedList;
@@ -15,6 +17,7 @@ public class RelationalEntity extends Entity{
     private LinkedList<Trigger> triggers = new LinkedList<>();
     private RelationalAttribute lastAddedAttribute;
     private Trigger lastAddedTrigger;
+    private Key lastAddedKey;
 
     public RelationalEntity(String name) {
         super(name);
@@ -34,6 +37,7 @@ public class RelationalEntity extends Entity{
     }
 
     public void setPrimaryKey(Key primaryKey){
+        lastAddedKey = primaryKey;
         this.primaryKey = primaryKey;
     }
 
@@ -46,6 +50,7 @@ public class RelationalEntity extends Entity{
     }
 
     public void addForeignKey(Key fk) {
+        lastAddedKey = fk;
         foreignKeys.add(fk);
     }
 
@@ -54,6 +59,7 @@ public class RelationalEntity extends Entity{
     }
 
     public void addAlternateKey(Key ak) {
+        lastAddedKey = ak;
         alternateKeys.add(ak);
     }
 
@@ -65,11 +71,10 @@ public class RelationalEntity extends Entity{
         return attributes;
     }
 
-    public RelationalAttribute getAttributeByName(String name) {
-        for (RelationalAttribute a : attributes){
-            if (a.getName().equals(name)){
-                return a;
-            }
+    public RelationalAttribute getAttributeById(int id) {
+        for (RelationalAttribute ra : attributes) {
+            if (ra.getId() == id)
+                return ra;
         }
         return null;
     }
@@ -201,5 +206,36 @@ public class RelationalEntity extends Entity{
 
     public Trigger getLastAddedTrigger() {
         return lastAddedTrigger;
+    }
+
+    public Key getLastAddedKey() {
+        return lastAddedKey;
+    }
+
+    @Override
+    public Element getXmlElement(Document doc) {
+        Element entity = doc.createElement(getXmlTagName());
+
+        entity.setAttribute("id", String.valueOf(getId()));
+        entity.setAttribute("name", toString());
+        entity.setAttribute("entityType", getEntityType());
+
+        for (RelationalAttribute attribute : attributes)
+            entity.appendChild(attribute.getXmlElement(doc));
+
+        Element pk = primaryKey.getXmlElement(doc);
+        pk.setAttribute("primary", String.valueOf(true));
+        entity.appendChild(pk);
+
+        for (Key key : alternateKeys){
+            Element ak = key.getXmlElement(doc);
+            ak.setAttribute("primary", String.valueOf(false));
+            entity.appendChild(ak);
+        }
+
+        for (Trigger trigger : triggers)
+            entity.appendChild(trigger.getXmlElement(doc));
+
+        return entity;
     }
 }

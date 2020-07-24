@@ -6,6 +6,7 @@ import graphic.GraphicComponent;
 import graphic.GraphicView;
 import graphic.entity.EntityView;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -25,6 +27,8 @@ import org.xml.sax.SAXException;
 import swing.dialog.DialogDeleteView;
 import swing.hierarchicalView.HierarchicalView;
 import utility.SMessageDialog;
+import utility.SQLconverter.SQLconverter;
+import utility.Utility;
 import utility.WatchDir;
 import utility.relConverter.RelConverter;
 
@@ -373,6 +377,82 @@ public class MultiViewManager {
         RelConverter.getInstance().setGraphicView(getSelectedGraphicView());
         RelConverter.getInstance().umlToRel();
       }
+    }
+  }
+
+  public static void SQLSelectedView() {
+    if (getSelectedGraphicView().isRelational()) {
+      Object[] possibilities = {"MYSQL", "POSTGRES", "SQ LITE"};
+      String s = (String)JOptionPane.showInputDialog(
+              Slyum.getInstance(),
+              "Select desired Database",
+              "SQL conversion",
+              JOptionPane.QUESTION_MESSAGE,
+              null,
+              possibilities,
+              "POSTGRES");
+      SQLconverter.getInstance().setRelGraphicView(getSelectedGraphicView());
+      String SQL = SQLconverter.getInstance().convertToSQL(s);
+
+      if (SQL.equals("unimplemented"))
+        JOptionPane.showMessageDialog(Slyum.getInstance(), "This database has yet to be implemented");
+      else
+        exportAsSQL(SQL);
+    }
+    else {
+      JOptionPane.showMessageDialog(Slyum.getInstance(), "You must select an Sql view to convert");
+    }
+  }
+
+
+  private static void exportAsSQL(String sql) {
+    final JFileChooser fc = new JFileChooser(Slyum.getCurrentDirectoryFileChooser());
+    fc.setAcceptAllFileFilterUsed(false);
+
+    fc.addChoosableFileFilter(new FileFilter() {
+
+      @Override
+      public boolean accept(File f) {
+        if (f.isDirectory()) return true;
+
+        final String extension = Utility.getExtension(f);
+        if (extension != null)
+          return extension.equals("sql");
+
+        return false;
+      }
+
+      @Override
+      public String getDescription() {
+        return "SQL (*.sql)";
+      }
+    });
+
+    final int result = fc.showSaveDialog(Slyum.getInstance());
+
+    if (result == JFileChooser.APPROVE_OPTION) {
+
+      File file = fc.getSelectedFile();
+      String extension = Utility.getExtension(file);
+
+      if (extension == null)
+        file = new File(file.getPath() + ".sql");
+
+      exportFileTo(file, sql);
+    }
+  }
+
+  private static void exportFileTo(File file, String sql) {
+    if (file.exists())
+      if (SMessageDialog.showQuestionMessageOkCancel(file + " already exists. Overwrite?") == JOptionPane.CANCEL_OPTION)
+        return;
+
+    try {
+      FileWriter writer =new FileWriter(file);
+      writer.write(sql);
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 }

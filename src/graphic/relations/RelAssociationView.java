@@ -1,5 +1,6 @@
 package graphic.relations;
 
+import classDiagram.IDiagramComponent;
 import classDiagram.components.Entity;
 import classDiagram.components.RelationalEntity;
 import classDiagram.relationships.Association;
@@ -9,6 +10,7 @@ import graphic.GraphicComponent;
 import graphic.GraphicView;
 import graphic.entity.EntityView;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Observable;
@@ -25,7 +27,8 @@ public class RelAssociationView extends AssociationView {
      * @param posTarget        the position for put the last MagneticGrip
      * @param checkRecursivity check if the relation points to itself
      */
-    public RelAssociationView(GraphicView parent, EntityView source, EntityView target, RelAssociation ra, Point posSource, Point posTarget, boolean checkRecursivity) throws IllegalArgumentException{
+    public RelAssociationView(GraphicView parent, EntityView source, EntityView target, RelAssociation ra,
+                              Point posSource, Point posTarget, boolean checkRecursivity) throws IllegalArgumentException{
         super(parent, source, target, ra, posSource, posTarget, checkRecursivity);
         addFk();
     }
@@ -73,9 +76,8 @@ public class RelAssociationView extends AssociationView {
 
     @Override
     public void delete() {
-        super.delete();
         deleteFKs();
-
+        super.delete();
     }
 
     @Override
@@ -88,6 +90,9 @@ public class RelAssociationView extends AssociationView {
             association.setDirected(Association.NavigateDirection.SECOND_TO_FIRST);
             deleteFKs();
             addFk();
+        } else if(e.getActionCommand().equals("Delete")){
+            GraphicView.deleteComponent(this);
+            deleteFKs();
         } else
             super.actionPerformed(e);
 
@@ -95,10 +100,10 @@ public class RelAssociationView extends AssociationView {
     }
 
     @Override
-    public void update(Observable observable, Object o) { //TODO check if call is a change of direction
+    public void changeOrientation() {
+        super.changeOrientation();
         deleteFKs();
         addFk();
-        super.update(observable, o);
     }
 
     private void deleteFKs() {
@@ -108,5 +113,25 @@ public class RelAssociationView extends AssociationView {
             sourceEntity.getForeignKeys().remove(targetEntity.getPrimaryKey());
             targetEntity.getForeignKeys().remove(sourceEntity.getPrimaryKey());
         }
+    }
+
+    @Override
+    protected void setMenuItemText() {
+        String sourceName = association.getSource().getName(), targetName = association
+                .getTarget().getName();
+        navFirstToSecond.setText(String.format("%s -> %s", sourceName, targetName));
+        navSecondToFirst.setText(String.format("%s -> %s", targetName, sourceName));
+    }
+
+    @Override
+    public void popupmenuInit() {
+        JMenu menuNavigation = new JMenu("Navigability");
+        popupMenu.addSeparator();
+        popupMenu.add(menuNavigation);
+        btnGrpNavigation = new ButtonGroup();
+        menuNavigation.add(navFirstToSecond = makeRadioButtonMenuItem("",
+                Association.NavigateDirection.FIRST_TO_SECOND.toString(), btnGrpNavigation));
+        menuNavigation.add(navSecondToFirst = makeRadioButtonMenuItem("",
+                Association.NavigateDirection.SECOND_TO_FIRST.toString(), btnGrpNavigation));
     }
 }

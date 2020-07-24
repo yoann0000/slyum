@@ -2,6 +2,7 @@ package graphic.textbox;
 
 import classDiagram.IDiagramComponent;
 import classDiagram.IDiagramComponent.UpdateMessage;
+import classDiagram.components.Attribute;
 import classDiagram.components.Key;
 import graphic.GraphicView;
 import utility.Utility;
@@ -12,7 +13,6 @@ import java.util.Observer;
 
 public class TextBoxKey extends TextBox implements Observer {
     private final Key key;
-    private final boolean foreign;
 
     /**
      * Create a new TextBoxAttribute with the given Attribute.
@@ -21,15 +21,31 @@ public class TextBoxKey extends TextBox implements Observer {
      *          the graphic view
      * @param key
      *          the key
-     * @param foreign
-     *          if the key is foreign
      */
-    public TextBoxKey(GraphicView parent, Key key, boolean foreign) {
-        super(parent, key.getFullKeyString(foreign));
+    public TextBoxKey(GraphicView parent, Key key) {
+        super(parent, getStringFromKey(key));
 
         this.key = key;
-        this.foreign = foreign;
         key.addObserver(this);
+    }
+
+    /**
+     * Get a String representing the Key.
+     *
+     * @param key
+     *          the key to convert to String
+     * @return a String representing the key.
+     */
+    public static String getStringFromKey(Key key) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(key.getName());
+        if(key.getTable().getPrimaryKey() == key)
+            sb.append(" ").append("<PK>");
+        if(key.getTable().getForeignKeys().contains(key))
+            sb.append(" ").append("<FK : ").append(key.getTable().getName()).append(">");
+        if (key.getTable().getAlternateKeys().contains(key))
+            sb.append(" ").append("<AK>");
+        return sb.toString();
     }
 
     @Override
@@ -56,12 +72,12 @@ public class TextBoxKey extends TextBox implements Observer {
 
     @Override
     public String getText() {
-        return key.getFullKeyString(foreign);
+        return getStringFromKey(key);
     }
 
     @Override
     public String getEditingText() {
-        return key.getFullKeyString(foreign);
+        return getStringFromKey(key);
     }
 
     @Override
@@ -78,12 +94,12 @@ public class TextBoxKey extends TextBox implements Observer {
 
     @Override
     public void setText(String text) {
-
+        super.setText(getStringFromKey(key));
     }
 
     @Override
     public String getFullString() {
-        return key.getFullKeyString(foreign);
+        return getStringFromKey(key);
     }
 
     @Override
@@ -105,8 +121,7 @@ public class TextBoxKey extends TextBox implements Observer {
                     break;
             }
         else
-            super.setText(key.getFullKeyString(foreign));
-
+            super.setText(getStringFromKey(key));
         repaint();
     }
 

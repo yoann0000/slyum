@@ -26,9 +26,29 @@ public class Variable extends Observable implements IDiagramComponent {
 
   protected boolean constant = false;
 
-  protected final int id = ClassDiagram.getNextId();
+  protected final int id;
   protected String name;
   protected Type type = PrimitiveType.VOID_TYPE;
+
+  /**
+   * Create a variable with a given name type and id.
+   * @param name the name of the variable
+   * @param type the type of the variable
+   * @param id the id of the variable
+   */
+  public Variable(String name, Type type, int id) {
+    boolean isBlocked = Change.isBlocked();
+    Change.setBlocked(true);
+
+    while (!setName(name))
+      throw new IllegalArgumentException("Syntaxe error.");
+
+    setType(type);
+
+    Change.setBlocked(isBlocked);
+
+    this.id = id;
+  }
 
   /**
    * Create a new variable with the given name and type.
@@ -48,6 +68,8 @@ public class Variable extends Observable implements IDiagramComponent {
     setType(type);
 
     Change.setBlocked(isBlocked);
+
+    this.id = ClassDiagram.getNextId();
   }
 
   /**
@@ -59,6 +81,7 @@ public class Variable extends Observable implements IDiagramComponent {
   public Variable(Variable variable) {
     this.name = variable.name;
     this.type = new Type(variable.type.getName());
+    this.id = ClassDiagram.getNextId();
   }
 
   public void setVariable(Variable variable) {

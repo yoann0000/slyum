@@ -2,7 +2,6 @@ package classDiagram.components;
 
 import change.BufferIndex;
 import change.Change;
-import classDiagram.ClassDiagram;
 import classDiagram.IDiagramComponent;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -11,9 +10,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Key extends Type implements IDiagramComponent {
-    protected final int id = ClassDiagram.getNextId();
     private final LinkedList<RelationalAttribute> keyComponents = new LinkedList<>();
     private final RelationalEntity table;
+
+    public Key(Key key) {
+        super(key.getName(), key.getId());
+        this.table = key.getTable();
+    }
 
     public Key(String name, RelationalEntity table) {
         super(name);
@@ -42,22 +45,6 @@ public class Key extends Type implements IDiagramComponent {
         return table;
     }
 
-    public String getFullKeyString(boolean froeignKey) {
-        StringBuilder sb = new StringBuilder(name);
-        sb.append(" <");
-        if (!keyComponents.isEmpty()){
-            sb.append(keyComponents.get(0).getName());
-            for (int i = 1; i < keyComponents.size(); i++) {
-                sb.append(", ").append(keyComponents.get(i).getName());
-            }
-        }
-        sb.append(">");
-        if (froeignKey) {
-            sb.append(" [").append(table.getName()).append("]");
-        }
-        return sb.toString();
-    }
-
     public String nodeKeyName(int keyType) {
         switch (keyType){
             case 0:
@@ -72,11 +59,6 @@ public class Key extends Type implements IDiagramComponent {
     }
 
     @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
     public void select() {
         setChanged();
     }
@@ -86,8 +68,13 @@ public class Key extends Type implements IDiagramComponent {
         Element key = doc.createElement(getXmlTagName());
         key.setAttribute("name", name);
 
-        for (RelationalAttribute attribute : keyComponents)
-            key.appendChild(attribute.getXmlElement(doc));
+        key.setAttribute("id", String.valueOf(table.getId()));
+
+        for (RelationalAttribute attribute : keyComponents) {
+            Element compId = doc.createElement("raID");
+            compId.setAttribute("id", String.valueOf(attribute.id));
+            key.appendChild(compId);
+        }
 
         return key;
     }
@@ -113,7 +100,7 @@ public class Key extends Type implements IDiagramComponent {
      * @param offset
      *          the offset for compute the new index
      */
-    protected <T extends Object> void moveComponentPosition(List<T> list, T o, int offset) {
+    protected <T> void moveComponentPosition(List<T> list, T o, int offset) {
         int index = list.indexOf(o);
 
         if (index != -1) {

@@ -62,6 +62,7 @@ public class Slyum extends JFrame implements ActionListener {
 
   // Action command
   public static final String ACTION_CONVERT_UML = "ConvertUml";
+  public static final String ACTION_CONVERT_SQL = "ConvertSQL";
   public static final String ACTION_MODE_CURSOR = "ModeCursor";
   public static final String ACTION_MODE_GRIP = "ModeGrip";
   public static final String ACTION_MOVE_BOTTOM = "MoveBottom";
@@ -155,6 +156,7 @@ public class Slyum extends JFrame implements ActionListener {
   public static final String KEY_REL_VIEW = "V";
 
   public static final String KEY_CONVERT = "alt C";
+  public static final String KEY_SQL = "alt S";
   
   public final static String KEY_CLOSE_VIEW = "ctrl W";
   public static final String KEY_COLOR = "ctrl L";
@@ -1677,5 +1679,7 @@ public class Slyum extends JFrame implements ActionListener {
     final ProcessBuilder builder = new ProcessBuilder(command);
     builder.start();
   }
+
+
 
 }

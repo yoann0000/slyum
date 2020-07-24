@@ -6,7 +6,6 @@ import classDiagram.verifyName.TypeName;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
 public class RelationalAttribute extends Variable {
     private boolean unique = false;
     private boolean notNull = false;
@@ -14,6 +13,17 @@ public class RelationalAttribute extends Variable {
 
     public RelationalAttribute(String name, Type type) {
         super(name, type);
+
+        boolean isBlocked = Change.isBlocked();
+        Change.setBlocked(true);
+
+        setDefaultValue("");
+
+        Change.setBlocked(isBlocked);
+    }
+
+    public RelationalAttribute(String name, Type type, int id) {
+        super(name, type, id);
 
         boolean isBlocked = Change.isBlocked();
         Change.setBlocked(true);
@@ -109,9 +119,9 @@ public class RelationalAttribute extends Variable {
         if (subString.length >= 3) {
             subString[2] = subString[2].trim();
 
-            if(subString[2].equals("unique")) {
+            if(subString[2].equals("UNIQUE")) {
                 unique = true;
-            }else if (subString[2].equals("notNull")) {
+            }else if (subString[2].equals("NOTNULL")) {
                 notNull = true;
             }else {
                 return;
@@ -121,7 +131,7 @@ public class RelationalAttribute extends Variable {
         if (subString.length >= 4) {
             subString[2] = subString[2].trim();
 
-            if (subString[2].equals("notNull")) {
+            if (subString[2].equals("NOTNULL")) {
                 notNull = true;
             }else {
                 return;
@@ -153,6 +163,7 @@ public class RelationalAttribute extends Variable {
             attribute.setAttribute("defaultValue", defaultValue);
         attribute.setAttribute("unique", String.valueOf(unique));
         attribute.setAttribute("notNull", String.valueOf(notNull));
+        attribute.setAttribute("id", String.valueOf(getId()));
         return attribute;
     }
 }

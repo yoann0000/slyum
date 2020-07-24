@@ -105,10 +105,18 @@ public class XMLParser extends DefaultHandler {
     LinkedList<EnumValue> enums = new LinkedList<>();
     LinkedList<Operation> triggers = new LinkedList<>();
     String procedure = null;
+    LinkedList<Key> keys = new LinkedList<>();
+  }
+
+  private class Key {
+    int id = -1;
+    String name = null;
+    boolean primary = false;
+    LinkedList<Integer> components = new LinkedList<>();
   }
 
   public enum EntityType {
-    ASSOCIATION_CLASS, CLASS, INTERFACE, ENUM, TABLE, VIEW;
+    ASSOCIATION_CLASS, CLASS, INTERFACE, ENUM, TABLE, VIEW
   }
 
   private class Inheritance {
@@ -200,6 +208,7 @@ public class XMLParser extends DefaultHandler {
     Visibility visibility = null;
     boolean unique = false;
     boolean notNull = false;
+    int id = -1;
   }
 
   LinkedList<AssociationClass> associationClassEntities = new LinkedList<>();
@@ -218,6 +227,7 @@ public class XMLParser extends DefaultHandler {
   Inheritance currentInheritance;
   LinkedList<Point> currentLine;
   UMLView currentUMLView;
+  Key currentKey;
 
   Operation currentMethod;
   int currentMin, currentMax;
@@ -381,9 +391,9 @@ public class XMLParser extends DefaultHandler {
 
       case 2:
         RelationalEntity re = (RelationalEntity) ce;
+
         for (Variable v : e.attribute) {
-          RelationalAttribute a = new RelationalAttribute(VariableName.verifyAndAskNewName(v.name),
-                  v.type);
+          RelationalAttribute a = new RelationalAttribute(VariableName.verifyAndAskNewName(v.name), v.type, v.id);
 
           re.addAttribute(a);
           re.notifyObservers(UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
@@ -401,6 +411,27 @@ public class XMLParser extends DefaultHandler {
           t.setTriggerType(o.triggerType);
           t.setActivationTime(o.activationTime);
           t.notifyObservers();
+        }
+
+        for (Key key : e.keys) {
+          if(key.primary) {
+            classDiagram.components.Key pk = new classDiagram.components.Key(key.name, re);
+            for (int id : key.components) {
+              RelationalAttribute ra = re.getAttributeById(id);
+              if (ra != null)
+                pk.addKeyComponent(ra);
+            }
+            re.setPrimaryKey(pk);
+          } else {
+            classDiagram.components.Key ak = new classDiagram.components.Key(key.name, re);
+            for (int id : key.components) {
+              RelationalAttribute ra = re.getAttributeById(id);
+              if (ra != null)
+                ak.addKeyComponent(ra);
+            }
+            re.addAlternateKey(ak);
+          }
+          re.notifyObservers(UpdateMessage.ADD_KEY_NO_EDIT);
         }
         break;
     }
@@ -451,6 +482,9 @@ public class XMLParser extends DefaultHandler {
         break;
       case "method":
         currentMethod = null;
+        break;
+      case "key":
+        currentKey = null;
         break;
       case "EnumValue":
         currentEntity.enums.add(new EnumValue(buffer.toString()));
@@ -653,6 +687,7 @@ public class XMLParser extends DefaultHandler {
           break;
         case REL:
           ac = new RelAssociation(source, target, a.direction, a.id);
+          ((RelationalEntity) source).addForeignKey(((RelationalEntity) target).getPrimaryKey());
           classDiagram.addRelAssociation((RelAssociation) ac);
           break;
       }
@@ -970,6 +1005,11 @@ public class XMLParser extends DefaultHandler {
           if (currentAttributeValue != null)
             currentEntity.isAbstract = Boolean.parseBoolean(attributes
                 .getValue("isAbstract"));
+
+          currentAttributeValue = attributes.getValue("procedure");
+          if (currentAttributeValue != null)
+            currentEntity.procedure = attributes.getValue("procedure");
+
           
           umlClassDiagram.diagrameElement.entity.add(currentEntity);
         } catch (final NumberFormatException e) {
@@ -1030,6 +1070,39 @@ public class XMLParser extends DefaultHandler {
         } catch (final SyntaxeNameException e) {
           throw new SAXException(e);
         } break;
+      case "relationalAttribute":
+        try {
+          final Variable variable = new Variable();
+          variable.name = attributes.getValue("name");
+          variable.type = new Type(TypeName.verifyAndAskNewName(attributes
+                  .getValue("type")));
+          variable.defaultValue = attributes.getValue("defaultValue");
+          variable.unique = Boolean.parseBoolean(attributes.getValue("unique"));
+          variable.notNull = Boolean.parseBoolean(attributes.getValue("notNull"));
+          variable.id = Integer.parseInt(attributes.getValue("id"));
+
+          currentEntity.attribute.add(variable);
+        } catch (SyntaxeNameException e) {
+          throw new SAXException(e);
+        } break;
+      case "key":
+        currentKey = new Key();
+        currentKey.primary = Boolean.parseBoolean(attributes.getValue("primary"));
+        currentKey.id = Integer.parseInt(attributes.getValue("id"));
+        currentKey.name = attributes.getValue("name");
+        currentEntity.keys.add(currentKey);
+        break;
+      case "raID":
+        currentKey.components.add(Integer.parseInt(attributes.getValue("id")));
+        break;
+      case "trigger":
+        final Operation trigger = new Operation();
+        trigger.name = attributes.getValue("name");
+        trigger.procedure = attributes.getValue("procedure");
+        trigger.activationTime = ActivationTime.getFromName(attributes.getValue("activationTime"));
+        trigger.triggerType = TriggerType.getFromName(attributes.getValue("triggerType"));
+        currentEntity.triggers.add(trigger);
+        break;
       case "association":
         try {
           currentAssociation = new Association();

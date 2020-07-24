@@ -13,7 +13,6 @@ import swing.MultiViewManager;
 import swing.PanelClassDiagram;
 import swing.Slyum;
 import utility.PersonalizedIcon;
-import utility.Utility;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,11 +44,12 @@ public class RelationalEntityView extends EntityView {
 
     // Attributs et méthodes
     protected LinkedList<TextBoxRelAttribute> attributesView = new LinkedList<>();
-    protected boolean displayTriggers = true;
-
     protected LinkedList<TextBoxTrigger> triggersView = new LinkedList<>();
 
+    protected LinkedList<TextBoxKey> keysView = new LinkedList<>();
+
     private boolean displayAttributes = true;
+    protected boolean displayTriggers = true;
     // Style de vue
     private boolean displayDefault = true;
 
@@ -140,19 +140,16 @@ public class RelationalEntityView extends EntityView {
         component.notifyObservers(UpdateMessage.ADD_ATTRIBUTE);
     }
 
-    private void addDefaultAttribute(){
-        final RelationalAttribute attribute = new RelationalAttribute("id", PrimitiveType.INTEGER_TYPE);
-        prepareNewAttribute(attribute);
-
-        ((RelationalEntity) component).addAttribute(attribute);
-        component.notifyObservers(UpdateMessage.ADD_ATTRIBUTE);
-    }
-
+    /**
+     * Create a default key
+     */
     private void addDefaultKey(){
         RelationalEntity re = (RelationalEntity) component;
         if(re.getPrimaryKey() != null)
             return;
         final Key pk = new Key("ID", re);
+        keysView.add(new TextBoxKey(parent, pk));
+        updateHeight();
         re.setPrimaryKey(pk);
     }
 
@@ -208,9 +205,9 @@ public class RelationalEntityView extends EntityView {
 
     @Override
     public int computeHeight(int classNameHeight, int stereotypeHeight, int elementsHeight) {
-        int height = super.computeHeight(classNameHeight, stereotypeHeight,
-                elementsHeight);
+        int height = super.computeHeight(classNameHeight, stereotypeHeight, elementsHeight);
 
+        height += 10 + elementsHeight * keysView.size();
         if (displayTriggers) height += 10 + elementsHeight * triggersView.size();
         if (displayAttributes)
             height += 10 + elementsHeight * attributesView.size();
@@ -254,14 +251,15 @@ public class RelationalEntityView extends EntityView {
             t.setPictureMode(enable);
         for (TextBox t : attributesView)
             t.setPictureMode(enable);
+        for (TextBox t : keysView)
+            t.setPictureMode(enable);
     }
 
     @Override
     public Element getXmlElement(Document doc) {
         Element entityView = super.getXmlElement(doc);
         entityView.setAttribute("displayDefault", String.valueOf(displayDefault));
-        entityView.setAttribute("displayAttributes",
-                String.valueOf(displayAttributes));
+        entityView.setAttribute("displayAttributes", String.valueOf(displayAttributes));
         entityView.setAttribute("displayMethods", String.valueOf(displayTriggers));
         return entityView;
     }
@@ -363,12 +361,28 @@ public class RelationalEntityView extends EntityView {
         return false;
     }
 
+    /**
+     * Remove the trigger associated with TextBoxTrigger from model (UML)
+     *
+     * @param tbFK
+     *          the trigger to remove.
+     * @return true if component has been removed; false otherwise.
+     */
+    public boolean removeFk(TextBoxKey tbFK) {
+        ((RelationalEntity) component).removeForeignKey((Key) tbFK.getAssociedComponent());
+        component.notifyObservers();
+        updateHeight();
+        return true;
+    }
+
     @Override
     public boolean removeTextBox(TextBox tb) {
         if (tb instanceof TextBoxAttribute)
             return removeAttribute((TextBoxAttribute) tb);
         else if (tb instanceof TextBoxTrigger)
             return removeTrigger((TextBoxTrigger) tb);
+        else if (tb instanceof TextBoxKey)
+            return removeFk((TextBoxKey) tb);
         return false;
     }
 
@@ -485,6 +499,22 @@ public class RelationalEntityView extends EntityView {
     @Override
     protected int paintTextBoxes(Graphics2D g2, Rectangle bounds,
                                  int textboxHeight, int offset) { //TODO add keys here
+
+        // draw attributs separator
+        offset += 10;
+        g2.setStroke(new BasicStroke(BORDER_WIDTH));
+        g2.setColor(DEFAULT_BORDER_COLOR);
+        g2.drawLine(bounds.x, offset, bounds.x + bounds.width, offset);
+
+        // draw keys
+        for (TextBoxKey tb : keysView) {
+            tb.setBounds(new Rectangle(bounds.x + 8, offset + 2, bounds.width - 15,
+                    textboxHeight + 2));
+            tb.paintComponent(g2);
+
+            offset += textboxHeight;
+        }
+
 
         if (displayAttributes) {
             // draw attributs separator

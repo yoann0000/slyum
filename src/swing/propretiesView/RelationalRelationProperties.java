@@ -99,7 +99,7 @@ public class RelationalRelationProperties extends GlobalPropreties {
     private void setCurrentObjectDirected(NavigateDirection direction) {
         if (currentObject != null && currentObject instanceof Association) {
             ((Association) currentObject).setDirected(direction);
-            ((Association) currentObject).notifyObservers();
+            ((Association) currentObject).notifyObservers(UpdateMessage.MODIF);
         }
     }
 

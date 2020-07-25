@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 public class RelValidator {
-    private LinkedList<IDiagramComponent> components;
+    private final LinkedList<IDiagramComponent> components;
     private int errors;
     private String errorString;
 
@@ -21,22 +21,32 @@ public class RelValidator {
         return instance;
     }
 
+    /**
+     * Constructor
+     */
     private RelValidator() {
         components = new LinkedList<>();
         errors = 0;
         errorString = "";
     }
 
+    /**
+     * Validate the relational diagram
+     */
     public void validate() {
-        if (components == null) return;
         errors = 0;
         errorString = "";
+        if (components.isEmpty()) {
+            errorString = "Diagram is empty";
+            errors++;
+            return;
+        }
         LinkedList<RelationalEntity> re = new LinkedList<>();
         LinkedList<RelViewEntity> views = new LinkedList<>();
         LinkedList<RelAssociation> ra = new LinkedList<>();
 
         StringBuilder sb = new StringBuilder();
-        int previousErrors = 0;
+        int previousErrors;
 
         for (IDiagramComponent component : components) {
             if (component instanceof RelationalEntity) {
@@ -60,17 +70,17 @@ public class RelValidator {
             }
         }
 
-        LinkedList<String> reNames = new LinkedList<>();
+        LinkedList<String> entityNames = new LinkedList<>();
 
         for (RelationalEntity entity : re) {
             previousErrors = errors;
             sb.append("Table ").append(entity.getName()).append(" :\n");
 
-            if (reNames.contains(entity.getName())){
-                sb.append("There is already a table called ").append(entity.getName()).append("\n");
+            if (entityNames.contains(entity.getName())){
+                sb.append("There is already an entity called ").append(entity.getName()).append("\n");
                 errors++;
             }
-            reNames.add(entity.getName());
+            entityNames.add(entity.getName());
 
             validateEntity(entity, sb);
             if (errors == previousErrors){
@@ -79,11 +89,29 @@ public class RelValidator {
             sb.append("\n");
         }
 
+        for (RelViewEntity entity : views) {
+            previousErrors = errors;
+            sb.append("View ").append(entity.getName()).append(" :\n");
+            if (entityNames.contains(entity.getName())){
+                sb.append("There is already an entity called ").append(entity.getName()).append("\n");
+                errors++;
+            }
+            entityNames.add(entity.getName());
+
+            validateView(entity, sb);
+            if (errors == previousErrors){
+                sb.append("None\n");
+            }
+            sb.append("\n");
+        }
+
+
         checkNoCycles(re, ra, sb);
         errorString = sb.toString();
     }
 
     private void validateEntity(RelationalEntity entity, StringBuilder sb) {
+        int previousErrors;
         if (entity.getPrimaryKey() == null) {
             sb.append("Table has no primary key.\n");
             errors++;
@@ -94,6 +122,19 @@ public class RelValidator {
         if (entity.getAttributes() == null || entity.getAttributes().isEmpty()) {
             sb.append("Table has no attributes\n");
             errors++;
+        }
+
+        for (Trigger t : entity.getTriggers()) {
+            previousErrors = errors;
+            sb.append("Trigger ").append(t.getName()).append("\n");
+            if (t.getProcedure() == null || t.getProcedure().isEmpty()) {
+                sb.append("has no procedure\n");
+                errors++;
+            }
+
+            if (errors == previousErrors){
+                sb.append("None\n");
+            }
         }
 
         for (Key ak : entity.getAlternateKeys()) {
@@ -120,6 +161,13 @@ public class RelValidator {
         }
     }
 
+    private void validateView(RelViewEntity entity, StringBuilder sb) {
+        if(entity.getProcedure() == null || entity.getProcedure().isEmpty()) {
+            sb.append("view has no procedure.\n");
+            errors++;
+        }
+    }
+
     private void checkNoCycles(LinkedList<RelationalEntity> re, LinkedList<RelAssociation> ra, StringBuilder sb) {
         Map<Entity, Integer> vertexIds = new HashMap<>();
         for (int i = 0; i < re.size(); i++) {
@@ -139,14 +187,26 @@ public class RelValidator {
         }
     }
 
+    /**
+     * Get the number of errors
+     * @return the number of errors
+     */
     public int getErrors() {
         return errors;
     }
 
+    /**
+     * Get the error string
+     * @return the error string
+     */
     public String getErrorString() {
         return errorString;
     }
 
+    /**
+     * Set the components to validate from a list of graphical components
+     * @param components the list of graphical components to validate
+     */
     public void setComponents(LinkedList<GraphicComponent> components) {
         this.components.clear();
         components.forEach(graphicComponent -> this.components.add(graphicComponent.getAssociedComponent()));

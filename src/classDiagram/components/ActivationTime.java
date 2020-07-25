@@ -1,5 +1,8 @@
 package classDiagram.components;
 
+/**
+ * Trigger activation times
+ */
 public enum ActivationTime {
     AFTER_CREATION("After Creation"),
     BEFORE_ALTER("Before Alter"),

@@ -26,6 +26,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 import swing.dialog.DialogDeleteView;
 import swing.hierarchicalView.HierarchicalView;
+import utility.RelValidation.RelValidator;
 import utility.SMessageDialog;
 import utility.SQLconverter.SQLconverter;
 import utility.Utility;
@@ -382,6 +383,14 @@ public class MultiViewManager {
 
   public static void SQLSelectedView() {
     if (getSelectedGraphicView().isRelational()) {
+      RelValidator rv = RelValidator.getInstance();
+      rv.setComponents(getSelectedGraphicView().getAllDiagramComponents());
+      rv.validate();
+      if (rv.getErrors() != 0) {
+        JOptionPane.showMessageDialog(Slyum.getInstance(), rv.getErrorString(), "Diagram errors", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+
       Object[] possibilities = {"MYSQL", "POSTGRES", "SQ LITE"};
       String s = (String)JOptionPane.showInputDialog(
               Slyum.getInstance(),
@@ -400,7 +409,7 @@ public class MultiViewManager {
         exportAsSQL(SQL);
     }
     else {
-      JOptionPane.showMessageDialog(Slyum.getInstance(), "You must select an Sql view to convert");
+      JOptionPane.showMessageDialog(Slyum.getInstance(), "You must select a relational view to convert");
     }
   }
 

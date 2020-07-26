@@ -398,4 +398,8 @@ public class SPanelDiagramComponent extends SToolBar implements ActionListener{
   public SButton getBtnAssocRel() {
     return btnAssocRel;
   }
+
+  public SButton getBtnView() {
+    return btnView;
+  }
 }

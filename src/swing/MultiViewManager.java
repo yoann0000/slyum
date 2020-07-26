@@ -377,6 +377,8 @@ public class MultiViewManager {
       if(dialogResult == JOptionPane.YES_OPTION){
         RelConverter.getInstance().setGraphicView(getSelectedGraphicView());
         RelConverter.getInstance().umlToRel();
+        JOptionPane.showMessageDialog(Slyum.getInstance(), "Default keys have been added.\n " +
+                "You must add attributes to them");
       }
     }
   }

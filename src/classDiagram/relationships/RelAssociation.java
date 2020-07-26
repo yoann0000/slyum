@@ -7,14 +7,17 @@ import swing.XMLParser;
 public class RelAssociation extends Binary{
     public RelAssociation(Entity source, Entity target) {
         super(source, target, NavigateDirection.FIRST_TO_SECOND);
+        addForeignKeys();
     }
 
     public RelAssociation(Entity source, Entity target, NavigateDirection directed) {
         super(source, target, directed);
+        addForeignKeys();
     }
 
     public RelAssociation(Entity source, Entity target, NavigateDirection directed, int id) {
         super(source, target, directed, id);
+        addForeignKeys();
     }
 
     @Override
@@ -23,10 +26,12 @@ public class RelAssociation extends Binary{
     }
 
     public void addForeignKeys(){
-        ((RelationalEntity)getSource()).addForeignKey(((RelationalEntity)getTarget()).getPrimaryKey());
+        if(getSource() instanceof RelationalEntity && getTarget() instanceof RelationalEntity)
+            ((RelationalEntity)getSource()).addForeignKey(((RelationalEntity)getTarget()).getPrimaryKey());
     }
 
     public void removeForeignKeys() {
-        ((RelationalEntity)getSource()).removeForeignKey(((RelationalEntity)getTarget()).getPrimaryKey());
+        if(getSource() instanceof RelationalEntity && getTarget() instanceof RelationalEntity)
+            ((RelationalEntity)getSource()).removeForeignKey(((RelationalEntity)getTarget()).getPrimaryKey());
     }
 }

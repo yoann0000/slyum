@@ -16,7 +16,7 @@ public class RelViewFactory extends EntityFactory {
      */
     public RelViewFactory(GraphicView parent) {
         super(parent);
-        GraphicView.setButtonFactory(SPanelDiagramComponent.getInstance().getBtnTable());
+        GraphicView.setButtonFactory(SPanelDiagramComponent.getInstance().getBtnView());
     }
 
     @Override

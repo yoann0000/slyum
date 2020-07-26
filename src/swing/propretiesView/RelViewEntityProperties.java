@@ -80,7 +80,7 @@ public class RelViewEntityProperties extends GlobalPropreties {
 
         JLabel proc = new JLabel();
 
-        proc.setText("Trigger Procedure");
+        proc.setText("View Procedure");
         panel.add(proc);
         panel.add(Box.createVerticalStrut(5));
         panel.add(textAreaPane);

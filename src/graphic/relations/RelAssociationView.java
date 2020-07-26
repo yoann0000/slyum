@@ -30,7 +30,6 @@ public class RelAssociationView extends AssociationView {
     public RelAssociationView(GraphicView parent, EntityView source, EntityView target, RelAssociation ra,
                               Point posSource, Point posTarget, boolean checkRecursivity) throws IllegalArgumentException{
         super(parent, source, target, ra, posSource, posTarget, checkRecursivity);
-        addFk();
     }
 
     @Override

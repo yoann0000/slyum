@@ -27,13 +27,11 @@ public class RelConverter {
     private GraphicView graphicView;
     private GraphicView relGraphicView;
 
+    private ClassDiagram classDiagram;
+
     private boolean converted = false;
 
     private Map<Entity, RelationalEntity> alreadyConverted;
-
-    private Map<Multi, RelationalEntity> createdFromMulti;
-
-    ClassDiagram cdResult;
 
     public void setGraphicView(GraphicView graphicView) {
         this.graphicView = graphicView;
@@ -44,8 +42,12 @@ public class RelConverter {
         if (graphicView.isRelational() || converted)
             return;
 
+        classDiagram = graphicView.getClassDiagram();
+
+        if (classDiagram == null)
+            return;
+
         alreadyConverted = new HashMap<>();
-        createdFromMulti = new HashMap<>();
 
         relGraphicView = MultiViewManager.addNewView(graphicView.getName() + " - REL", true);
 
@@ -84,6 +86,8 @@ public class RelConverter {
         for (RelationalAttribute ra : re.getAttributes()) {
             ((RelationalEntityView) component).addAttribute(ra, false);
         }
+
+        classDiagram.addTableEntity(re, false);
     }
 
     /**
@@ -100,6 +104,8 @@ public class RelConverter {
 
         PropretiesChanger.getInstance().addRelationalAssociation(ra);
         PanelClassDiagram.getInstance().getHierarchicalView().addRelationalAssociation(ra);
+
+        classDiagram.addRelAssociation(ra, false);
     }
 
     /**
@@ -154,7 +160,7 @@ public class RelConverter {
      * Converts a binary association to a relational association
      * @param binary the association to convert
      */
-    private void convertBinary(Binary binary) { //TODO make sure this works
+    private void convertBinary(Binary binary) {
         Association.NavigateDirection nav = binary.getDirected();
         Multiplicity m1 = binary.getRoles().getFirst().getMultiplicity();
         Multiplicity m2 = binary.getRoles().getLast().getMultiplicity();

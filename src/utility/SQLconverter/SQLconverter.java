@@ -216,7 +216,7 @@ public class SQLconverter {
 
         //fk attributes
         re.getForeignKeys().forEach(fk -> fk.getKeyComponents().forEach(
-                ra -> sb.append("\n  ").append(fk.getName()).append("_").append(convertAttribute(ra, true)).append(",")
+                ra -> sb.append("\n  ").append(fk.getTable().getName()).append("_").append(convertAttribute(ra, true)).append(",")
         ));
 
         //primary key

@@ -110,6 +110,11 @@ public class RelValidator {
         errorString = sb.toString();
     }
 
+    /**
+     * Validates a table
+     * @param entity the table to validate
+     * @param sb string builder
+     */
     private void validateEntity(RelationalEntity entity, StringBuilder sb) {
         int previousErrors;
         if (entity.getPrimaryKey() == null) {
@@ -124,9 +129,24 @@ public class RelValidator {
             errors++;
         }
 
+        LinkedList<String> uniqueNames = new LinkedList<>();
+        for(RelationalAttribute attribute : entity.getAttributes()) {
+            if (uniqueNames.contains(attribute.getName())){
+                sb.append("Table contains multiple attribute called ").append(attribute.getName()).append("\n");
+                errors++;
+            }
+            uniqueNames.add(attribute.getName());
+        }
+
+        uniqueNames = new LinkedList<>();
         for (Trigger t : entity.getTriggers()) {
             previousErrors = errors;
-            sb.append("Trigger ").append(t.getName()).append("\n");
+            sb.append("Trigger ").append(t.getName()).append(":\n");
+            if (uniqueNames.contains(t.getName())) {
+                sb.append("Table already contains a trigger named ").append(t.getName()).append("\n");
+            }
+            uniqueNames.add(t.getName());
+
             if (t.getProcedure() == null || t.getProcedure().isEmpty()) {
                 sb.append("has no procedure\n");
                 errors++;
@@ -142,6 +162,12 @@ public class RelValidator {
         }
     }
 
+    /**
+     * Validate a key
+     * @param key the key to validate
+     * @param sb string builder
+     * @param type key type (primary, alternate, foreign)
+     */
     private void validateKey(Key key, StringBuilder sb, String type){
         if (key.getName().equals("")){
             sb.append(type).append(" key has no name.\n");
@@ -153,14 +179,19 @@ public class RelValidator {
             errors++;
         } else {
             for (RelationalAttribute ra : key.getKeyComponents()) {
-                if (ra.isUnique() && ra.isNotNull())
+                if (ra.isUnique())
                     return;
             }
-            sb.append(type).append(" key does not uniquely identify entity (no UNIQUE NOT NULL attribute)\n");
+            sb.append(type).append(" key does not uniquely identify entity (no UNIQUE attribute)\n");
             errors++;
         }
     }
 
+    /**
+     * Validate a relational view
+     * @param entity view to validate
+     * @param sb string builder
+     */
     private void validateView(RelViewEntity entity, StringBuilder sb) {
         if(entity.getProcedure() == null || entity.getProcedure().isEmpty()) {
             sb.append("view has no procedure.\n");
@@ -168,6 +199,12 @@ public class RelValidator {
         }
     }
 
+    /**
+     * Check that a diagram has no cycles
+     * @param re list of all tables in the diagram
+     * @param ra list of all relations in the diagram
+     * @param sb string builder
+     */
     private void checkNoCycles(LinkedList<RelationalEntity> re, LinkedList<RelAssociation> ra, StringBuilder sb) {
         Map<Entity, Integer> vertexIds = new HashMap<>();
         for (int i = 0; i < re.size(); i++) {

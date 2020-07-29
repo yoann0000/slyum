@@ -6,6 +6,7 @@ import classDiagram.relationships.*;
 import graphic.GraphicComponent;
 import graphic.GraphicView;
 import graphic.entity.ClassView;
+import graphic.entity.InterfaceView;
 import graphic.entity.RelationalEntityView;
 import graphic.relations.MultiView;
 import graphic.relations.RelationView;
@@ -52,8 +53,8 @@ public class RelConverter {
         relGraphicView = MultiViewManager.addNewView(graphicView.getName() + " - REL", true);
 
         for (GraphicComponent gc : graphicView.getAllDiagramComponents()) {
-            if (gc instanceof ClassView) {
-                RelationalEntity re = convertClass((ClassEntity) gc.getAssociedComponent());
+            if (gc instanceof ClassView || gc instanceof InterfaceView) {
+                RelationalEntity re = convertSimpleEntity((SimpleEntity) gc.getAssociedComponent());
                 addRelationalEntity(re, gc.getBounds());
             }
         }
@@ -110,18 +111,18 @@ public class RelConverter {
 
     /**
      * Convert a class to a table or returns the associated table if it already has been converted
-     * @param classEntity the class to convert
+     * @param simpleEntity the class to convert
      * @return the converted class
      */
-    private RelationalEntity convertClass(ClassEntity classEntity) {
-        if (alreadyConverted.containsKey(classEntity)) {
-            return alreadyConverted.get(classEntity);
+    private RelationalEntity convertSimpleEntity(SimpleEntity simpleEntity) {
+        if (alreadyConverted.containsKey(simpleEntity)) {
+            return alreadyConverted.get(simpleEntity);
         }else {
-            RelationalEntity re = new RelationalEntity(classEntity.getName());
-            for (Attribute a : classEntity.getAttributes()) {
+            RelationalEntity re = new RelationalEntity(simpleEntity.getName());
+            for (Attribute a : simpleEntity.getAttributes()) {
                 re.addAttribute(convertAttribute(a));
             }
-            alreadyConverted.put(classEntity, re);
+            alreadyConverted.put(simpleEntity, re);
             return re;
         }
     }
@@ -142,7 +143,8 @@ public class RelConverter {
     private void convertRelation(Relation relation) {
         Entity source = relation.getSource();
         Entity target = relation.getTarget();
-        if (!(source instanceof ClassEntity) || !(target instanceof ClassEntity))
+        if (!(source instanceof ClassEntity || source instanceof InterfaceEntity)
+                || !(target instanceof ClassEntity || source instanceof InterfaceEntity))
             return;
 
         if (relation instanceof RelAssociation)
@@ -172,31 +174,31 @@ public class RelConverter {
 
             if (nav == Association.NavigateDirection.FIRST_TO_SECOND ||
                     nav == Association.NavigateDirection.BIDIRECTIONAL) {
-                source = convertClass((ClassEntity) binary.getSource());
-                target = convertClass((ClassEntity) binary.getTarget());
+                source = convertSimpleEntity((ClassEntity) binary.getSource());
+                target = convertSimpleEntity((ClassEntity) binary.getTarget());
             } else {
-                target = convertClass((ClassEntity) binary.getSource());
-                source = convertClass((ClassEntity) binary.getTarget());
+                target = convertSimpleEntity((ClassEntity) binary.getSource());
+                source = convertSimpleEntity((ClassEntity) binary.getTarget());
             }
             addRelAssociation(source, target, name);
 
         } else if (m1.isZeroToOne() || m1.isOne()) {
             if (m2.isZeroToOne() || m2.isOne()) { //1-1
-                source = convertClass((ClassEntity) binary.getSource());
-                target = convertClass((ClassEntity) binary.getTarget());
+                source = convertSimpleEntity((ClassEntity) binary.getSource());
+                target = convertSimpleEntity((ClassEntity) binary.getTarget());
             } else { //1-N
-                source = convertClass((ClassEntity) binary.getSource());
-                target = convertClass((ClassEntity) binary.getTarget());
+                source = convertSimpleEntity((ClassEntity) binary.getSource());
+                target = convertSimpleEntity((ClassEntity) binary.getTarget());
             }
             addRelAssociation(source, target, name);
         } else {
             if (m2.isZeroToOne() || m2.isOne()) { //N-1
-                source = convertClass((ClassEntity) binary.getTarget());
-                target = convertClass((ClassEntity) binary.getSource());
+                source = convertSimpleEntity((ClassEntity) binary.getTarget());
+                target = convertSimpleEntity((ClassEntity) binary.getSource());
                 addRelAssociation(source, target, name);
             } else { //N-M
-                source = convertClass((ClassEntity) binary.getSource());
-                target = convertClass((ClassEntity) binary.getTarget());
+                source = convertSimpleEntity((ClassEntity) binary.getSource());
+                target = convertSimpleEntity((ClassEntity) binary.getTarget());
                 RelationalEntity re = new RelationalEntity(source.getName() + "-" + target.getName());
                 source.getPrimaryKey().getKeyComponents().forEach(re::addAttribute);
                 target.getPrimaryKey().getKeyComponents().forEach(re::addAttribute);
@@ -221,9 +223,9 @@ public class RelConverter {
      * @param inheritance the inheritance to convert
      */
     private void convertInheritance(Inheritance inheritance) {
-        RelationalEntity target = convertClass((ClassEntity) inheritance.getSource());
-        RelationalEntity source = convertClass((ClassEntity) inheritance.getTarget());
-        target.setPrimaryKey(source.getPrimaryKey());
+        RelationalEntity target = convertSimpleEntity((ClassEntity) inheritance.getSource());
+        RelationalEntity source = convertSimpleEntity((ClassEntity) inheritance.getTarget());
+        source.setPrimaryKey(target.getPrimaryKey());
         addRelAssociation(source, target, "");
     }
 
@@ -237,7 +239,7 @@ public class RelConverter {
         addRelationalEntity(source, bounds);
         for (Role role : multi.getRoles()){
             if (role.getEntity() instanceof ClassEntity) {
-                RelationalEntity target = convertClass((ClassEntity) role.getEntity());
+                RelationalEntity target = convertSimpleEntity((ClassEntity) role.getEntity());
                 addRelAssociation(source, target, "");
             }
         }

@@ -402,6 +402,8 @@ public class MultiViewManager {
               null,
               possibilities,
               "POSTGRES");
+      if (s == null)
+        return;
       SQLconverter.getInstance().setRelGraphicView(getSelectedGraphicView());
       String SQL = SQLconverter.getInstance().convertToSQL(s);
 

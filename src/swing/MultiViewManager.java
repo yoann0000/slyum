@@ -18,7 +18,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -28,7 +27,7 @@ import swing.dialog.DialogDeleteView;
 import swing.hierarchicalView.HierarchicalView;
 import utility.RelValidation.RelValidator;
 import utility.SMessageDialog;
-import utility.SQLconverter.SQLconverter;
+import utility.SQLconverter.SQLConverter;
 import utility.Utility;
 import utility.WatchDir;
 import utility.relConverter.RelConverter;
@@ -404,8 +403,8 @@ public class MultiViewManager {
               "POSTGRES");
       if (s == null)
         return;
-      SQLconverter.getInstance().setRelGraphicView(getSelectedGraphicView());
-      String SQL = SQLconverter.getInstance().convertToSQL(s);
+      SQLConverter.getInstance().setRelGraphicView(getSelectedGraphicView());
+      String SQL = SQLConverter.getInstance().convertToSQL(s);
 
       if (SQL.equals("unimplemented"))
         JOptionPane.showMessageDialog(Slyum.getInstance(), "This database has yet to be implemented");

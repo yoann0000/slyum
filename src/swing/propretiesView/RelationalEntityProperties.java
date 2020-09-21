@@ -580,7 +580,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
     }
 
-    private class TriggerProcedure extends JTextArea implements Observer {
+    private static class TriggerProcedure extends JTextArea implements Observer {
 
         private Trigger currentTrigger;
 
@@ -1083,10 +1083,12 @@ public class RelationalEntityProperties extends GlobalPropreties{
         keyAttributesTable.setPreferredScrollableViewportSize(new Dimension(70, 0));
 
         keyAttributesTable.getModel().addTableModelListener(
-                (RelationalEntityProperties.PKTableModel) keyAttributesTable.getModel());
+                (RelationalEntityProperties.PKTableModel) keyAttributesTable.getModel()
+        );
 
-        keyAttributesTable.addMouseListener((RelationalEntityProperties.PKTableModel) keyAttributesTable
-                .getModel());
+        keyAttributesTable.addMouseListener(
+                (RelationalEntityProperties.PKTableModel) keyAttributesTable.getModel()
+        );
 
         triggerTable = new STable(new TriggerTableModel(), () -> addTrigger(false));
         triggerTable.setEmptyText("No trigger");
@@ -1164,6 +1166,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
                 ((RelationalEntity) currentObject).getPrimaryKey().notifyObservers();
                 attribute.select();
                 attribute.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+                updateComponentInformations(null);
             });
 
             panelButton.add(btnUpPkAttribute);
@@ -1184,6 +1187,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
                 ((RelationalEntity) currentObject).getPrimaryKey().notifyObservers();
                 attribute.select();
                 attribute.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
+                updateComponentInformations(null);
             });
 
             panelButton.add(btnDownPkAttribute);
@@ -1203,6 +1207,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
                 ((RelationalEntity) currentObject).getPrimaryKey().removeKeyComponent(attribute);
                 ((RelationalEntity) currentObject).getPrimaryKey().notifyObservers();
+                updateComponentInformations(null);
 
                 for (int i = 0; i <= 1; i++) {
                     try {
@@ -1338,8 +1343,9 @@ public class RelationalEntityProperties extends GlobalPropreties{
                                 ((RelationalEntityProperties.AttributeTableModel) attributesTable.getModel())
                                         .getMapIndex(), index).iterator().next();
 
-                addPkAttribute(attribute, false);
+                addPkAttribute(attribute);
                 ((PKTableModel) keyAttributesTable.getModel()).fireTableDataChanged();
+                attribute.notifyObservers(IDiagramComponent.UpdateMessage.ADD_KEY_NO_EDIT);
                 keyAttributesTable.repaint();
             });
 
@@ -1363,8 +1369,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
         {
             final JButton button = new SButton(
-                    PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "plus.png"),
-                    "Add");
+                    PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "plus.png"), "Add");
             button.setAlignmentX(CENTER_ALIGNMENT);
             button.addActionListener(arg0 -> addTrigger(true));
 
@@ -1691,7 +1696,6 @@ public class RelationalEntityProperties extends GlobalPropreties{
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == '\n') {
                     final RelationalEntity relationalEntity = (RelationalEntity) currentObject;
-
                     if (!relationalEntity.getPrimaryKey().setName(pkName.getText()))
                         pkName.setText(relationalEntity.getPrimaryKey().getName());
                     else
@@ -1724,15 +1728,12 @@ public class RelationalEntityProperties extends GlobalPropreties{
             entity.notifyObservers(IDiagramComponent.UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
     }
 
-    private void addPkAttribute(RelationalAttribute ra, boolean editRequest) {
-        Key key = ((RelationalEntity)currentObject).getPrimaryKey();
+    private void addPkAttribute(RelationalAttribute ra) {
+        RelationalEntity entity = (RelationalEntity)currentObject;
 
-        key.addKeyComponent(ra);
-
-        if (editRequest)
-            key.notifyObservers(IDiagramComponent.UpdateMessage.ADD_KEY);
-        else
-            key.notifyObservers(IDiagramComponent.UpdateMessage.ADD_KEY_NO_EDIT);
+        entity.getPrimaryKey().addKeyComponent(ra);
+        updateComponentInformations(null);
+        entity.notifyObservers(IDiagramComponent.UpdateMessage.ADD_KEY_NO_EDIT);
     }
 
     private void addTrigger(boolean editRequest) {

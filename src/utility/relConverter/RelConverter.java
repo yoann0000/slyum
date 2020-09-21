@@ -187,14 +187,14 @@ public class RelConverter {
                 source = convertSimpleEntity((ClassEntity) binary.getSource());
                 target = convertSimpleEntity((ClassEntity) binary.getTarget());
             } else { //1-N
-                source = convertSimpleEntity((ClassEntity) binary.getSource());
-                target = convertSimpleEntity((ClassEntity) binary.getTarget());
+                source = convertSimpleEntity((ClassEntity) binary.getTarget());
+                target = convertSimpleEntity((ClassEntity) binary.getSource());
             }
             addRelAssociation(source, target, name);
         } else {
             if (m2.isZeroToOne() || m2.isOne()) { //N-1
-                source = convertSimpleEntity((ClassEntity) binary.getTarget());
-                target = convertSimpleEntity((ClassEntity) binary.getSource());
+                source = convertSimpleEntity((ClassEntity) binary.getSource());
+                target = convertSimpleEntity((ClassEntity) binary.getTarget());
                 addRelAssociation(source, target, name);
             } else { //N-M
                 source = convertSimpleEntity((ClassEntity) binary.getSource());

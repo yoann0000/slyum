@@ -8,11 +8,11 @@ import graphic.entity.RelationalEntityView;
 
 import java.util.LinkedList;
 
-public class SQLconverter {
+public class SQLConverter {
 
-    private static final SQLconverter instance = new SQLconverter();
+    private static final SQLConverter instance = new SQLConverter();
 
-    public static SQLconverter getInstance() {
+    public static SQLConverter getInstance() {
         return instance;
     }
 
@@ -20,7 +20,7 @@ public class SQLconverter {
 
     /**
      * Sets the graphic view to convert
-     * @param relGraphicView
+     * @param relGraphicView the view to be converted
      */
     public void setRelGraphicView(GraphicView relGraphicView) {
         this.relGraphicView = relGraphicView;

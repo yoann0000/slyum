@@ -45,7 +45,7 @@ public class Key extends Type implements IDiagramComponent {
         return table;
     }
 
-    public String nodeKeyName(int keyType) {
+    public String keyName(int keyType) {
         switch (keyType){
             case 0:
                 return name + " <PK>";

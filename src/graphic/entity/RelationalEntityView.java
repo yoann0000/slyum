@@ -42,7 +42,7 @@ public class RelationalEntityView extends EntityView {
         return rels;
     }
 
-    // Attributs et méthodes
+    // Attributs et triggers
     protected LinkedList<TextBoxRelAttribute> attributesView = new LinkedList<>();
     protected LinkedList<TextBoxTrigger> triggersView = new LinkedList<>();
 
@@ -113,15 +113,14 @@ public class RelationalEntityView extends EntityView {
                         entity.notifyObservers(UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
                         entity.moveAttributePosition(attribute,
                                 attributes.indexOf(component) - attributes.size() + 1);
-                        entity.notifyObservers();
                     } else {
                         Trigger trigger = new Trigger((Trigger) component);
                         LinkedList<Trigger> triggers = entity.getTriggers();
                         entity.addTrigger(trigger);
                         entity.notifyObservers(UpdateMessage.ADD_TRIGGER_NO_EDIT);
                         entity.moveTriggerPosition(trigger, triggers.indexOf(component) - triggers.size() + 1);
-                        entity.notifyObservers();
                     }
+                    entity.notifyObservers();
                 }
             }
             component.notifyObservers();
@@ -143,7 +142,7 @@ public class RelationalEntityView extends EntityView {
      * Create a default key
      */
     private void addPkTextbox(){
-        TextBoxKey tbpk = new TextBoxKey(parent, ((RelationalEntity) component).getPrimaryKey());
+        TextBoxKey tbpk = new TextBoxKey(parent, ((RelationalEntity) component).getPrimaryKey(), 0);
         keysView.add(tbpk);
         updateHeight();
     }
@@ -174,7 +173,7 @@ public class RelationalEntityView extends EntityView {
      * @param trigger
      *          the trigger
      * @param editing
-     *          true if creating a new attribute view in editing mode; false
+     *          true if creating a new trigger view in editing mode; false
      *          otherwise
      */
     public void addTrigger(Trigger trigger, boolean editing) {
@@ -191,13 +190,18 @@ public class RelationalEntityView extends EntityView {
      * the new attribute view will be in editing mode while it created.
      *
      * @param key
-     *          the trigger
+     *          the key
      * @param editing
-     *          true if creating a new attribute view in editing mode; false
+     *          true if creating a new key view in editing mode; false
      *          otherwise
      */
     public void addKey(Key key, boolean editing) {
-        final TextBoxKey newTextBox = new TextBoxKey(parent, key);
+        int kt = 1;
+        if (((RelationalEntity) component).getAlternateKeys().contains(key))
+            kt = 2;
+        if (((RelationalEntity) component).getPrimaryKey() == key)
+            kt = 0;
+        final TextBoxKey newTextBox = new TextBoxKey(parent, key, kt);
         keysView.add(newTextBox);
 
         updateHeight();
@@ -231,6 +235,7 @@ public class RelationalEntityView extends EntityView {
         List<TextBox> tb = super.getAllTextBox();
         tb.addAll(triggersView);
         tb.addAll(attributesView);
+        tb.addAll(keysView);
         return tb;
     }
 
@@ -406,6 +411,12 @@ public class RelationalEntityView extends EntityView {
                 case ADD_KEY_NO_EDIT:
                     addKey(((RelationalEntity) component).getLastAddedKey(), enable);
                     break;
+                case ADD_FK:
+                    addKey(((RelationalEntity) component).getLastAddedKey(), false);
+                    break;
+                case RM_FK:
+                    regenerateEntity();
+                    break;
                 default:
                     super.update(observable, object);
                     break;
@@ -498,12 +509,17 @@ public class RelationalEntityView extends EntityView {
     protected void innerRegenerate() {
         triggersView.clear();
         attributesView.clear();
+        keysView.clear();
         for (RelationalAttribute a : ((RelationalEntity) component).getAttributes())
             addAttribute(a, false);
+        for (Trigger t : ((RelationalEntity) component).getTriggers())
+            addTrigger(t, false);
+        for (Key k : ((RelationalEntity) component).getAllKeys())
+            addKey(k, false);
     }
 
     @Override
-    protected int paintTextBoxes(Graphics2D g2, Rectangle bounds, int textboxHeight, int offset) { //TODO add keys here
+    protected int paintTextBoxes(Graphics2D g2, Rectangle bounds, int textboxHeight, int offset) {
 
         // draw keys separator
         offset += 10;
@@ -540,13 +556,13 @@ public class RelationalEntityView extends EntityView {
         }
 
         if (displayTriggers) {
-            // draw methods separator
+            // draw triggers separator
             offset += 10;
             g2.setStroke(new BasicStroke(BORDER_WIDTH));
             g2.setColor(DEFAULT_BORDER_COLOR);
             g2.drawLine(bounds.x, offset, bounds.x + bounds.width, offset);
 
-            // draw methods
+            // draw triggers
             for (final TextBoxTrigger tb : triggersView) {
                 tb.setBounds(new Rectangle(bounds.x + 8, offset + 2, bounds.width - 15,
                         textboxHeight + 2));

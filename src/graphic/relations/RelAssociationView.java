@@ -57,9 +57,9 @@ public class RelAssociationView extends AssociationView {
             RelationalEntity targetEntity = (RelationalEntity) relation.getTarget();
             Association.NavigateDirection direction = ((RelAssociation) relation).getDirected();
             if (direction == Association.NavigateDirection.FIRST_TO_SECOND) {
-                sourceEntity.addForeignKey(targetEntity.getPrimaryKey());
+                sourceEntity.addForeignKey(sourceEntity.getPrimaryKey());
             } else if (direction == Association.NavigateDirection.SECOND_TO_FIRST) {
-                targetEntity.addForeignKey(sourceEntity.getPrimaryKey());
+                targetEntity.addForeignKey(targetEntity.getPrimaryKey());
             }
         }
     }
@@ -109,8 +109,8 @@ public class RelAssociationView extends AssociationView {
         if (relation.getSource() instanceof RelationalEntity && relation.getTarget() instanceof RelationalEntity){
             RelationalEntity sourceEntity = (RelationalEntity) relation.getSource();
             RelationalEntity targetEntity = (RelationalEntity) relation.getTarget();
-            sourceEntity.getForeignKeys().remove(targetEntity.getPrimaryKey());
-            targetEntity.getForeignKeys().remove(sourceEntity.getPrimaryKey());
+            sourceEntity.removeForeignKey(targetEntity.getPrimaryKey());
+            targetEntity.removeForeignKey(sourceEntity.getPrimaryKey());
         }
     }
 

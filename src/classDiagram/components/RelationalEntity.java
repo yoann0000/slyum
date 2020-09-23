@@ -52,10 +52,14 @@ public class RelationalEntity extends Entity{
     public void addForeignKey(Key fk) {
         lastAddedKey = fk;
         foreignKeys.add(fk);
+        notifyObservers(UpdateMessage.ADD_FK);
     }
 
     public void removeForeignKey(Key fk) {
-        foreignKeys.remove(fk);
+        if (foreignKeys.contains(fk)) {
+            foreignKeys.remove(fk);
+            notifyObservers(UpdateMessage.RM_FK); //FIXME
+        }
     }
 
     public void addAlternateKey(Key ak) {

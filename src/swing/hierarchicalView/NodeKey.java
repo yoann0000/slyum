@@ -36,7 +36,7 @@ public class NodeKey
      *          the type of key (0 -> primarykey, 1 -> foreign key, 2 -> alternate key)
      */
     public NodeKey(Key key, DefaultTreeModel treeModel, STree tree, int keyType) {
-        super(key.nodeKeyName(keyType));
+        super(key.keyName(keyType));
 
         if (treeModel == null)
             throw new IllegalArgumentException("treeModel is null");
@@ -78,7 +78,7 @@ public class NodeKey
                     break;
             }
         } else {
-            setUserObject(key.nodeKeyName(keyType));
+            setUserObject(key.keyName(keyType));
             treeModel.reload(this);
         }
     }

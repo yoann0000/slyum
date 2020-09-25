@@ -82,7 +82,6 @@ public class RelConverter {
         component.setBounds(bounds);
 
         PropretiesChanger.getInstance().addRelationalEntity(re);
-        PanelClassDiagram.getInstance().getHierarchicalView().addRelationalEntity(re);
 
         for (RelationalAttribute ra : re.getAttributes()) {
             ((RelationalEntityView) component).addAttribute(ra, false);
@@ -104,7 +103,6 @@ public class RelConverter {
         relGraphicView.addRelAssociation(ra);
 
         PropretiesChanger.getInstance().addRelationalAssociation(ra);
-        PanelClassDiagram.getInstance().getHierarchicalView().addRelationalAssociation(ra);
 
         classDiagram.addRelAssociation(ra, false);
     }
@@ -115,16 +113,14 @@ public class RelConverter {
      * @return the converted class
      */
     private RelationalEntity convertSimpleEntity(SimpleEntity simpleEntity) {
-        if (alreadyConverted.containsKey(simpleEntity)) {
-            return alreadyConverted.get(simpleEntity);
-        }else {
+        if (!alreadyConverted.containsKey(simpleEntity)) {
             RelationalEntity re = new RelationalEntity(simpleEntity.getName());
             for (Attribute a : simpleEntity.getAttributes()) {
                 re.addAttribute(convertAttribute(a));
             }
             alreadyConverted.put(simpleEntity, re);
-            return re;
         }
+        return alreadyConverted.get(simpleEntity);
     }
 
     /**

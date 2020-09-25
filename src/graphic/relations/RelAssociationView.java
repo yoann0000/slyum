@@ -133,4 +133,14 @@ public class RelAssociationView extends AssociationView {
         menuNavigation.add(navSecondToFirst = makeRadioButtonMenuItem("",
                 Association.NavigateDirection.SECOND_TO_FIRST.toString(), btnGrpNavigation));
     }
+
+    @Override
+    public void update(Observable observable, Object object) {
+        if (object != null && object.getClass() == IDiagramComponent.UpdateMessage.class) {
+            if (object == IDiagramComponent.UpdateMessage.MODIF) {
+                deleteFKs();
+                addFk();
+            }
+        }
+    }
 }

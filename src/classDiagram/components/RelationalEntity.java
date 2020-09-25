@@ -56,10 +56,9 @@ public class RelationalEntity extends Entity{
     }
 
     public void removeForeignKey(Key fk) {
-        if (foreignKeys.contains(fk)) {
-            foreignKeys.remove(fk);
-            notifyObservers(UpdateMessage.RM_FK); //FIXME
-        }
+        foreignKeys.remove(fk);
+        setChanged();
+        notifyObservers(UpdateMessage.RM_FK);
     }
 
     public void addAlternateKey(Key ak) {
@@ -228,12 +227,12 @@ public class RelationalEntity extends Entity{
             entity.appendChild(attribute.getXmlElement(doc));
 
         Element pk = primaryKey.getXmlElement(doc);
-        pk.setAttribute("primary", String.valueOf(true));
+        pk.setAttribute("keyType", "primary");
         entity.appendChild(pk);
 
         for (Key key : alternateKeys){
             Element ak = key.getXmlElement(doc);
-            ak.setAttribute("primary", String.valueOf(false));
+            ak.setAttribute("keyType", "alternate");
             entity.appendChild(ak);
         }
 

@@ -1009,7 +1009,7 @@ public class GraphicView extends GraphicComponent
     boolean isRecord = Change.isRecord();
     Change.record();
 
-    list.stream().forEach(EntityView::adjustWidth);
+    list.forEach(EntityView::adjustWidth);
 
     if (!isRecord) Change.stopRecord();
   }
@@ -1032,8 +1032,7 @@ public class GraphicView extends GraphicComponent
    * Get all selected entities contents in this graphic view and adjust their
    * width. See adjustWidth() method from EntityView.
    */
-  public void adjustWidthSelectedEntities(
-      ) {
+  public void adjustWidthSelectedEntities() {
     adjustEntities(getSelectedEntities());
   }
 

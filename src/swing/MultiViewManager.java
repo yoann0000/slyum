@@ -392,6 +392,15 @@ public class MultiViewManager {
         return;
       }
 
+      if (rv.isCyclic()) {
+        int dialogResult = JOptionPane.showConfirmDialog(Slyum.getInstance(),
+                "Cycle detected. Potential semantic problems.\n Proceed anyway?",
+                "Cycle confirmation",
+                JOptionPane.OK_CANCEL_OPTION);
+        if (dialogResult == JOptionPane.CANCEL_OPTION || dialogResult == JOptionPane.CLOSED_OPTION)
+          return;
+      }
+
       Object[] possibilities = {"MYSQL", "POSTGRES", "SQ LITE"};
       String s = (String)JOptionPane.showInputDialog(
               Slyum.getInstance(),

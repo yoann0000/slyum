@@ -14,6 +14,7 @@ public class RelValidator {
     private final LinkedList<IDiagramComponent> components;
     private int errors;
     private String errorString;
+    private boolean hasCycle;
 
     private static final RelValidator instance = new RelValidator();
 
@@ -28,6 +29,7 @@ public class RelValidator {
         components = new LinkedList<>();
         errors = 0;
         errorString = "";
+        hasCycle = false;
     }
 
     /**
@@ -36,6 +38,7 @@ public class RelValidator {
     public void validate() {
         errors = 0;
         errorString = "";
+        hasCycle = false;
         if (components.isEmpty()) {
             errorString = "Diagram is empty";
             errors++;
@@ -219,8 +222,8 @@ public class RelValidator {
         }
 
         if(graph.isCyclic()) {
-            sb.append("Table relations are cyclic\n");
-            errors++;
+            sb.append("Table relations are cyclic. Check semantic.\n");
+            hasCycle = true;
         }
     }
 
@@ -238,6 +241,14 @@ public class RelValidator {
      */
     public String getErrorString() {
         return errorString;
+    }
+
+    /**
+     * Get the hasCycle value
+     * @return true is the graph has a cycle
+     */
+    public boolean isCyclic() {
+        return hasCycle;
     }
 
     /**

@@ -242,8 +242,13 @@ public class DiagramPropreties
           rv.setComponents(MultiViewManager.getSelectedGraphicView().getAllDiagramComponents());
           rv.validate();
           if (rv.getErrors() == 0) {
-            txtRelVal.setForeground(Color.GREEN);
-            txtRelVal.setText("No Errors");
+            if (rv.isCyclic()){
+              txtRelVal.setForeground(Color.ORANGE);
+              txtRelVal.setText("Cycle detected. Check semantic.");
+            } else {
+              txtRelVal.setForeground(Color.GREEN);
+              txtRelVal.setText("No Errors");
+            }
           } else {
             txtRelVal.setForeground(Color.RED);
             txtRelVal.setText(rv.getErrorString());

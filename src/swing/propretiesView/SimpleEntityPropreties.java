@@ -1256,7 +1256,7 @@ public class SimpleEntityPropreties extends GlobalPropreties {
   }
 
   @Override
-  public void updateComponentInformations(UpdateMessage msg) {
+  public void updateComponentInformation(UpdateMessage msg) {
     if (currentObject == null) return;
 
     stopEditingTables();

@@ -74,7 +74,6 @@ public class RelationalEntityProperties extends GlobalPropreties{
             return columnNames[col];
         }
 
-        @SuppressWarnings("unchecked")
         public HashMap<RelationalAttribute, Integer> getMapIndex() {
             return (HashMap<RelationalAttribute, Integer>) mapIndex.clone();
         }
@@ -160,20 +159,16 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
             switch (column) {
                 case 0: // nom
-
                     if (attribute.setName((String) data))
                         setValueAt(attribute.getName(), row, column);
-
                     break;
 
                 case 1: // type
                     String s = (String) data;
-
                     if (!TypeName.getInstance().verifyName(s))
                         setValueAt(attribute.getType().getName(), row, column);
                     else
                         attribute.setType(new Type(s));
-
                     break;
 
                 case 2: // unique
@@ -220,13 +215,10 @@ public class RelationalEntityProperties extends GlobalPropreties{
                     }
 
                 setAttribute(attribute, index);
-            } catch (final Exception ignored) {
-
-            }
+            } catch (final Exception ignored) {}
         }
     }
 
-    //FIXME
     private class PKTableModel extends AbstractTableModel implements Observer, TableModelListener, MouseListener {
         private final String[] columnNames = {"Pk Attributes"};
 
@@ -615,6 +607,10 @@ public class RelationalEntityProperties extends GlobalPropreties{
         }
     }
 
+    /**
+     * Alternate Key table model.
+     * Commented out until interface can be reorganised.
+     */
     /*private class AlternateKeyTableModel extends AbstractTableModel
             implements Observer, TableModelListener, MouseListener {
 
@@ -1166,7 +1162,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
                 ((RelationalEntity) currentObject).getPrimaryKey().notifyObservers();
                 attribute.select();
                 attribute.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
-                updateComponentInformations(null);
+                updateComponentInformation(null);
             });
 
             panelButton.add(btnUpPkAttribute);
@@ -1187,7 +1183,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
                 ((RelationalEntity) currentObject).getPrimaryKey().notifyObservers();
                 attribute.select();
                 attribute.notifyObservers(IDiagramComponent.UpdateMessage.SELECT);
-                updateComponentInformations(null);
+                updateComponentInformation(null);
             });
 
             panelButton.add(btnDownPkAttribute);
@@ -1207,7 +1203,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
 
                 ((RelationalEntity) currentObject).getPrimaryKey().removeKeyComponent(attribute);
                 ((RelationalEntity) currentObject).getPrimaryKey().notifyObservers();
-                updateComponentInformations(null);
+                updateComponentInformation(null);
 
                 for (int i = 0; i <= 1; i++) {
                     try {
@@ -1732,7 +1728,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
         RelationalEntity entity = (RelationalEntity)currentObject;
 
         entity.getPrimaryKey().addKeyComponent(ra);
-        updateComponentInformations(null);
+        updateComponentInformation(null);
         entity.notifyObservers(IDiagramComponent.UpdateMessage.ADD_KEY_NO_EDIT);
     }
 
@@ -1770,7 +1766,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
     }
 
     @Override
-    public void updateComponentInformations(IDiagramComponent.UpdateMessage msg) {
+    public void updateComponentInformation(IDiagramComponent.UpdateMessage msg) {
         if (currentObject == null) return;
 
         stopEditingTables();

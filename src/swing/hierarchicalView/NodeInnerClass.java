@@ -34,7 +34,7 @@ public class NodeInnerClass extends AbstractNode {
   }
 
   @Override
-  public IDiagramComponent getAssociedComponent() {
+  public IDiagramComponent getAssociatedComponent() {
     return innerClass;
   }
 

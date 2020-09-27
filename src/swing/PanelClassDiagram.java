@@ -30,12 +30,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -657,7 +655,7 @@ public class PanelClassDiagram extends JPanel {
     
     RecentProjectManager.addhistoryEntry(file.getAbsolutePath());
         
-    DiagramPropreties.getInstance().updateComponentInformations(null);
+    DiagramPropreties.getInstance().updateComponentInformation(null);
 
     SwingUtilities.invokeLater(new Runnable() {
 

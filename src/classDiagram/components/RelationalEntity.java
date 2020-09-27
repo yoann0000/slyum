@@ -52,6 +52,7 @@ public class RelationalEntity extends Entity{
     public void addForeignKey(Key fk) {
         lastAddedKey = fk;
         foreignKeys.add(fk);
+        setChanged();
         notifyObservers(UpdateMessage.ADD_FK);
     }
 
@@ -162,9 +163,14 @@ public class RelationalEntity extends Entity{
         setChanged();
     }
 
+    /**
+     * Remove a given trigger.
+     * @param trigger the trigger to remove
+     * @return if the trigger was removed
+     */
     public boolean removeTrigger(Trigger trigger) {
         if (trigger == null)
-            throw new IllegalArgumentException("attribute is null");
+            throw new IllegalArgumentException("trigger is null");
 
         int i = triggers.indexOf(trigger);
 

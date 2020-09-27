@@ -42,7 +42,7 @@ public class TreeRenderer extends DefaultTreeCellRenderer {
     
     if (value instanceof IClassDiagramNode) {
       
-      IDiagramComponent component = ((IClassDiagramNode)value).getAssociedComponent();
+      IDiagramComponent component = ((IClassDiagramNode)value).getAssociatedComponent();
       
       if (value instanceof AbstractNode && // Only main component must be treated.
           component != null) {

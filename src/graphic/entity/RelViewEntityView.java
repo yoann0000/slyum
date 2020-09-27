@@ -59,61 +59,8 @@ public class RelViewEntityView extends EntityView {
         } else if ("ViewNothing".equals(e.getActionCommand())) {
             parent.showAttributsForSelectedEntity(false);
             parent.showMethodsForSelectedEntity(false);
-        } else if ("Abstract".equals(e.getActionCommand())) {
-            IDiagramComponent component;
-            if (pressedTextBox == null) {
-                component = getAssociedComponent();
-                ((SimpleEntity) component).setAbstract(!((SimpleEntity) component)
-                        .isAbstract());
-            } else {
-                component = pressedTextBox.getAssociedComponent();
-                ((Method) component).setAbstract(!((Method) component).isAbstract());
-            }
-            component.notifyObservers();
-        } else if ("Static".equals(e.getActionCommand())) {
-            IDiagramComponent component = pressedTextBox.getAssociedComponent();
-            if (component instanceof Attribute)
-                ((Attribute) component).setStatic(!((Attribute) component).isStatic());
-            else
-                ((Method) component).setStatic(!((Method) component).isStatic());
-            component.notifyObservers();
-        } else if (Slyum.ACTION_TEXTBOX_UP.equals(e.getActionCommand())
-                || Slyum.ACTION_TEXTBOX_DOWN.equals(e.getActionCommand())) {
-            int offset = 1;
-            if (Slyum.ACTION_TEXTBOX_UP.equals(e.getActionCommand())) offset = -1;
-            if (pressedTextBox.getClass() == TextBoxAttribute.class) {
-                final Attribute attribute = (Attribute) pressedTextBox
-                        .getAssociedComponent();
-                ((SimpleEntity) component).moveAttributePosition(attribute, offset);
-            } else if (pressedTextBox.getClass() == TextBoxMethod.class) {
-                final Method method = (Method) pressedTextBox
-                        .getAssociedComponent();
-                ((SimpleEntity) component).moveMethodPosition(method, offset);
-            } else if (Slyum.ACTION_DUPLICATE.equals(e.getActionCommand())) {
-                if (pressedTextBox != null) {
-                    IDiagramComponent component = pressedTextBox.getAssociedComponent();
-                    SimpleEntity entity = (SimpleEntity) getAssociedComponent();
-                    if (component instanceof Attribute) {
-                        Attribute attribute = new Attribute((Attribute) component);
-                        LinkedList<Attribute> attributes = entity.getAttributes();
-                        entity.addAttribute(attribute);
-                        entity.notifyObservers(UpdateMessage.ADD_ATTRIBUTE_NO_EDIT);
-                        entity.moveAttributePosition(attribute,
-                                attributes.indexOf(component) - attributes.size() + 1);
-                        entity.notifyObservers();
-                    } else {
-                        Method method = new Method((Method) component);
-                        LinkedList<Method> methods = entity.getMethods();
-                        entity.addMethod(method);
-                        entity.notifyObservers(UpdateMessage.ADD_METHOD_NO_EDIT);
-                        entity.moveMethodPosition(method, methods.indexOf(component)
-                                - methods.size() + 1);
-                        entity.notifyObservers();
-                    }
-                }
-            }
-            component.notifyObservers();
         }
+        component.notifyObservers();
     }
 
     @Override

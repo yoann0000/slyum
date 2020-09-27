@@ -33,7 +33,7 @@ public class NodeKey
      * @param tree
      *          the JTree
      * @param keyType
-     *          the type of key (0 -> primarykey, 1 -> foreign key, 2 -> alternate key)
+     *          the type of key (0 -> primary key, 1 -> foreign key, 2 -> alternate key)
      */
     public NodeKey(Key key, DefaultTreeModel treeModel, STree tree, int keyType) {
         super(key.keyName(keyType));
@@ -52,7 +52,7 @@ public class NodeKey
     }
 
     @Override
-    public IDiagramComponent getAssociedComponent() {
+    public IDiagramComponent getAssociatedComponent() {
         return key;
     }
 

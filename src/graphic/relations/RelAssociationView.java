@@ -25,11 +25,11 @@ public class RelAssociationView extends AssociationView {
      * @param ra               the relational association
      * @param posSource        the position for put the first MagneticGrip
      * @param posTarget        the position for put the last MagneticGrip
-     * @param checkRecursivity check if the relation points to itself
+     * @param checkRecursion check if the relation points to itself
      */
     public RelAssociationView(GraphicView parent, EntityView source, EntityView target, RelAssociation ra,
-                              Point posSource, Point posTarget, boolean checkRecursivity) throws IllegalArgumentException{
-        super(parent, source, target, ra, posSource, posTarget, checkRecursivity);
+                              Point posSource, Point posTarget, boolean checkRecursion) throws IllegalArgumentException{
+        super(parent, source, target, ra, posSource, posTarget, checkRecursion);
     }
 
     @Override

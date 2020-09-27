@@ -41,7 +41,7 @@ public abstract class AbstractNode
   }
   
   protected ActionListener getMenuItemDeleteActionListener() {
-    return (ActionEvent e) -> PanelClassDiagram.getInstance().getClassDiagram().removeComponent(getAssociedComponent());
+    return (ActionEvent e) -> PanelClassDiagram.getInstance().getClassDiagram().removeComponent(getAssociatedComponent());
   }
 
   public JPopupMenu getPopupMenu() {

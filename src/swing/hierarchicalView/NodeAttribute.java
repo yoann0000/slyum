@@ -54,7 +54,7 @@ public class NodeAttribute
   }
 
   @Override
-  public IDiagramComponent getAssociedComponent() {
+  public IDiagramComponent getAssociatedComponent() {
     return attribute;
   }
 

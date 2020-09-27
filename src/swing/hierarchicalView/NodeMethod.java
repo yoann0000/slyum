@@ -50,7 +50,7 @@ public class NodeMethod extends DefaultMutableTreeNode implements Observer, ICla
   }
 
   @Override
-  public IDiagramComponent getAssociedComponent() {
+  public IDiagramComponent getAssociatedComponent() {
     return method;
   }
 
@@ -61,7 +61,7 @@ public class NodeMethod extends DefaultMutableTreeNode implements Observer, ICla
 
   @Override
   public void update(Observable observable, Object o) {
-    if (o != null && o instanceof UpdateMessage) {
+    if (o instanceof UpdateMessage) {
       final TreePath path = new TreePath(getPath());
 
       switch ((UpdateMessage) o) {

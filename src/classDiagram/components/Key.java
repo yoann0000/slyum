@@ -29,22 +29,43 @@ public class Key extends Type implements IDiagramComponent {
         this.table = table;
     }
 
+    /**
+     * Get all of the key's relational attributes.
+     * @return A list containing the relational attributes.
+     */
     public LinkedList<RelationalAttribute> getKeyComponents() {
         return keyComponents;
     }
 
+    /**
+     * Add a relational attribute to the key.
+     * @param attribute the attribute to add.
+     */
     public void addKeyComponent(RelationalAttribute attribute) {
         keyComponents.add(attribute);
     }
 
+    /**
+     * Remove a relational attribute from the key.
+     * @param attribute the attribute to remove.
+     */
     public void removeKeyComponent(RelationalAttribute attribute) {
         keyComponents.remove(attribute);
     }
 
+    /**
+     * Get the table associated with this key.
+     * @return the table associated with this key.
+     */
     public RelationalEntity getTable() {
         return table;
     }
 
+    /**
+     * Get a string that describes the key depending on it's type.
+     * @param keyType the type of the key (primary, foreign, alternate).
+     * @return the string representation of the key.
+     */
     public String keyName(int keyType) {
         switch (keyType){
             case 0:

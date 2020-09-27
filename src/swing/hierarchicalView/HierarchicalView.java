@@ -79,7 +79,7 @@ public class HierarchicalView
     for (int i = 0; i < root.getChildCount(); i++) {
       child = (IClassDiagramNode) root.getChildAt(i);
       
-      if (child.getAssociedComponent().equals(o))
+      if (child.getAssociatedComponent().equals(o))
         return child;
       
       if (!root.getChildAt(i).isLeaf())
@@ -315,7 +315,7 @@ public class HierarchicalView
       protected Transferable createTransferable(JComponent c) {
         Object o = tree.getSelectionPath().getLastPathComponent();
         if (o instanceof NodeEntity)
-          return (Transferable)((NodeEntity)o).getAssociedComponent();
+          return (Transferable)((NodeEntity)o).getAssociatedComponent();
         return null;
       }
 
@@ -719,7 +719,7 @@ public class HierarchicalView
         continue;
       
       final IDiagramComponent component =
-      ((IClassDiagramNode) o).getAssociedComponent();
+      ((IClassDiagramNode) o).getAssociatedComponent();
       component.select();
       tree.scrollPathToVisible(treePath);
       

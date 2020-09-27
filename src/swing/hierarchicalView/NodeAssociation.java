@@ -81,7 +81,7 @@ public class NodeAssociation extends AbstractNode {
   }
 
   @Override
-  public IDiagramComponent getAssociedComponent() {
+  public IDiagramComponent getAssociatedComponent() {
     return association;
   }
 

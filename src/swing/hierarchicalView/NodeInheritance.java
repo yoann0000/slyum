@@ -62,7 +62,7 @@ public class NodeInheritance extends AbstractNode {
   }
 
   @Override
-  public IDiagramComponent getAssociedComponent() {
+  public IDiagramComponent getAssociatedComponent() {
     return inheritance;
   }
 

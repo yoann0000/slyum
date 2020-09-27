@@ -77,7 +77,7 @@ public abstract class NodeEntity extends AbstractNode {
   }
 
   @Override
-  public IDiagramComponent getAssociedComponent() {
+  public IDiagramComponent getAssociatedComponent() {
     return entity;
   }
 
@@ -95,7 +95,7 @@ public abstract class NodeEntity extends AbstractNode {
   public void removeAllChildren() {
     for (int i = getChildCount() - 1; i >= 0; i--) {
       IClassDiagramNode node = (IClassDiagramNode) getChildAt(i);
-      node.getAssociedComponent().deleteObserver((Observer) node);
+      node.getAssociatedComponent().deleteObserver((Observer) node);
     }
     super.removeAllChildren();
   }

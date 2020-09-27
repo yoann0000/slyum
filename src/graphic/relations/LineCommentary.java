@@ -70,7 +70,7 @@ public class LineCommentary extends LineView {
     super(graphicView, source, target, posSource, posTarget, checkRecursivity);
     setStroke(new BasicStroke(LINE_WIDTH, BasicStroke.CAP_BUTT,
             BasicStroke.JOIN_MITER, 10.0f, new float[] { 4.f }, 0.0f));
-    NoteProperties.getInstance().updateComponentInformations(null);
+    NoteProperties.getInstance().updateComponentInformation(null);
     graphicView.selectOnly(this);
     notifyNoteProperties();
   }

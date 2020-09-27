@@ -37,7 +37,7 @@ public class NodeEnumValue extends DefaultMutableTreeNode implements ICustomized
   }
 
   @Override
-  public IDiagramComponent getAssociedComponent() {
+  public IDiagramComponent getAssociatedComponent() {
     return enumValue;
   }
 

@@ -49,7 +49,7 @@ public class NodeRelationalAttribute
     }
 
     @Override
-    public IDiagramComponent getAssociedComponent() {
+    public IDiagramComponent getAssociatedComponent() {
         return attribute;
     }
 

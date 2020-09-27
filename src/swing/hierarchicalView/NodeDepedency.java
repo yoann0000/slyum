@@ -62,7 +62,7 @@ public class NodeDepedency extends AbstractNode {
   }
 
   @Override
-  public IDiagramComponent getAssociedComponent() {
+  public IDiagramComponent getAssociatedComponent() {
     return dependency;
   }
 

@@ -64,22 +64,22 @@ public abstract class GlobalPropreties extends JPanel implements Observer {
       switch ((UpdateMessage) object) {
         case SELECT:
           currentObject = observable;
-          updateComponentInformations((UpdateMessage) object);
+          updateComponentInformation((UpdateMessage) object);
           showInProperties();
 
           break;
         case UNSELECT:
           if (observable == currentObject)
             PropretiesChanger.getInstance().setViewportView(null);
-          updateComponentInformations((UpdateMessage) object);
+          updateComponentInformation((UpdateMessage) object);
           break;
         default:
-          updateComponentInformations((UpdateMessage) object);
+          updateComponentInformation((UpdateMessage) object);
           break;
       }
     else
-      updateComponentInformations(null);
+      updateComponentInformation(null);
   }
 
-  public abstract void updateComponentInformations(UpdateMessage msg);
+  public abstract void updateComponentInformation(UpdateMessage msg);
 }

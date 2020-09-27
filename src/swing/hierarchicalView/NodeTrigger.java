@@ -46,7 +46,7 @@ public class NodeTrigger extends DefaultMutableTreeNode implements Observer, ICl
     }
 
     @Override
-    public IDiagramComponent getAssociedComponent() {
+    public IDiagramComponent getAssociatedComponent() {
         return trigger;
     }
 

@@ -22,17 +22,17 @@ public class RelViewEntity extends Entity {
         this.procedure = procedure;
     }
 
-    @Override
-    protected String getEntityType() {
-        return XMLParser.EntityType.VIEW.toString();
-    }
-
     public String getProcedure() {
         return procedure;
     }
 
     public void setProcedure(String procedure) {
         this.procedure = procedure;
+    }
+
+    @Override
+    protected String getEntityType() {
+        return XMLParser.EntityType.VIEW.toString();
     }
 
     @Override

@@ -15,7 +15,7 @@ public interface IClassDiagramNode {
    * 
    * @return the associated UML object with this node
    */
-  public IDiagramComponent getAssociedComponent();
+  public IDiagramComponent getAssociatedComponent();
 
   public void remove();
 }

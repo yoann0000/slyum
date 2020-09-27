@@ -13,7 +13,7 @@ public class NodeRelAssociation extends NodeAssociation{
      * @param association the associated association
      * @param treeModel   the model of the JTree
      * @param icon        the customized icon
-     * @param tree
+     * @param tree        the JTree
      */
     public NodeRelAssociation(Association association, DefaultTreeModel treeModel, ImageIcon icon, HierarchicalView.STree tree) {
         super(association, treeModel, icon, tree);

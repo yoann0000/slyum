@@ -67,11 +67,11 @@ public class RelationalRelationProperties extends GlobalPropreties {
 
         radFirstToSecond = new SRadioButton();
         radFirstToSecond.setBackground(null);
-        radFirstToSecond.addActionListener(evt -> setCurrentObjectDirected(NavigateDirection.FIRST_TO_SECOND));
+        radFirstToSecond.addActionListener(evt -> setNavDir(NavigateDirection.FIRST_TO_SECOND));
 
         radSecondToFirst = new SRadioButton();
         radSecondToFirst.setBackground(null);
-        radSecondToFirst.addActionListener(evt -> setCurrentObjectDirected(NavigateDirection.SECOND_TO_FIRST));
+        radSecondToFirst.addActionListener(evt -> setNavDir(NavigateDirection.SECOND_TO_FIRST));
 
         btnGrpNavigation = new ButtonGroup();
         btnGrpNavigation.add(radFirstToSecond);
@@ -99,12 +99,11 @@ public class RelationalRelationProperties extends GlobalPropreties {
     private void setCurrentObjectDirected(NavigateDirection direction) {
         if (currentObject != null && currentObject instanceof Association) {
             ((Association) currentObject).setDirected(direction);
-            ((Association) currentObject).notifyObservers(UpdateMessage.MODIF);
         }
     }
 
     @Override
-    public void updateComponentInformations(UpdateMessage msg) {
+    public void updateComponentInformation(UpdateMessage msg) {
         if (currentObject != null) {
             if (currentObject instanceof RelAssociation) {
                 final RelAssociation association = (RelAssociation) currentObject;
@@ -181,5 +180,10 @@ public class RelationalRelationProperties extends GlobalPropreties {
     private void setVisibleNavigationBtn(boolean visible) {
         radFirstToSecond.setVisible(visible);
         radSecondToFirst.setVisible(visible);
+    }
+
+    private void setNavDir(NavigateDirection navDir) {
+        setCurrentObjectDirected(navDir);
+        ((RelAssociation)currentObject).resetKeys();
     }
 }

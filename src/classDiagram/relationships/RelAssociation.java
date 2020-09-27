@@ -7,17 +7,17 @@ import swing.XMLParser;
 public class RelAssociation extends Binary{
     public RelAssociation(Entity source, Entity target) {
         super(source, target, NavigateDirection.FIRST_TO_SECOND);
-        addForeignKeys();
+        addForeignKey();
     }
 
     public RelAssociation(Entity source, Entity target, NavigateDirection directed) {
         super(source, target, directed);
-        addForeignKeys();
+        addForeignKey();
     }
 
     public RelAssociation(Entity source, Entity target, NavigateDirection directed, int id) {
         super(source, target, directed, id);
-        addForeignKeys();
+        addForeignKey();
     }
 
     @Override
@@ -25,13 +25,29 @@ public class RelAssociation extends Binary{
         return XMLParser.Aggregation.REL.toString();
     }
 
-    public void addForeignKeys(){
-        if(getSource() instanceof RelationalEntity && getTarget() instanceof RelationalEntity)
+    public void addForeignKey(){
+        if (getSource() instanceof RelationalEntity && getTarget() instanceof RelationalEntity)
             ((RelationalEntity)getSource()).addForeignKey(((RelationalEntity)getTarget()).getPrimaryKey());
     }
 
-    public void removeForeignKeys() {
-        if(getSource() instanceof RelationalEntity && getTarget() instanceof RelationalEntity)
+    public void removeForeignKey() {
+        if (getSource() instanceof RelationalEntity && getTarget() instanceof RelationalEntity)
             ((RelationalEntity)getSource()).removeForeignKey(((RelationalEntity)getTarget()).getPrimaryKey());
+    }
+
+    /**
+     * Reset the foreign keys.
+     * Used when the relation's direction is changed.
+     */
+    public void resetKeys() {
+        if (getSource() instanceof RelationalEntity && getTarget() instanceof RelationalEntity){
+            ((RelationalEntity)getSource()).removeForeignKey(((RelationalEntity)getTarget()).getPrimaryKey());
+            ((RelationalEntity)getTarget()).removeForeignKey(((RelationalEntity)getSource()).getPrimaryKey());
+            if (directed == NavigateDirection.FIRST_TO_SECOND) {
+                ((RelationalEntity)getSource()).addForeignKey(((RelationalEntity)getTarget()).getPrimaryKey());
+            } else if (directed == NavigateDirection.SECOND_TO_FIRST){
+                ((RelationalEntity)getTarget()).addForeignKey(((RelationalEntity)getSource()).getPrimaryKey());
+            }
+        }
     }
 }

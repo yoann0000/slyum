@@ -42,15 +42,13 @@ public class RelationalEntityView extends EntityView {
         return rels;
     }
 
-    // Attributs et triggers
+    // Attributs, triggers and keys
     protected LinkedList<TextBoxRelAttribute> attributesView = new LinkedList<>();
     protected LinkedList<TextBoxTrigger> triggersView = new LinkedList<>();
-
     protected LinkedList<TextBoxKey> keysView = new LinkedList<>();
 
     private boolean displayAttributes = true;
     protected boolean displayTriggers = true;
-    // Style de vue
     private boolean displayDefault = true;
 
     private ButtonGroup groupView, groupViewTriggers;
@@ -444,62 +442,48 @@ public class RelationalEntityView extends EntityView {
     protected void initializeMenuViews(JPopupMenu popupMenu) {
         JMenu subMenu;
         subMenu = new JMenu("View");
-        subMenu.setIcon(PersonalizedIcon.createImageIcon(Slyum.ICON_PATH
-                + "eye.png"));
+        subMenu.setIcon(PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "eye.png"));
         groupView = new ButtonGroup();
 
         // Item Default
-        menuItemViewDefault = makeRadioButtonMenuItem("Default", "ViewDefault",
-                groupView);
+        menuItemViewDefault = makeRadioButtonMenuItem("Default", "ViewDefault", groupView);
         menuItemViewDefault.setSelected(true);
         subMenu.add(menuItemViewDefault);
 
         // Item All
         subMenu.add(
-                menuItemViewAll = makeRadioButtonMenuItem("All", "ViewAll",
-                        groupView), 1);
+                menuItemViewAll = makeRadioButtonMenuItem("All", "ViewAll", groupView), 1);
 
         // Item Only attributes
         subMenu.add(
-                menuItemViewAttributes = makeRadioButtonMenuItem("Only attributes",
-                        "ViewAttribute", groupView), 2);
+                menuItemViewAttributes = makeRadioButtonMenuItem("Only attributes", "ViewAttribute", groupView), 2);
 
         // Item Only methods
         subMenu.add(
-                menuItemViewTriggers = makeRadioButtonMenuItem("Only Methods",
-                        "ViewMethods", groupView), 3);
+                menuItemViewTriggers = makeRadioButtonMenuItem("Only Methods", "ViewMethods", groupView), 3);
 
         // Item Nothing
-        subMenu.add(menuItemViewNothing = makeRadioButtonMenuItem("Nothing",
-                "ViewNothing", groupView));
+        subMenu.add(menuItemViewNothing = makeRadioButtonMenuItem("Nothing", "ViewNothing", groupView));
 
         popupMenu.add(subMenu);
 
         // Menu VIEW METHODS
         subMenu = new JMenu("Methods View");
-        subMenu.setIcon(PersonalizedIcon.createImageIcon(Slyum.ICON_PATH
-                + "eye.png"));
+        subMenu.setIcon(PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "eye.png"));
         groupViewTriggers = new ButtonGroup();
 
-        menuItemTriggersDefault = makeRadioButtonMenuItem("Default",
-                "ViewMethodsDefault", groupViewTriggers);
+        menuItemTriggersDefault = makeRadioButtonMenuItem("Default", "ViewMethodsDefault", groupViewTriggers);
         menuItemTriggersDefault.setSelected(true);
+
         subMenu.add(menuItemTriggersDefault);
 
-        subMenu.add(
-                menuItemTriggersAll = makeRadioButtonMenuItem("Type and Name",
-                        "ViewTypeAndName", groupViewTriggers), 1);
+        subMenu.add(menuItemTriggersAll = makeRadioButtonMenuItem("Type and Name", "ViewTypeAndName", groupViewTriggers), 1);
 
-        subMenu.add(
-                menuItemTriggersType = makeRadioButtonMenuItem("Type", "ViewType",
-                        groupViewTriggers), 2);
+        subMenu.add(menuItemTriggersType = makeRadioButtonMenuItem("Type", "ViewType", groupViewTriggers), 2);
 
-        subMenu.add(
-                menuItemTriggersName = makeRadioButtonMenuItem("Name", "ViewName",
-                        groupViewTriggers), 3);
+        subMenu.add(menuItemTriggersName = makeRadioButtonMenuItem("Name", "ViewName", groupViewTriggers), 3);
 
-        subMenu.add(menuItemTriggersNothing = makeRadioButtonMenuItem("Nothing",
-                "ViewMethodNothing", groupViewTriggers));
+        subMenu.add(menuItemTriggersNothing = makeRadioButtonMenuItem("Nothing", "ViewMethodNothing", groupViewTriggers));
 
         popupMenu.add(subMenu);
         popupMenu.addSeparator();
@@ -536,7 +520,6 @@ public class RelationalEntityView extends EntityView {
 
             offset += textboxHeight;
         }
-
 
         if (displayAttributes) {
             // draw attributes separator
@@ -586,8 +569,7 @@ public class RelationalEntityView extends EntityView {
 
             for (int i = 0; i < textbox.size() - 1; i++) {
                 Trigger current = (Trigger) textbox.get(i).getAssociedComponent();
-                Trigger next = (Trigger) textbox
-                        .get(i + 1).getAssociedComponent();
+                Trigger next = (Trigger) textbox.get(i + 1).getAssociedComponent();
                 /*if (!current.getConcretParametersViewStyle().equals(
                         next.getConcretParametersViewStyle())) {
                     groupViewTriggers.clearSelection();
@@ -596,11 +578,10 @@ public class RelationalEntityView extends EntityView {
             }
 
             if (textbox.size() > 0)
-                newView = ((Method) textbox.get(0).getAssociedComponent())
-                        .getConcretParametersViewStyle();
+                newView = ((Method) textbox.get(0).getAssociedComponent()).getConcretParametersViewStyle();
+
         } else if (pressedTextBox instanceof TextBoxMethod) {
-            newView = ((Method) pressedTextBox.getAssociedComponent())
-                    .getConcretParametersViewStyle();
+            newView = ((Method) pressedTextBox.getAssociedComponent()).getConcretParametersViewStyle();
         }
 
         if (newView != null) {

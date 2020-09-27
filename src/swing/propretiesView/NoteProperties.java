@@ -70,7 +70,7 @@ public class NoteProperties extends GlobalPropreties {
       for (LineCommentary lc : list.getSelectedValuesList())
         lc.delete();
 
-      updateComponentInformations(null);
+      updateComponentInformation(null);
 
       SwingUtilities.invokeLater(() -> {
         int j = i;
@@ -85,7 +85,7 @@ public class NoteProperties extends GlobalPropreties {
   }
 
   @Override
-  public void updateComponentInformations(UpdateMessage msg) {
+  public void updateComponentInformation(UpdateMessage msg) {
     SwingUtilities.invokeLater(() -> list.setModel(new ListLineCommentaryModel()));
   }
 

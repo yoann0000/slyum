@@ -37,7 +37,7 @@ import swing.propretiesView.DiagramPropreties;
  * This class read the XML file and create the diagram UML structured from this.
  *
  * @author David Miserez
- * @verson 1.0 - 25.07.2011
+ * @version 1.0 - 25.07.2011
  */
 public class XMLParser extends DefaultHandler {
     public enum Aggregation {
@@ -52,12 +52,12 @@ public class XMLParser extends DefaultHandler {
         String name = null;
     }
 
-    private class ClassDiagram {
+    private static class ClassDiagram {
         LinkedList<UMLView> uMLView = new LinkedList<>();
-        DiagramElements diagrameElement = null;
+        DiagramElements diagramElement = null;
 
         String name = "";
-        String informations = "";
+        String information = "";
 
         classDiagram.ClassDiagram.ViewEntity defaultViewEntities =
                 GraphicView.getDefaultViewEntities();
@@ -159,7 +159,7 @@ public class XMLParser extends DefaultHandler {
         int color = 0;
         Rectangle labelAssociation = new Rectangle();
         LinkedList<Point> line = new LinkedList<>();
-        LinkedList<Rectangle> multipliciteAssociations = new LinkedList<>();
+        LinkedList<Rectangle> multiplicityAssociations = new LinkedList<>();
         LinkedList<Rectangle> roleAssociations = new LinkedList<>();
     }
 
@@ -198,7 +198,6 @@ public class XMLParser extends DefaultHandler {
 
     // UML STRUCTURE
     private static class Variable {
-        int collection = 0;
         boolean constant = false;
         String defaultValue = null;
         boolean isStatic = false;
@@ -210,14 +209,10 @@ public class XMLParser extends DefaultHandler {
         int id = -1;
     }
 
-    LinkedList<AssociationClass> associationClassEntities = new LinkedList<>();
-    LinkedList<Association> associations = new LinkedList<>();
     private StringBuffer buffer;
 
     private final classDiagram.ClassDiagram classDiagram;
 
-    LinkedList<ClassEntity> classEntities = new LinkedList<>();
-    // LinkedList<InnerCLass> innerCLass = new LinkedList<InnerCLass>();
     Association currentAssociation;
     ComponentView currentComponentView;
     Dependency currentDependency;
@@ -230,9 +225,6 @@ public class XMLParser extends DefaultHandler {
 
     Operation currentMethod;
     int currentMin, currentMax;
-    // InnerClass currentInnerClass;
-
-    Multiplicity currentMultiplicity;
 
     MultiView currentMultiView;
 
@@ -244,17 +236,11 @@ public class XMLParser extends DefaultHandler {
 
     Role currentRole;
 
-    LinkedList<Dependency> dependency = new LinkedList<>();
-
-    LinkedList<Inheritance> inheritance = new LinkedList<>();
-
     private boolean inMultiViewBounds;
 
     boolean inRelationView = false, inComponentView = false,
             inNoteGeometry = false, inNoteRelation = false,
             inLabelAssociation = false;
-
-    LinkedList<InterfaceEntity> interfaceEntities = new LinkedList<>();
 
     private ClassDiagram umlClassDiagram;
 
@@ -449,8 +435,8 @@ public class XMLParser extends DefaultHandler {
 
         GraphicView rootGraphicView = MultiViewManager.getSelectedGraphicView();
         classDiagram.setName(umlClassDiagram.name);
-        classDiagram.setInformation(umlClassDiagram.informations);
-        DiagramPropreties.setDiagramsInformations(umlClassDiagram.informations);
+        classDiagram.setInformation(umlClassDiagram.information);
+        DiagramPropreties.setDiagramsInformations(umlClassDiagram.information);
         classDiagram.setViewEntity(umlClassDiagram.defaultViewEntities);
         classDiagram.setDefaultViewMethods(umlClassDiagram.defaultViewMethods);
         classDiagram.setDefaultViewEnum(umlClassDiagram.defaultViewEnum);
@@ -465,7 +451,7 @@ public class XMLParser extends DefaultHandler {
         importAssociations(); // Import associations that cannot be imported first
         // time
         importInheritances(); // <- ...
-        importDepedency();
+        importDependency();
 
         rootGraphicView.setPaintBackgroundLast(true);
         rootGraphicView.goRepaint();
@@ -588,7 +574,7 @@ public class XMLParser extends DefaultHandler {
                 inLabelAssociation = false;
                 break;
             case "multipliciteAssociation":
-                currentRelationView.multipliciteAssociations.add(currentGeometry);
+                currentRelationView.multiplicityAssociations.add(currentGeometry);
                 currentGeometry = null;
                 inLabelAssociation = false;
                 break;
@@ -629,7 +615,7 @@ public class XMLParser extends DefaultHandler {
 
     private void importAssociationClass()
             throws SyntaxeNameException, SAXNotRecognizedException {
-        for (final Entity e : umlClassDiagram.diagrameElement.entity)
+        for (final Entity e : umlClassDiagram.diagramElement.entity)
             if (e.entityType == EntityType.ASSOCIATION_CLASS)
                 createEntity(e);
     }
@@ -637,7 +623,7 @@ public class XMLParser extends DefaultHandler {
     public void importAssociations() {
         final LinkedList<Association> associationsNotAdded = new LinkedList<>();
 
-        for (final Association a : umlClassDiagram.diagrameElement.association) {
+        for (final Association a : umlClassDiagram.diagramElement.association) {
             classDiagram.relationships.Association ac = null;
 
             if (a.role.size() < 2)
@@ -705,18 +691,18 @@ public class XMLParser extends DefaultHandler {
             ac.notifyObservers();
         }
 
-        umlClassDiagram.diagrameElement.association = associationsNotAdded;
+        umlClassDiagram.diagramElement.association = associationsNotAdded;
     }
 
     private void importClassesAndInterfaces()
             throws SyntaxeNameException, SAXNotRecognizedException {
-        for (final Entity e : umlClassDiagram.diagrameElement.entity)
+        for (final Entity e : umlClassDiagram.diagramElement.entity)
             if (!(e.entityType == EntityType.ASSOCIATION_CLASS)) createEntity(e);
 
     }
 
-    public void importDepedency() {
-        for (final Dependency d : umlClassDiagram.diagrameElement.dependency) {
+    public void importDependency() {
+        for (final Dependency d : umlClassDiagram.diagramElement.dependency) {
             classDiagram.components.Entity source = (classDiagram.components.Entity) classDiagram
                     .searchComponentById(d.source);
             classDiagram.components.Entity target = (classDiagram.components.Entity) classDiagram
@@ -733,7 +719,7 @@ public class XMLParser extends DefaultHandler {
     // view
 
     public void importInheritances() {
-        for (final Inheritance h : umlClassDiagram.diagrameElement.inheritance) {
+        for (final Inheritance h : umlClassDiagram.diagramElement.inheritance) {
 
             if (h.innerClass) {
                 final classDiagram.components.Entity child =
@@ -881,12 +867,12 @@ public class XMLParser extends DefaultHandler {
 
                                 ((TextBoxRole) tb.get(1)).getTextBoxMultiplicity()
                                         .computeDeplacement(
-                                                new Point(rl.multipliciteAssociations.get(0).x,
-                                                        rl.multipliciteAssociations.get(0).y));
+                                                new Point(rl.multiplicityAssociations.get(0).x,
+                                                        rl.multiplicityAssociations.get(0).y));
                                 ((TextBoxRole) tb.get(2)).getTextBoxMultiplicity()
                                         .computeDeplacement(
-                                                new Point(rl.multipliciteAssociations.get(1).x,
-                                                        rl.multipliciteAssociations.get(1).y));
+                                                new Point(rl.multiplicityAssociations.get(1).x,
+                                                        rl.multiplicityAssociations.get(1).y));
                             }
                         }
                     });
@@ -936,8 +922,8 @@ public class XMLParser extends DefaultHandler {
 
                                 ((TextBoxRole) tb.getFirst()).getTextBoxMultiplicity()
                                         .computeDeplacement(
-                                                new Point(rl.multipliciteAssociations.get(0).x,
-                                                        rl.multipliciteAssociations.get(0).y));
+                                                new Point(rl.multiplicityAssociations.get(0).x,
+                                                        rl.multiplicityAssociations.get(0).y));
                             }
                         });
                     }
@@ -962,10 +948,10 @@ public class XMLParser extends DefaultHandler {
                     throw new SAXException(e);
                 } break;
             case "diagramElements":
-                umlClassDiagram.diagrameElement = new DiagramElements();
+                umlClassDiagram.diagramElement = new DiagramElements();
 
                 umlClassDiagram.name = attributes.getValue("name");
-                umlClassDiagram.informations = attributes.getValue("informations");
+                umlClassDiagram.information = attributes.getValue("informations");
 
                 if (attributes.getValue("defaultViewEntities") != null)
                     umlClassDiagram.defaultViewEntities = ViewEntity.valueOf(
@@ -1010,7 +996,7 @@ public class XMLParser extends DefaultHandler {
                         currentEntity.procedure = attributes.getValue("procedure");
 
 
-                    umlClassDiagram.diagrameElement.entity.add(currentEntity);
+                    umlClassDiagram.diagramElement.entity.add(currentEntity);
                 } catch (final NumberFormatException e) {
                     throw new SAXException(e);
                 } break;
@@ -1122,7 +1108,7 @@ public class XMLParser extends DefaultHandler {
                     currentAssociation.aggregation = Aggregation.valueOf(attributes
                             .getValue("aggregation"));
 
-                    umlClassDiagram.diagrameElement.association.add(currentAssociation);
+                    umlClassDiagram.diagramElement.association.add(currentAssociation);
                 } catch (final NumberFormatException e) {
                     throw new SAXException(e);
                 } break;
@@ -1150,7 +1136,7 @@ public class XMLParser extends DefaultHandler {
 
                     buffer = new StringBuffer();
 
-                    umlClassDiagram.diagrameElement.inheritance.add(currentInheritance);
+                    umlClassDiagram.diagramElement.inheritance.add(currentInheritance);
                 } catch (final NumberFormatException e) {
                     throw new SAXException(e);
                 } break;
@@ -1162,7 +1148,7 @@ public class XMLParser extends DefaultHandler {
 
                     buffer = new StringBuffer();
 
-                    umlClassDiagram.diagrameElement.dependency.add(currentDependency);
+                    umlClassDiagram.diagramElement.dependency.add(currentDependency);
                 } catch (final NumberFormatException e) {
                     throw new SAXException(e);
                 } break;

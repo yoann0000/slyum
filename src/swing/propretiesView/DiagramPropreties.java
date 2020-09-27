@@ -11,7 +11,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
 
-import graphic.relations.RelationView;
 import swing.MultiViewManager;
 import swing.PanelClassDiagram;
 import swing.Slyum;
@@ -45,7 +44,7 @@ public class DiagramPropreties
   }
 
   public static void updateComponentInformations() {
-    instance.updateComponentInformations(null);
+    instance.updateComponentInformation(null);
   }
 
   JPanel west = createJPanelInformations(),
@@ -270,7 +269,7 @@ public class DiagramPropreties
   }
  
  @Override
-  public void updateComponentInformations(UpdateMessage msg) {
+  public void updateComponentInformation(UpdateMessage msg) {
     PanelClassDiagram panel = PanelClassDiagram.getInstance();
     if (panel == null) {
       west.setVisible(false);

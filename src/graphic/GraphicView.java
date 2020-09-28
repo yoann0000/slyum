@@ -56,11 +56,8 @@ import java.util.Observer;
 import java.util.logging.Level;
 import javax.print.attribute.Size2DSyntax;
 import javax.print.attribute.standard.MediaSize;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
+import javax.swing.*;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import swing.IListenerComponentSelectionChanged;
@@ -705,13 +702,7 @@ public class GraphicView extends GraphicComponent
       setScale(getScale() / yRatio);
     
     // Must wait scaling.
-    SwingUtilities.invokeLater(new Runnable() {
-      
-      @Override
-      public void run() {
-        getScene().scrollRectToVisible(Utility.scaleRect(limits, getScale()));
-      }
-    });
+    SwingUtilities.invokeLater(() -> getScene().scrollRectToVisible(Utility.scaleRect(limits, getScale())));
   }
 
   public void adaptSelectionToWindow() {

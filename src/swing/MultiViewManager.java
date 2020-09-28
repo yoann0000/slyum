@@ -183,6 +183,7 @@ public class MultiViewManager {
         selectedIndex == index ? 
             index - (index == pane.getTabCount() - 1 ? 1 : 0) : 
             (selectedIndex > index ? selectedIndex - 1 : selectedIndex));
+    Slyum.updateButtonsUMLREL();
     return graphicView;
   }
   
@@ -217,6 +218,7 @@ public class MultiViewManager {
     instance.hierarchicalView.removeView(graphicView);
     removeViewInFile(graphicView);
     instance.graphicViews.remove(graphicView);
+    Slyum.updateButtonsUMLREL();
   }
   
   private static String[] getArrayNameComponents(List<EntityView> components) {

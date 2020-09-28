@@ -569,13 +569,7 @@ public class PanelClassDiagram extends JPanel {
    * Launch a new printing.
    */
   public void initPrinting() {
-    new Thread(new Runnable() {
-
-      @Override
-      public void run() {
-        print();
-      }
-    }).start();
+    new Thread(this::print).start();
   }
   
   public boolean isDisabledUpdate() {
@@ -657,22 +651,18 @@ public class PanelClassDiagram extends JPanel {
         
     DiagramPropreties.getInstance().updateComponentInformation(null);
 
-    SwingUtilities.invokeLater(new Runnable() {
+    SwingUtilities.invokeLater(() -> {
+      rootGraphicView.paintBackgroundFirst();
 
-      @Override
-      public void run() {
-        rootGraphicView.paintBackgroundFirst();
-        
-        rootGraphicView.unselectAll();
-        
-        for (GraphicView gv : MultiViewManager.getAllGraphicViews())
-          gv.refreshAllComponents();
+      rootGraphicView.unselectAll();
 
-        rootGraphicView.getScrollPane().getVerticalScrollBar().setValue(0);
-        rootGraphicView.getScrollPane().getHorizontalScrollBar().setValue(0);
-        
-        System.gc();
-      }
+      for (GraphicView gv : MultiViewManager.getAllGraphicViews())
+        gv.refreshAllComponents();
+
+      rootGraphicView.getScrollPane().getVerticalScrollBar().setValue(0);
+      rootGraphicView.getScrollPane().getHorizontalScrollBar().setValue(0);
+
+      System.gc();
     });
   }
 
@@ -753,7 +743,7 @@ public class PanelClassDiagram extends JPanel {
   }
   
   public static void saveDocumentInCurrentFile(
-      Document document, File currentFile) throws TransformerConfigurationException, TransformerException {
+      Document document, File currentFile) throws TransformerException {
     
     Path currentPath = currentFile.toPath(); 
    
@@ -897,7 +887,7 @@ public class PanelClassDiagram extends JPanel {
    * @author David Miserez
    * @date 6 déc. 2011
    */
-  private class SlyFileChooser extends FileFilter {
+  private static class SlyFileChooser extends FileFilter {
     
     @Override
     public boolean accept(File f) {
@@ -906,7 +896,7 @@ public class PanelClassDiagram extends JPanel {
       final String extension = Utility.getExtension(f);
       
       if (extension != null)
-        if (extension.equals(Slyum.EXTENTION)) return true;
+        return extension.equals(Slyum.EXTENTION);
 
       return false;
     }

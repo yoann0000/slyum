@@ -51,14 +51,7 @@ public class RelationalEntityView extends EntityView {
     protected boolean displayTriggers = true;
     private boolean displayDefault = true;
 
-    private ButtonGroup groupView, groupViewTriggers;
-    private JMenuItem menuItemAbstract;
-    private JMenuItem menuItemTriggersAll;
-    private JMenuItem menuItemTriggersDefault;
-    private JMenuItem menuItemTriggersName;
-    private JMenuItem menuItemTriggersNothing;
-    private JMenuItem menuItemTriggersType;
-    private JMenuItem menuItemStatic;
+    private ButtonGroup groupView;
     private JMenuItem menuItemViewAll;
     private JMenuItem menuItemViewAttributes;
     private JMenuItem menuItemViewDefault;
@@ -77,6 +70,8 @@ public class RelationalEntityView extends EntityView {
 
         if ("AddAttribute".equals(e.getActionCommand())) {
             addAttribute();
+        } else if("AddTrigger".equals(e.getActionCommand())) {
+            addTrigger();
         } else if ("ViewDefault".equals(e.getActionCommand())) {
             parent.setDefaultForSelectedEntities(true);
         } else if ("ViewAttribute".equals(e.getActionCommand())) {
@@ -134,6 +129,16 @@ public class RelationalEntityView extends EntityView {
 
         ((RelationalEntity) component).addAttribute(attribute);
         component.notifyObservers(UpdateMessage.ADD_ATTRIBUTE);
+    }
+
+    /**
+     * Create a new Trigger with default name.
+     */
+    public void addTrigger() {
+        final Trigger trigger = new Trigger("trigger");
+
+        ((RelationalEntity) component).addTrigger(trigger);
+        component.notifyObservers(UpdateMessage.ADD_TRIGGER_NO_EDIT);
     }
 
     /**
@@ -293,14 +298,8 @@ public class RelationalEntityView extends EntityView {
             updateMenuItemView();
             updateMenuItemMethodsView();
 
-            menuItemAbstract.setEnabled(false);
-
             // If context menu is requested on a TextBox, customize popup menu.
             if (pressedTextBox != null) {
-                boolean isConstructor = pressedTextBox.getAssociedComponent().getClass()
-                        .equals(ConstructorMethod.class);
-                menuItemStatic.setEnabled(!isConstructor);
-
                 menuItemMoveUp.setEnabled(attributesView.indexOf(pressedTextBox) != 0
                         && triggersView.indexOf(pressedTextBox) != 0);
                 menuItemMoveDown
@@ -308,14 +307,10 @@ public class RelationalEntityView extends EntityView {
                                 .indexOf(pressedTextBox) != attributesView.size() - 1)
                                 && (triggersView.size() == 0 || triggersView
                                 .indexOf(pressedTextBox) != triggersView.size() - 1));
-                if (pressedTextBox instanceof TextBoxMethod)
-                    menuItemAbstract.setEnabled(!isConstructor);
 
             } else {
                 menuItemMoveUp.setEnabled(false);
                 menuItemMoveDown.setEnabled(false);
-                menuItemStatic.setEnabled(false);
-                menuItemAbstract.setEnabled(true);
             }
         }
         super.maybeShowPopup(e, popupMenu);
@@ -426,16 +421,13 @@ public class RelationalEntityView extends EntityView {
     @Override
     protected void initializeMenuItemsAddElements(JPopupMenu popupmenu) {
         popupMenu.add(makeMenuItem("Add attribute", "AddAttribute", "attribute"));
-        popupMenu.add(makeMenuItem("Add method", "AddMethod", "method"));
+        popupMenu.add(makeMenuItem("Add trigger", "AddTrigger", "method"));
         popupMenu.addSeparator();
     }
 
     @Override
     protected void initializeMenuItemsPropertiesElements(JPopupMenu popupMenu) {
-        popupMenu.add(menuItemAbstract = makeMenuItem("Abstract", "Abstract",
-                "abstract"));
-        popupMenu.add(menuItemStatic = makeMenuItem("Static", "Static", "static"));
-        popupMenu.addSeparator();
+
     }
 
     @Override
@@ -460,33 +452,11 @@ public class RelationalEntityView extends EntityView {
 
         // Item Only methods
         subMenu.add(
-                menuItemViewTriggers = makeRadioButtonMenuItem("Only Methods", "ViewMethods", groupView), 3);
+                menuItemViewTriggers = makeRadioButtonMenuItem("Only Triggers", "ViewMethods", groupView), 3);
 
         // Item Nothing
         subMenu.add(menuItemViewNothing = makeRadioButtonMenuItem("Nothing", "ViewNothing", groupView));
-
         popupMenu.add(subMenu);
-
-        // Menu VIEW METHODS
-        subMenu = new JMenu("Methods View");
-        subMenu.setIcon(PersonalizedIcon.createImageIcon(Slyum.ICON_PATH + "eye.png"));
-        groupViewTriggers = new ButtonGroup();
-
-        menuItemTriggersDefault = makeRadioButtonMenuItem("Default", "ViewMethodsDefault", groupViewTriggers);
-        menuItemTriggersDefault.setSelected(true);
-
-        subMenu.add(menuItemTriggersDefault);
-
-        subMenu.add(menuItemTriggersAll = makeRadioButtonMenuItem("Type and Name", "ViewTypeAndName", groupViewTriggers), 1);
-
-        subMenu.add(menuItemTriggersType = makeRadioButtonMenuItem("Type", "ViewType", groupViewTriggers), 2);
-
-        subMenu.add(menuItemTriggersName = makeRadioButtonMenuItem("Name", "ViewName", groupViewTriggers), 3);
-
-        subMenu.add(menuItemTriggersNothing = makeRadioButtonMenuItem("Nothing", "ViewMethodNothing", groupViewTriggers));
-
-        popupMenu.add(subMenu);
-        popupMenu.addSeparator();
     }
 
     @Override
@@ -582,35 +552,6 @@ public class RelationalEntityView extends EntityView {
 
         } else if (pressedTextBox instanceof TextBoxMethod) {
             newView = ((Method) pressedTextBox.getAssociedComponent()).getConcretParametersViewStyle();
-        }
-
-        if (newView != null) {
-            switch (newView) {
-                case DEFAULT:
-                    itemToSelect = menuItemTriggersDefault;
-                    break;
-                case NAME:
-                    itemToSelect = menuItemTriggersName;
-                    break;
-
-                case NOTHING:
-                    itemToSelect = menuItemTriggersNothing;
-                    break;
-
-                case TYPE:
-                    itemToSelect = menuItemTriggersType;
-                    break;
-
-                case TYPE_AND_NAME:
-                    itemToSelect = menuItemTriggersAll;
-                    break;
-
-                default:
-                    itemToSelect = menuItemTriggersAll;
-                    break;
-            }
-
-            groupViewTriggers.setSelected(itemToSelect.getModel(), true);
         }
     }
 

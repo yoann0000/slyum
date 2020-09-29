@@ -1818,6 +1818,7 @@ public class RelationalEntityProperties extends GlobalPropreties{
         btnRemoveAttribute.setEnabled(false);
         btnUpAttribute.setEnabled(false);
         btnDownAttribute.setEnabled(false);
+        btnAddAttributeToPk.setEnabled(false);
 
         validate();
 

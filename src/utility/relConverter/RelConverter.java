@@ -179,9 +179,12 @@ public class RelConverter {
             addRelAssociation(source, target, name);
 
         } else if (m1.isZeroToOne() || m1.isOne()) {
-            if (m2.isZeroToOne() || m2.isOne()) { //1-1
+            if (m2.isZeroToOne()) { //1-0..1 or 0..1-0..1
                 source = convertSimpleEntity((ClassEntity) binary.getSource());
                 target = convertSimpleEntity((ClassEntity) binary.getTarget());
+            } else if (m2.isOne()) { //1-1 or 0..1-1
+                source = convertSimpleEntity((ClassEntity) binary.getTarget());
+                target = convertSimpleEntity((ClassEntity) binary.getSource());
             } else { //1-N
                 source = convertSimpleEntity((ClassEntity) binary.getTarget());
                 target = convertSimpleEntity((ClassEntity) binary.getSource());

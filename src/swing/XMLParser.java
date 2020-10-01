@@ -673,7 +673,8 @@ public class XMLParser extends DefaultHandler {
                 case REL:
                     ac = new RelAssociation(source, target, a.direction, a.id);
                     classDiagram.addRelAssociation((RelAssociation) ac);
-                    ((RelationalEntity) source).addForeignKey(((RelationalEntity) target).getPrimaryKey());
+                    if (source instanceof RelationalEntity && target instanceof RelationalEntity)
+                        ((RelationalEntity) source).addForeignKey(((RelationalEntity) target).getPrimaryKey());
                     break;
             }
 

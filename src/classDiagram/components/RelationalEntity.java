@@ -14,7 +14,7 @@ public class RelationalEntity extends Entity{
     private final LinkedList<Key> foreignKeys = new LinkedList<>();
     private final LinkedList<Key> alternateKeys = new LinkedList<>();
     private LinkedList<RelationalAttribute> attributes = new LinkedList<>();
-    private LinkedList<Trigger> triggers = new LinkedList<>();
+    private final LinkedList<Trigger> triggers = new LinkedList<>();
     private RelationalAttribute lastAddedAttribute;
     private Trigger lastAddedTrigger;
     private Key lastAddedKey;
